@@ -1,0 +1,14 @@
+{
+  "name": "forage-library",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Forkable, HTML-first knowledge repository for Forage DeepMind.",
+  "type": "module",
+  "scripts": {
+    "export-pdfs": "node scripts/export-pdfs.mjs"
+  },
+  "license": "CC-BY-NC-SA-4.0",
+  "devDependencies": {
+    "puppeteer": "^23.9.0"
+  }
+}
