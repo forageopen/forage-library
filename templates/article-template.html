@@ -9,8 +9,8 @@
 </head>
 <body>
 
-  <!-- ============ RIBBON — do not remove data-published, it drives the "Published on" label ============ -->
-  <header class="ribbon" data-published="mm/dd/yy">
+  <!-- ============ RIBBON — data-published must be yyyy-mm-dd, ribbon.js renders it as "Aug 5, 2026" ============ -->
+  <header class="ribbon" data-published="yyyy-mm-dd">
     <span class="ribbon-title">[Article Title]</span>
     <div class="ribbon-actions">
       <span class="ribbon-meta">Published on <time class="ribbon-date"></time></span>

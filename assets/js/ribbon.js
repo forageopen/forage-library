@@ -82,9 +82,21 @@
     btn.setAttribute('aria-expanded', 'false');
   }
 
+  var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  function formatDate(raw) {
+    if (!raw) return '';
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
+    if (!m) return raw; // not ISO — show as authored
+    var year = Number(m[1]), month = Number(m[2]) - 1, day = Number(m[3]);
+    var d = new Date(year, month, day);
+    if (isNaN(d.getTime())) return raw;
+    return MONTHS[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+  }
+
   function initRibbon(ribbon) {
     const dateEl = ribbon.querySelector('.ribbon-date');
-    if (dateEl) dateEl.textContent = ribbon.dataset.published || '';
+    if (dateEl) dateEl.textContent = formatDate(ribbon.dataset.published);
 
     ribbon.querySelectorAll('[data-action="copy-link"]').forEach(function (btn) {
       btn.addEventListener('click', function () {
