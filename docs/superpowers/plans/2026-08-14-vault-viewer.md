@@ -341,7 +341,7 @@ test('buildTree builds a nested folder/file tree, skipping unsupported extension
   writeFileSync(path.join(dir, 'Sub', 'a.md'), '# A\n');
   writeFileSync(path.join(dir, 'ignored.png'), 'not text');
   const tree = buildTree(dir, '');
-  assert.equal(tree.length, 2);
+  assert.equal(tree.length, 1);
   const folder = tree.find((n) => n.type === 'folder');
   const skipped = tree.find((n) => n.name === 'ignored.png');
   assert.equal(folder.name, 'Sub');
