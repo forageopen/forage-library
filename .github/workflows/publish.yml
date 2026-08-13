@@ -36,34 +36,28 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Install Chromium system libraries
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 \
-            libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 \
-            libgbm1 libasound2t64 libpango-1.0-0 libpangocairo-1.0-0 \
-            libcairo2 libxext6 libx11-6 libx11-xcb1 libxcb1 fonts-liberation
+      - name: Run tests
+        run: npm test
 
-      - name: Export PDFs (headless Chromium print)
-        run: npm run export-pdfs
+      - name: Generate vault manifest
+        run: npm run generate-manifest
 
-      - name: Commit generated PDFs
+      - name: Commit generated manifest
         run: |
           git config user.name "forage-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add articles frameworks courses
+          git add vault/manifest.json
           if ! git diff --cached --quiet; then
-            git commit -m "chore: auto-generate PDFs [skip ci]"
+            git commit -m "chore: regenerate vault manifest [skip ci]"
             git push
           else
-            echo "No PDF changes to commit."
+            echo "No manifest changes to commit."
           fi
 
       - name: Prepare site directory
         run: |
           mkdir -p _site
-          cp -r index.html assets articles frameworks courses templates _site/
+          cp -r index.html assets vault _site/
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
