@@ -5,10 +5,12 @@
   "description": "Forkable, HTML-first knowledge repository for Forage DeepMind.",
   "type": "module",
   "scripts": {
-    "export-pdfs": "node scripts/export-pdfs.mjs"
+    "generate-manifest": "node scripts/generate-manifest.mjs",
+    "test": "node --test"
   },
   "license": "CC-BY-NC-SA-4.0",
   "devDependencies": {
-    "puppeteer": "^23.9.0"
+    "@xmldom/xmldom": "^0.9.11",
+    "jszip": "^3.10.1"
   }
 }

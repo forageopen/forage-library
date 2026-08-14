@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <script>(function(){try{if(localStorage.getItem('forage-theme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vault — Forage Library</title>
+  <link rel="stylesheet" href="../assets/css/forage.css" />
+  <script src="https://cdn.jsdelivr.net/npm/marked@18.0.9/lib/marked.umd.js" integrity="sha384-kyb7rY2xnKgiRpRdAeNJxQ8e2SiGZy1m+FK9yME6M0eGJpg7EFaGGvf7+JSirgqE" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mammoth@1.12.1/mammoth.browser.min.js" integrity="sha384-HDD+X9TzmVU2HzA3VYqphTtip2QgcmmSAuKTMkFv709AUMZ6LPn0ysDRZeQIL31w" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js" integrity="sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG" crossorigin="anonymous"></script>
+</head>
+<body>
+
+  <header class="ribbon" data-published="">
+    <span class="ribbon-title">Forage Library — Vault</span>
+    <div class="ribbon-actions">
+      <button class="ribbon-btn ribbon-icon ribbon-theme-toggle" type="button" data-action="toggle-theme" aria-label="Toggle dark mode">
+        <svg class="icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="icon-dark" viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <div class="ribbon-kebab-wrap">
+        <button class="ribbon-btn ribbon-icon" type="button" data-action="toggle-menu" aria-haspopup="true" aria-expanded="false" aria-label="More options">
+          <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
+        </button>
+        <ul class="ribbon-menu" role="menu" hidden>
+          <li role="menuitem" data-action="toggle-sidenote">Sidenote</li>
+          <li role="menuitem" data-action="open-split">Open in split</li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <div class="vault-layout">
+    <nav class="vault-sidebar" data-vault-sidebar aria-label="Vault folders"></nav>
+    <main class="vault-panes" data-vault-panes>
+      <section class="vault-pane">
+        <div class="vault-pane-main">
+          <div class="vault-dropzone" data-vault-dropzone>
+            <label class="vault-dropzone-label">
+              Choose files or<br>drop files here
+              <input type="file" class="vault-dropzone-input" accept=".md,.txt,.docx,.pptx" hidden>
+            </label>
+          </div>
+          <div class="vault-pane-content" data-vault-pane-content hidden></div>
+        </div>
+        <aside class="vault-sidenote" data-vault-sidenote hidden>
+          <h2>Sidenote</h2>
+          <textarea class="vault-sidenote-input" data-vault-sidenote-input placeholder="Notes on this page…"></textarea>
+        </aside>
+      </section>
+    </main>
+  </div>
+
+  <template data-vault-pane-template>
+    <section class="vault-pane">
+      <div class="vault-pane-main">
+        <div class="vault-dropzone" data-vault-dropzone>
+          <label class="vault-dropzone-label">
+            Choose files or<br>drop files here
+            <input type="file" class="vault-dropzone-input" accept=".md,.txt,.docx,.pptx" hidden>
+          </label>
+        </div>
+        <div class="vault-pane-content" data-vault-pane-content hidden></div>
+      </div>
+      <aside class="vault-sidenote" data-vault-sidenote hidden>
+        <h2>Sidenote</h2>
+        <textarea class="vault-sidenote-input" data-vault-sidenote-input placeholder="Notes on this page…"></textarea>
+      </aside>
+    </section>
+  </template>
+
+  <script src="../assets/js/ribbon.js"></script>
+  <script type="module" src="../assets/js/vault/app.js"></script>
+</body>
+</html>

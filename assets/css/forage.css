@@ -18,6 +18,7 @@
   --blue: #2596be;
   --panel: #f3f4f6;
   --arrow: #9ca3af;
+  --error: #c0392b;
 
   --ribbon-bg: #ffffff;
   --ribbon-text: #111827;
@@ -40,6 +41,7 @@ html[data-theme="dark"] {
   --blue: #4fb3d9;
   --panel: #1f2226;
   --arrow: #6b7280;
+  --error: #f0766a;
 
   --ribbon-bg: #0d0f12;
   --ribbon-text: #e8e9ec;
@@ -232,4 +234,126 @@ html[data-theme="dark"] .ribbon-theme-toggle .icon-dark { display: block; }
 @media (max-width: 900px) {
   .workflow { flex-direction: column; }
   .arrow { transform: rotate(90deg); }
+}
+
+/* ---------- Vault ---------- */
+
+.vault-layout { display: flex; height: calc(100vh - 49px); }
+
+.vault-sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  padding: 16px 12px;
+  border-right: 1px solid var(--ribbon-border);
+  background: var(--bg);
+}
+
+.vault-tree, .vault-tree-children { list-style: none; }
+.vault-tree-children { padding-left: 14px; }
+.vault-tree-folder--collapsed > .vault-tree-children { display: none; }
+
+.vault-tree-folder-label {
+  display: block;
+  padding: 6px 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-soft);
+  cursor: pointer;
+  border-radius: 6px;
+}
+.vault-tree-folder-label:hover { background: var(--ribbon-hover); }
+
+.vault-tree-file-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: 13px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.vault-tree-file-btn:hover, .vault-tree-file-btn:focus-visible { background: var(--ribbon-hover); }
+
+.vault-panes { flex: 1; display: flex; overflow: hidden; }
+.vault-panes--split .vault-pane { border-right: 1px solid var(--ribbon-border); }
+.vault-panes--split .vault-pane:last-child { border-right: none; }
+
+.vault-pane { flex: 1; display: flex; min-width: 0; }
+.vault-pane-main { flex: 1; overflow-y: auto; padding: 40px; background: var(--panel); }
+
+.vault-dropzone {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed var(--border);
+  border-radius: 10px;
+}
+.vault-dropzone[hidden] { display: none; }
+.vault-dropzone--active { border-color: var(--teal); background: var(--teal-bg); }
+.vault-dropzone-label { text-align: center; font-size: 15px; color: var(--text-soft); cursor: pointer; }
+
+.vault-pane-content { max-width: 720px; margin: 0 auto; }
+.vault-content h1, .vault-content h2, .vault-content h3 { margin-top: 1em; margin-bottom: 0.4em; }
+.vault-content p { font-size: 14px; line-height: 1.7; color: var(--text-soft); margin-bottom: 14px; }
+.vault-table-wrap { overflow-x: auto; margin: 1em 0; }
+
+.vault-status { padding: 24px; font-size: 13px; color: var(--subtitle); text-align: center; }
+.vault-status--error { color: var(--error); }
+
+.vault-sidenote {
+  width: 260px;
+  flex-shrink: 0;
+  padding: 16px;
+  border-left: 1px solid var(--ribbon-border);
+  background: var(--bg);
+}
+.vault-sidenote h2 { font-size: 13px; margin-bottom: 10px; }
+.vault-sidenote-input {
+  width: 100%;
+  min-height: 200px;
+  resize: vertical;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 13px;
+  color: var(--text);
+  background: var(--page-bg);
+}
+
+/* ---------- PPTX slide deck ---------- */
+
+.vault-deck { display: flex; flex-direction: column; gap: 32px; }
+.vault-slide {
+  background: var(--page-bg);
+  border-radius: 10px;
+  padding: 48px;
+  text-align: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+.vault-slide-title { font-size: 24px; margin-bottom: 10px; }
+.vault-slide-subtitle { font-size: 15px; color: var(--subtitle); }
+.vault-slide-bullets { list-style: none; text-align: left; max-width: 480px; margin: 16px auto 0; }
+.vault-slide-bullets li { font-size: 14px; padding: 6px 0; color: var(--text-soft); }
+.vault-slide-image { max-width: 100%; margin-top: 16px; border-radius: 6px; }
+
+.vault-slide-rail {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
+}
+.vault-slide-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); }
+
+@media (max-width: 900px) {
+  .vault-layout { flex-direction: column; height: auto; }
+  .vault-sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--ribbon-border); }
+  .vault-panes--split { flex-direction: column; }
+  .vault-panes--split .vault-pane { border-right: none; border-bottom: 1px solid var(--ribbon-border); }
 }
