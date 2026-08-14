@@ -35,9 +35,11 @@ function loadPdfjs() {
 
 /* Renders every page to a canvas at 2x scale (crisp on retina displays
    without the browser upscaling a 1x raster) and embeds each as a
-   data-URL <img> — reusing the exact deck/slide-rail markup the PPTX
-   viewer already produces, since "one page at a time with a position
-   rail" is the same shape of UI either way. */
+   data-URL <img> — reusing the exact deck markup the PPTX viewer already
+   produces, since "one page at a time" is the same shape of UI either
+   way. No dot rail: the stats bar's "x/y pages" (see reading-stats.js)
+   already tells you where you are, scroll-synced, without the redundant
+   bullet indicator. */
 export async function renderPdf(arrayBuffer, deps = {}) {
   const pdfjsLib = deps.pdfjsLib || (await loadPdfjs());
   const createCanvas = deps.createCanvas || ((w, h) => {
@@ -59,10 +61,5 @@ export async function renderPdf(arrayBuffer, deps = {}) {
     );
   }
 
-  const rail = pdf.numPages > 1
-    ? `<div class="vault-slide-rail" role="tablist">${slides
-        .map((_, i) => `<span class="vault-slide-dot" data-slide-index="${i}"></span>`)
-        .join('')}</div>`
-    : '';
-  return `<div class="vault-content vault-deck">${slides.join('')}</div>${rail}`;
+  return `<div class="vault-content vault-deck">${slides.join('')}</div>`;
 }

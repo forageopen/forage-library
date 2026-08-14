@@ -20,6 +20,5 @@ function slideToHtml(slide, index) {
 
 export function slidesToHtml(slides) {
   const deck = slides.map(slideToHtml).join('');
-  const rail = slides.map((_, i) => `<span class="vault-slide-dot" data-slide-index="${i}"></span>`).join('');
-  return `<div class="vault-content vault-deck">${deck}</div><div class="vault-slide-rail" role="tablist">${rail}</div>`;
+  return `<div class="vault-content vault-deck">${deck}</div>`;
 }

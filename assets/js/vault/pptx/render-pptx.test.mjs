@@ -52,11 +52,11 @@ test('resolves and embeds an image referenced by a slide', async () => {
   assert.match(html, /<img class="vault-slide-image" src="data:image\/png;base64,[^"]+"/);
 });
 
-test('builds a slide-position rail with one dot per slide', async () => {
+test('renders no slide-position dot rail', async () => {
   const buffer = await buildSamplePptx();
   const html = await renderPptx(buffer, JSZip);
-  const dots = html.match(/vault-slide-dot/g) || [];
-  assert.equal(dots.length, 2);
+  assert.ok(!html.includes('vault-slide-rail'));
+  assert.ok(!html.includes('vault-slide-dot'));
 });
 
 test('throws a clear error when JSZip is not available', async () => {

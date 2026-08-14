@@ -398,7 +398,7 @@ th { font-weight: 600; background: var(--panel); font-size: 11px; text-transform
      pane" marker in the DOM/CSS to key off of, so scoping print to just
      one pane isn't done here. */
   .vault-layout { height: auto; display: block; }
-  .vault-sidebar, .vault-dropzone, .vault-sidenote, .vault-slide-rail, .vault-editor-toolbar, .vault-resize-handle, .vault-pane-header, .vault-pane-stats-bar { display: none !important; }
+  .vault-sidebar, .vault-dropzone, .vault-sidenote, .vault-editor-toolbar, .vault-resize-handle, .vault-pane-header, .vault-pane-stats-bar, .vault-export-progress { display: none !important; }
   .vault-panes { display: block; }
   .vault-pane, .vault-pane-body { display: block; }
   .vault-pane-main { overflow: visible; padding: 0; background: #fff; }
@@ -575,6 +575,33 @@ body.vault-resizing { cursor: col-resize; user-select: none; }
 }
 .vault-pane-stats-bar[hidden] { display: none; }
 .vault-pane-stats { font-size: 9pt; color: var(--text-soft); }
+
+/* Shown only during a multi-page JPEG export (see viewer-pane.js
+   exportJpeg) — rendering a page at a time via html2canvas is slow
+   enough on a 10+ page doc that silent progress would look hung. */
+.vault-export-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--ribbon-bg);
+}
+.vault-export-progress[hidden] { display: none; }
+.vault-export-progress-label { font-size: 12px; color: var(--text-soft); white-space: nowrap; }
+.vault-export-progress-track {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--border);
+  overflow: hidden;
+}
+.vault-export-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--teal);
+  transition: width 0.15s ease;
+}
 
 .vault-dropzone {
   height: 100%;
@@ -806,16 +833,6 @@ body.vault-resizing { cursor: col-resize; user-select: none; }
   margin-top: 0;
   border-radius: 0;
 }
-
-.vault-slide-rail {
-  position: sticky;
-  bottom: 0;
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  padding: 10px;
-}
-.vault-slide-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); }
 
 @media (max-width: 900px) {
   .vault-layout { flex-direction: column; height: auto; }

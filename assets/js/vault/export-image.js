@@ -32,3 +32,49 @@ export async function elementToJpegBlob(element, html2canvasLib = globalThis.htm
     canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('canvas.toBlob produced no data'))), 'image/jpeg', quality);
   });
 }
+
+/** DOM: re-encode an already-rendered <img> (a PDF page) as a JPEG Blob by
+ * drawing it onto a canvas at its own natural resolution — cheaper and
+ * crisper than routing it back through html2canvas, since it's already a
+ * finished raster image and doesn't need re-layout/re-paint. White
+ * backing fill first: PDF page PNGs have no transparency, but JPEG has no
+ * alpha channel at all, so any edge antialiasing would otherwise composite
+ * onto black. */
+export async function imageElementToJpegBlob(imgEl, quality = 0.95) {
+  await imgEl.decode().catch(() => {});
+  const canvas = document.createElement('canvas');
+  canvas.width = imgEl.naturalWidth;
+  canvas.height = imgEl.naturalHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(imgEl, 0, 0);
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('canvas.toBlob produced no data'))), 'image/jpeg', quality);
+  });
+}
+
+/** Pure: zero-padded "page-N" filename stem, width matched to the total
+ * count (page-1..page-9 for under 10 pages, page-01..page-10 for 10-99,
+ * and so on) so filenames still sort correctly in a file browser. */
+export function pageFileName(current, total) {
+  const width = String(total).length;
+  return `page-${String(current).padStart(width, '0')}`;
+}
+
+/** DOM: JPEG-encode every slide in a deck (PDF pages, PPTX slides) as its
+ * own page — the "one long image" complaint — reporting progress via
+ * `onProgress(current, total)` as each page finishes, for a progress-bar
+ * UI. A slide that's purely an already-rendered image (every PDF page)
+ * uses the cheaper direct re-encode; anything else (a PPTX slide with
+ * title/bullets) goes through html2canvas like a normal element. */
+export async function slidesToJpegBlobs(slides, onProgress) {
+  const blobs = [];
+  for (let i = 0; i < slides.length; i++) {
+    const slide = slides[i];
+    const onlyImg = slide.children.length === 1 && slide.firstElementChild.tagName === 'IMG' ? slide.firstElementChild : null;
+    blobs.push(onlyImg ? await imageElementToJpegBlob(onlyImg) : await elementToJpegBlob(slide));
+    if (onProgress) onProgress(i + 1, slides.length);
+  }
+  return blobs;
+}

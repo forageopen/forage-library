@@ -10,7 +10,7 @@ import {
   withExtension,
   downloadBlob,
 } from './export.js';
-import { elementToJpegBlob } from './export-image.js';
+import { elementToJpegBlob, slidesToJpegBlobs, pageFileName } from './export-image.js';
 import { blocksToDocxBlob } from './export-docx.js';
 import { blocksFromTokens, blocksFromElement } from './document-model.js';
 import { initResizeHandle } from './resize.js';
@@ -97,8 +97,24 @@ export function createViewerPane(paneEl) {
   const exportMenu = paneEl.querySelector('.vault-pane-export-menu');
   const statsBar = paneEl.querySelector('[data-vault-pane-stats-bar]');
   const statsEl = paneEl.querySelector('[data-vault-pane-stats]');
+  const progressBar = paneEl.querySelector('[data-vault-export-progress]');
+  const progressLabel = paneEl.querySelector('[data-vault-export-progress-label]');
+  const progressFill = paneEl.querySelector('[data-vault-export-progress-fill]');
 
   if (sidenoteHighlights) sidenoteHighlights.innerHTML = highlightSwatchesHtml('vault-sidenote-highlight');
+
+  /* Progress bar for a multi-page JPEG export — the only export path slow
+     enough (one html2canvas/decode pass per page) that silent progress
+     would read as hung. */
+  function setExportProgress(current, total) {
+    if (!progressBar || !progressLabel || !progressFill) return;
+    progressBar.hidden = false;
+    progressLabel.textContent = `Exporting page ${current} of ${total}…`;
+    progressFill.style.width = `${Math.round((current / total) * 100)}%`;
+  }
+  function hideExportProgress() {
+    if (progressBar) progressBar.hidden = true;
+  }
 
   let currentPath = null;
   let currentName = null;
@@ -505,9 +521,31 @@ export function createViewerPane(paneEl) {
     },
     /* JPEG export: rasterizes whatever's currently on screen via
        html2canvas, at the highest resolution that's safe to allocate (see
-       export-image.js) — not true AI upscaling, just a high-DPI capture. */
+       export-image.js) — not true AI upscaling, just a high-DPI capture.
+       A paginated doc (PDF, or a multi-slide PPTX) exports one JPEG per
+       page/slide, zipped, instead of one image of the whole scrolled-
+       through height — with a progress bar, since that's several
+       html2canvas/decode passes and can take a few seconds on a long doc. */
     async exportJpeg() {
       if (!currentName) return;
+      const slides = Array.from(contentEl.querySelectorAll('.vault-slide'));
+      if (slides.length > 1) {
+        const JSZipLib = globalThis.JSZip;
+        if (!JSZipLib) return;
+        try {
+          const zip = new JSZipLib();
+          const blobs = await slidesToJpegBlobs(slides, setExportProgress);
+          blobs.forEach((blob, i) => zip.file(`${pageFileName(i + 1, blobs.length)}.jpg`, blob));
+          const zipBlob = await zip.generateAsync({ type: 'blob' });
+          downloadBlob(withExtension(currentName, 'zip'), zipBlob, zipBlob.type);
+        } catch (err) {
+          // A page failed to render — no-op, same as every other export
+          // method when its precondition isn't met.
+        } finally {
+          hideExportProgress();
+        }
+        return;
+      }
       const target = contentEl.querySelector('.vault-editor-body') || contentEl;
       try {
         const blob = await elementToJpegBlob(target);

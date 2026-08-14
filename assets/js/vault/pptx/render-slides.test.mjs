@@ -24,11 +24,13 @@ test('escapes text content', () => {
   assert.ok(!html.includes('<script>'));
 });
 
-test('builds one rail dot per slide, matching slide count', () => {
+test('renders one .vault-slide section per slide, and no dot rail', () => {
   const html = slidesToHtml([
     { title: 'A', subtitle: null, bullets: [], images: [] },
     { title: 'B', subtitle: null, bullets: [], images: [] },
   ]);
-  const dots = html.match(/vault-slide-dot/g) || [];
-  assert.equal(dots.length, 2);
+  const sections = html.match(/class="vault-slide"/g) || [];
+  assert.equal(sections.length, 2);
+  assert.ok(!html.includes('vault-slide-rail'));
+  assert.ok(!html.includes('vault-slide-dot'));
 });
