@@ -18,14 +18,20 @@
     kokoblu: 'Kokoblu',
     dubai: 'Dubai',
   };
-  var THEME_SWATCH = {
-    sakura: '#c2185b',
-    cherry: '#ff2ea6',
-    'forest-brew': '#acc54e',
-    'tea-mist': '#242f21',
-    blueberry: '#647ebd',
-    kokoblu: '#a7bdd7',
-    dubai: '#abc44f',
+  /* One Lucide icon per theme (https://lucide.dev, ISC license) — inlined
+     as raw path data rather than pulling in the icon library, matching
+     how every other icon in this file's ribbon is already hand-inlined.
+     Picked for a loose thematic fit with each palette's name/mood rather
+     than its color, since the point of this change was icon+name instead
+     of a color swatch. */
+  var THEME_ICON = {
+    sakura: '<path d="M12 5a3 3 0 1 1 3 3m-3-3a3 3 0 1 0-3 3m3-3v1M9 8a3 3 0 1 0 3 3M9 8h1m5 0a3 3 0 1 1-3 3m3-3h-1m-2 3v-1"/><circle cx="12" cy="8" r="2"/><path d="M12 10v12"/><path d="M12 22c4.2 0 7-1.667 7-5-4.2 0-7 1.667-7 5Z"/><path d="M12 22c-4.2 0-7-1.667-7-5 4.2 0 7 1.667 7 5Z"/>',
+    cherry: '<path d="M2 17a5 5 0 0 0 10 0c0-2.76-2.5-5-5-3-2.5-2-5 .24-5 3Z"/><path d="M12 17a5 5 0 0 0 10 0c0-2.76-2.5-5-5-3-2.5-2-5 .24-5 3Z"/><path d="M7 14c3.22-2.91 4.29-8.75 5-12 1.66 2.38 4.94 9 5 12"/><path d="M22 9c-4.29 0-7.14-2.33-10-7 5.71 0 10 4.67 10 7Z"/>',
+    'forest-brew': '<path d="M10 10v.2A3 3 0 0 1 8.9 16H5a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0Z"/><path d="M7 16v6"/><path d="M13 19v3"/><path d="M12 19h8.3a1 1 0 0 0 .7-1.7L18 14h.3a1 1 0 0 0 .7-1.7L16 9h.2a1 1 0 0 0 .8-1.7L13 3l-1.4 1.5"/>',
+    'tea-mist': '<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>',
+    blueberry: '<path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/>',
+    kokoblu: '<path d="M2 12q2.5 2 5 0t5 0 5 0 5 0"/><path d="M2 19q2.5 2 5 0t5 0 5 0 5 0"/><path d="M2 5q2.5 2 5 0t5 0 5 0 5 0"/>',
+    dubai: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
   };
   /* First-time visitor (no stored preference) starts on Cherry — matches
      Noted's own default (a fixed default, not an OS-preference guess, so
@@ -60,7 +66,7 @@
       var selected = theme === current;
       return '<li role="menuitemradio" aria-checked="' + selected + '">' +
         '<button type="button" class="theme-option" data-theme="' + theme + '">' +
-        '<span class="theme-swatch" style="background:' + THEME_SWATCH[theme] + '"></span>' +
+        '<svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + THEME_ICON[theme] + '</svg>' +
         '<span>' + THEME_LABEL[theme] + '</span></button></li>';
     }).join('');
   }

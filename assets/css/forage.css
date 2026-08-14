@@ -336,11 +336,10 @@ th { font-weight: 600; background: var(--panel); font-size: 11px; text-transform
 .theme-option:hover, .theme-option:focus-visible { background: var(--ribbon-hover); }
 .theme-option[aria-checked="true"] { font-weight: 600; }
 
-.theme-swatch {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  border: 1px solid var(--ribbon-border);
+.theme-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--ribbon-text);
   flex-shrink: 0;
 }
 
