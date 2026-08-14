@@ -269,6 +269,8 @@ th { font-weight: 600; background: var(--panel); font-size: 11px; text-transform
   border-bottom: 1px solid var(--ribbon-border);
 }
 
+.ribbon-title-group { display: flex; align-items: center; gap: 8px; min-width: 0; }
+
 .ribbon-title {
   font-size: 14px;
   font-weight: 600;
@@ -396,10 +398,9 @@ th { font-weight: 600; background: var(--panel); font-size: 11px; text-transform
      pane" marker in the DOM/CSS to key off of, so scoping print to just
      one pane isn't done here. */
   .vault-layout { height: auto; display: block; }
-  .vault-sidebar, .vault-dropzone, .vault-sidenote, .vault-slide-rail, .vault-editor-toolbar { display: none !important; }
+  .vault-sidebar, .vault-dropzone, .vault-sidenote, .vault-slide-rail, .vault-editor-toolbar, .vault-resize-handle { display: none !important; }
   .vault-panes { display: block; }
   .vault-pane { display: block; }
-  .vault-panes--split .vault-pane { border-right: none; }
   .vault-pane-main { overflow: visible; padding: 0; background: #fff; }
   .vault-pane-content { max-width: none; color: #111; }
   .vault-deck { gap: 0; }
@@ -424,6 +425,10 @@ th { font-weight: 600; background: var(--panel); font-size: 11px; text-transform
   padding: 16px 12px;
   background: var(--bg);
 }
+/* Collapsed via the ribbon's toggle-sidebar icon — hide its resize handle
+   too (a sibling combinator, not :has(), since the handle comes AFTER the
+   sidebar in the DOM here, unlike the sidenote's handle which precedes it). */
+.vault-sidebar[hidden] ~ .vault-resize-handle[data-resize="sidebar"] { display: none; }
 
 /* Drag-to-resize handles — one between sidebar/viewer, one between
    viewer/sidenote (assets/js/vault/resize.js wires the drag behavior;
@@ -488,10 +493,13 @@ body.vault-resizing { cursor: col-resize; user-select: none; }
 .vault-tree-file-btn:hover, .vault-tree-file-btn:focus-visible { background: var(--ribbon-hover); }
 
 .vault-panes { flex: 1; display: flex; overflow: hidden; }
-.vault-panes--split .vault-pane { border-right: 1px solid var(--ribbon-border); }
-.vault-panes--split .vault-pane:last-child { border-right: none; }
 
 .vault-pane { flex: 1; display: flex; min-width: 0; }
+/* In split view the first pane becomes a fixed, resizable width (set by
+   the drag handle split-view.js inserts between the two panes) instead
+   of flex:1 — the second pane keeps flex:1 and fills whatever's left, so
+   the split isn't locked 50/50. */
+.vault-panes--split .vault-pane:first-child { flex: 0 0 auto; min-width: 200px; }
 .vault-pane-main { flex: 1; overflow-y: auto; padding: 40px; background: var(--panel); }
 
 .vault-dropzone {
