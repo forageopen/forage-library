@@ -1,0 +1,40 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { renderFile, extensionOf, SUPPORTED_EXTENSIONS } from './renderers.js';
+
+const textEncoder = new TextEncoder();
+
+test('extensionOf lowercases and strips the leading dot', () => {
+  assert.equal(extensionOf('Report.DOCX'), 'docx');
+  assert.equal(extensionOf('noext'), '');
+});
+
+test('SUPPORTED_EXTENSIONS lists all four handled types', () => {
+  assert.deepEqual(SUPPORTED_EXTENSIONS, ['md', 'txt', 'docx', 'pptx']);
+});
+
+test('dispatches .md to the markdown renderer as prose', async () => {
+  const buffer = textEncoder.encode('# Hi').buffer;
+  const result = await renderFile('note.md', buffer, { renderMarkdown: (text) => `<h1>${text}</h1>` });
+  assert.deepEqual(result, { kind: 'prose', html: '<h1># Hi</h1>' });
+});
+
+test('dispatches .txt to the text renderer as prose', async () => {
+  const buffer = textEncoder.encode('hello').buffer;
+  const result = await renderFile('note.txt', buffer, { renderText: (text) => `<p>${text}</p>` });
+  assert.deepEqual(result, { kind: 'prose', html: '<p>hello</p>' });
+});
+
+test('dispatches .docx to the docx renderer as prose', async () => {
+  const result = await renderFile('report.docx', new ArrayBuffer(0), { renderDocx: async () => '<p>doc</p>' });
+  assert.deepEqual(result, { kind: 'prose', html: '<p>doc</p>' });
+});
+
+test('dispatches .pptx to the pptx renderer as a deck', async () => {
+  const result = await renderFile('deck.pptx', new ArrayBuffer(0), { renderPptx: async () => '<section></section>' });
+  assert.deepEqual(result, { kind: 'deck', html: '<section></section>' });
+});
+
+test('throws a clear error for an unsupported extension', async () => {
+  await assert.rejects(() => renderFile('image.png', new ArrayBuffer(0), {}), /Unsupported file type: \.png/);
+});
