@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <script>(function(){try{if(localStorage.getItem('forage-theme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+  <script>(function(){var VALID=['sakura','cherry','forest-brew','tea-mist','blueberry','kokoblu','dubai'];try{var t=localStorage.getItem('forage-theme');document.documentElement.setAttribute('data-theme',VALID.indexOf(t)!==-1?t:'cherry');}catch(e){document.documentElement.setAttribute('data-theme','cherry');}})();</script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Forage Library</title>
   <link rel="stylesheet" href="assets/css/forage.css" />
@@ -23,10 +23,14 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07L11.5 4.5"/><path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07L12.5 19.5"/></svg>
       </button>
 
-      <button class="ribbon-btn ribbon-icon ribbon-theme-toggle" type="button" data-action="toggle-theme" aria-label="Toggle dark mode">
-        <svg class="icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
-        <svg class="icon-dark" viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-      </button>
+      <div class="ribbon-theme-wrap">
+        <button class="ribbon-btn ribbon-icon ribbon-theme-toggle" type="button" data-action="toggle-theme-menu" aria-haspopup="true" aria-expanded="false" aria-label="Theme">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+        </button>
+        <ul class="theme-popover" role="menu" hidden></ul>
+      </div>
+
+      <button class="ribbon-btn ribbon-icon" type="button" data-action="make-offline" aria-label="Make this site available offline"></button>
 
       <div class="ribbon-kebab-wrap">
         <button class="ribbon-btn ribbon-icon" type="button" data-action="toggle-menu" aria-haspopup="true" aria-expanded="false" aria-label="More options">
@@ -48,9 +52,12 @@
         <p>Every piece here lives as a raw file in the <a href="vault/">vault</a> — markdown, Word docs, PowerPoint decks, plain text — browsed and rendered client-side, restyled into one consistent look. Fork it, drop your own files into <code>vault/</code>, push.</p>
       </div>
       <p><a href="vault/">Open the vault →</a></p>
+      <p><a href="https://forage.goatcounter.com" target="_blank" rel="noopener">Visitor stats</a></p>
     </div>
   </main>
 
   <script src="assets/js/ribbon.js"></script>
+  <script src="assets/js/offline.js"></script>
+  <script src="assets/js/visitor-counter.js"></script>
 </body>
 </html>

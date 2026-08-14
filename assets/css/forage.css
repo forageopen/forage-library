@@ -1,53 +1,172 @@
 /* ============================================================
    FORAGE.CSS — shared stylesheet for the Forage Library
-   Palette + type lifted directly from the "Generative AI
-   Documentation Process" sample — not the Forage brand skill.
-   Light is default. Dark via <html data-theme="dark">, toggled
-   by the ribbon's light/dark button and persisted in localStorage.
+   Seven-theme system ported from github.com/forageopen/Noted
+   (src/theme.ts / styles.css) — same palettes, mapped onto this
+   file's existing token names (--bg/--text/--teal/--ribbon-* etc.)
+   rather than Noted's own --ds-* naming, so every existing
+   component rule (ribbon, page, vault) keeps working unmodified.
+   Applied as html[data-theme="sakura"|"cherry"|"forest-brew"|
+   "tea-mist"|"blueberry"|"kokoblu"|"dubai"], picked via the
+   ribbon's theme popover (assets/js/ribbon.js) and persisted in
+   localStorage. Cherry is the default for a first-time visitor
+   (no stored preference), matching Noted's own default.
+   Sakura (below, in :root) is the base/no-override theme.
    ============================================================ */
 
 :root {
-  --bg: #e5e7eb;
-  --page-bg: #ffffff;
-  --text: #111827;
-  --text-soft: #374151;
-  --subtitle: #6b7280;
-  --border: #d1d5db;
-  --teal: #167D6B;
-  --teal-bg: #f5fbfa;
-  --blue: #2596be;
-  --panel: #f3f4f6;
-  --arrow: #9ca3af;
-  --error: #c0392b;
+  /* Sakura — light pink surfaces, burgundy text. */
+  --bg: #ffe0eb;
+  --page-bg: #fff0f5;
+  --text: #4a0e2e;
+  --text-soft: #4a0e2e;
+  --subtitle: #8a4a63;
+  --border: #f3c6d6;
+  --teal: #c2185b;
+  --teal-bg: #ffd6e5;
+  --blue: #e64980;
+  --panel: #f8e1ea;
+  --arrow: #d98aa8;
+  --error: #de350b;
 
-  --ribbon-bg: #ffffff;
-  --ribbon-text: #111827;
-  --ribbon-muted: #6b7280;
-  --ribbon-border: #d1d5db;
-  --ribbon-hover: #f3f4f6;
+  --ribbon-bg: #fff0f5;
+  --ribbon-text: #4a0e2e;
+  --ribbon-muted: #8a4a63;
+  --ribbon-border: #f3c6d6;
+  --ribbon-hover: #fff5f9;
 
   --font: Inter, "Segoe UI", Arial, sans-serif;
 }
 
-html[data-theme="dark"] {
-  --bg: #0d0f12;
-  --page-bg: #17191d;
-  --text: #e8e9ec;
-  --text-soft: #b8bcc4;
-  --subtitle: #8b8f98;
-  --border: #2c2f34;
-  --teal: #35c9ac;
-  --teal-bg: #10201c;
-  --blue: #4fb3d9;
-  --panel: #1f2226;
-  --arrow: #6b7280;
-  --error: #f0766a;
+/* Cherry — charcoal surfaces, neon-pink accent. Default for first-time visitors. */
+html[data-theme="cherry"] {
+  --bg: #0e0d10;
+  --page-bg: #141316;
+  --text: #ece7ea;
+  --text-soft: #ece7ea;
+  --subtitle: #a99aa1;
+  --border: #2c262a;
+  --teal: #ff2ea6;
+  --teal-bg: #3a1230;
+  --blue: #ff5ec2;
+  --panel: #1c181c;
+  --arrow: #45383e;
+  --error: #ff6b81;
 
-  --ribbon-bg: #0d0f12;
-  --ribbon-text: #e8e9ec;
-  --ribbon-muted: #8b8f98;
-  --ribbon-border: #2c2f34;
-  --ribbon-hover: #1f2226;
+  --ribbon-bg: #141316;
+  --ribbon-text: #ece7ea;
+  --ribbon-muted: #a99aa1;
+  --ribbon-border: #2c262a;
+  --ribbon-hover: #1c1a1d;
+}
+
+/* Forest Brew — deep forest-green surfaces, olive-lime accent. */
+html[data-theme="forest-brew"] {
+  --bg: #212e1e;
+  --page-bg: #283624;
+  --text: #acc54e;
+  --text-soft: #acc54e;
+  --subtitle: #8fa968;
+  --border: #3a4a34;
+  --teal: #acc54e;
+  --teal-bg: #3c4a24;
+  --blue: #c3db6e;
+  --panel: #263424;
+  --arrow: #56684c;
+  --error: #ff8a65;
+
+  --ribbon-bg: #283624;
+  --ribbon-text: #acc54e;
+  --ribbon-muted: #8fa968;
+  --ribbon-border: #3a4a34;
+  --ribbon-hover: #324230;
+}
+
+/* Tea Mist — sage-green surfaces, dark forest-green accent. */
+html[data-theme="tea-mist"] {
+  --bg: #cad1ab;
+  --page-bg: #d6dcbc;
+  --text: #242f21;
+  --text-soft: #242f21;
+  --subtitle: #56604e;
+  --border: #b9c293;
+  --teal: #242f21;
+  --teal-bg: #dce2c4;
+  --blue: #3d4b37;
+  --panel: #d2d8b7;
+  --arrow: #9ca876;
+  --error: #c1502e;
+
+  --ribbon-bg: #d6dcbc;
+  --ribbon-text: #242f21;
+  --ribbon-muted: #56604e;
+  --ribbon-border: #b9c293;
+  --ribbon-hover: #e3e7ce;
+}
+
+/* Blueberry — blue-slate background, deep-plum surface, periwinkle accent. */
+html[data-theme="blueberry"] {
+  --bg: #4b4f76;
+  --page-bg: #411b32;
+  --text: #babcd3;
+  --text-soft: #babcd3;
+  --subtitle: #9799b5;
+  --border: #5a5e82;
+  --teal: #647ebd;
+  --teal-bg: #2e3350;
+  --blue: #acbadb;
+  --panel: #3e2038;
+  --arrow: #757aa3;
+  --error: #e0708a;
+
+  --ribbon-bg: #411b32;
+  --ribbon-text: #babcd3;
+  --ribbon-muted: #9799b5;
+  --ribbon-border: #5a5e82;
+  --ribbon-hover: #5a2f49;
+}
+
+/* Kokoblu — dark brown surfaces, steel-blue accent. No glow effect. */
+html[data-theme="kokoblu"] {
+  --bg: #31221d;
+  --page-bg: #3a2924;
+  --text: #a7bdd7;
+  --text-soft: #a7bdd7;
+  --subtitle: #8c97a3;
+  --border: #4a3a34;
+  --teal: #a7bdd7;
+  --teal-bg: #2e3a45;
+  --blue: #c3d3e6;
+  --panel: #362621;
+  --arrow: #665048;
+  --error: #e08566;
+
+  --ribbon-bg: #3a2924;
+  --ribbon-text: #a7bdd7;
+  --ribbon-muted: #8c97a3;
+  --ribbon-border: #4a3a34;
+  --ribbon-hover: #453330;
+}
+
+/* Dubai — near-black brown surfaces, olive-lime accent. No glow effect. */
+html[data-theme="dubai"] {
+  --bg: #2a1613;
+  --page-bg: #33201c;
+  --text: #abc44f;
+  --text-soft: #abc44f;
+  --subtitle: #8fa168;
+  --border: #43302a;
+  --teal: #abc44f;
+  --teal-bg: #3a431f;
+  --blue: #c3d876;
+  --panel: #301f1a;
+  --arrow: #5e463d;
+  --error: #e2705a;
+
+  --ribbon-bg: #33201c;
+  --ribbon-text: #abc44f;
+  --ribbon-muted: #8fa168;
+  --ribbon-border: #43302a;
+  --ribbon-hover: #402a24;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--font); }
@@ -179,9 +298,49 @@ th { font-weight: 600; background: var(--panel); font-size: 11px; text-transform
 .ribbon-btn.ribbon-icon { padding: 6px; }
 .ribbon-btn svg { width: 15px; height: 15px; display: block; }
 
-.ribbon-theme-toggle .icon-dark { display: none; }
-html[data-theme="dark"] .ribbon-theme-toggle .icon-light { display: none; }
-html[data-theme="dark"] .ribbon-theme-toggle .icon-dark { display: block; }
+.ribbon-theme-wrap { position: relative; }
+
+.theme-popover {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  background: var(--ribbon-bg);
+  border: 1px solid var(--ribbon-border);
+  border-radius: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  min-width: 160px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.theme-popover[hidden] { display: none; }
+
+.theme-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--ribbon-text);
+  padding: 8px 10px;
+  font-size: 13px;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.theme-option:hover, .theme-option:focus-visible { background: var(--ribbon-hover); }
+.theme-option[aria-checked="true"] { font-weight: 600; }
+
+.theme-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid var(--ribbon-border);
+  flex-shrink: 0;
+}
 
 .ribbon-kebab-wrap { position: relative; }
 
@@ -229,6 +388,22 @@ html[data-theme="dark"] .ribbon-theme-toggle .icon-dark { display: block; }
   .page-wrap { padding: 0; }
   .page { margin: 0; box-shadow: none; }
   .ribbon, .no-print { display: none !important; }
+
+  /* Vault: print the rendered content, not the sidebar/dropzone/sidenote
+     chrome, and let it flow across as many printed pages as it needs (the
+     on-screen scroll container must not clip it to one viewport-height).
+     In split view this prints both panes stacked — there's no "active
+     pane" marker in the DOM/CSS to key off of, so scoping print to just
+     one pane isn't done here. */
+  .vault-layout { height: auto; display: block; }
+  .vault-sidebar, .vault-dropzone, .vault-sidenote, .vault-slide-rail { display: none !important; }
+  .vault-panes { display: block; }
+  .vault-pane { display: block; }
+  .vault-panes--split .vault-pane { border-right: none; }
+  .vault-pane-main { overflow: visible; padding: 0; background: #fff; }
+  .vault-pane-content { max-width: none; color: #111; }
+  .vault-deck { gap: 0; }
+  .vault-slide { box-shadow: none; border: 1px solid #ccc; page-break-after: always; }
 }
 
 @media (max-width: 900px) {

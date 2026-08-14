@@ -11,6 +11,9 @@
   "license": "CC-BY-NC-SA-4.0",
   "devDependencies": {
     "@xmldom/xmldom": "^0.9.11",
-    "jszip": "^3.10.1"
+    "jszip": "^3.10.1",
+    "dompurify": "^3.4.13",
+    "jsdom": "^24.1.0",
+    "docx": "^8.5.0"
   }
 }

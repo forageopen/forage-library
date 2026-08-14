@@ -1,21 +1,108 @@
 /* ============================================================
    RIBBON.JS — Forage article ribbon interactions
-   Share, copy link, copy page content, export to PDF, light/dark
-   toggle. No dependencies. Attaches to every .ribbon on the page.
+   Share, copy link, copy page content, seven-theme popover picker
+   (ported from github.com/forageopen/Noted's src/theme.ts — same
+   palettes, same resolveInitialTheme/popover shape). No dependencies.
+   Attaches to every .ribbon on the page.
    ============================================================ */
 
 (function () {
   var THEME_KEY = 'forage-theme';
+  var THEME_ORDER = ['sakura', 'cherry', 'forest-brew', 'tea-mist', 'blueberry', 'kokoblu', 'dubai'];
+  var THEME_LABEL = {
+    sakura: 'Sakura',
+    cherry: 'Cherry',
+    'forest-brew': 'Forest Brew',
+    'tea-mist': 'Tea Mist',
+    blueberry: 'Blueberry',
+    kokoblu: 'Kokoblu',
+    dubai: 'Dubai',
+  };
+  var THEME_SWATCH = {
+    sakura: '#c2185b',
+    cherry: '#ff2ea6',
+    'forest-brew': '#acc54e',
+    'tea-mist': '#242f21',
+    blueberry: '#647ebd',
+    kokoblu: '#a7bdd7',
+    dubai: '#abc44f',
+  };
+  /* First-time visitor (no stored preference) starts on Cherry — matches
+     Noted's own default (a fixed default, not an OS-preference guess, so
+     "first open" looks the same for everyone). */
+  var DEFAULT_THEME = 'cherry';
 
-  function applyTheme(theme) {
-    document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'dark' : 'light');
+  function isTheme(value) {
+    return THEME_ORDER.indexOf(value) !== -1;
   }
 
-  function toggleTheme() {
-    var current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
-    var next = current === 'dark' ? 'light' : 'dark';
-    applyTheme(next);
-    try { localStorage.setItem(THEME_KEY, next); } catch (err) { /* ignore */ }
+  /* Pure: given a stored value (possibly invalid/absent), decide which
+     theme to start with. */
+  function resolveInitialTheme(stored) {
+    if (stored !== null && isTheme(stored)) return stored;
+    return DEFAULT_THEME;
+  }
+
+  function getStoredTheme() {
+    try { return localStorage.getItem(THEME_KEY); } catch (err) { return null; }
+  }
+
+  function persistTheme(theme) {
+    try { localStorage.setItem(THEME_KEY, theme); } catch (err) { /* ignore */ }
+  }
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+  }
+
+  function renderThemeOptions(popover, current) {
+    popover.innerHTML = THEME_ORDER.map(function (theme) {
+      var selected = theme === current;
+      return '<li role="menuitemradio" aria-checked="' + selected + '">' +
+        '<button type="button" class="theme-option" data-theme="' + theme + '">' +
+        '<span class="theme-swatch" style="background:' + THEME_SWATCH[theme] + '"></span>' +
+        '<span>' + THEME_LABEL[theme] + '</span></button></li>';
+    }).join('');
+  }
+
+  function setupThemePopover(toggleBtn, popover) {
+    var current = resolveInitialTheme(getStoredTheme());
+    applyTheme(current);
+    renderThemeOptions(popover, current);
+    toggleBtn.setAttribute('aria-label', 'Theme — currently ' + THEME_LABEL[current]);
+
+    function setOpen(open) {
+      popover.hidden = !open;
+      toggleBtn.setAttribute('aria-expanded', String(open));
+    }
+    setOpen(false);
+
+    toggleBtn.addEventListener('click', function (e) {
+      e.stopPropagation(); // don't let this click immediately trigger the outside-click closer below
+      setOpen(popover.hidden);
+    });
+
+    document.addEventListener('click', function (e) {
+      if (!popover.hidden && !popover.contains(e.target) && e.target !== toggleBtn) {
+        setOpen(false);
+      }
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !popover.hidden) setOpen(false);
+    });
+
+    popover.addEventListener('click', function (e) {
+      var btn = e.target.closest && e.target.closest('.theme-option');
+      var theme = btn && btn.dataset.theme;
+      if (!theme || !isTheme(theme)) return;
+      current = theme;
+      applyTheme(current);
+      persistTheme(current);
+      renderThemeOptions(popover, current);
+      toggleBtn.setAttribute('aria-label', 'Theme — currently ' + THEME_LABEL[current]);
+      setOpen(false);
+    });
   }
 
   function toast(msg) {
@@ -61,20 +148,6 @@
   function getArticleText() {
     const main = document.querySelector('[data-article-content]') || document.querySelector('main') || document.body;
     return main.innerText.trim();
-  }
-
-  async function exportArticle() {
-    const pdfHref = location.pathname.replace(/\.html?$/i, '.pdf');
-    try {
-      const res = await fetch(pdfHref, { method: 'HEAD' });
-      if (res.ok) {
-        window.open(pdfHref, '_blank');
-        return;
-      }
-    } catch (err) {
-      /* no network / not deployed yet / file:// preview — fall back below */
-    }
-    window.print();
   }
 
   function closeMenu(menu, btn) {
@@ -125,13 +198,11 @@
       });
     });
 
-    ribbon.querySelectorAll('[data-action="export"]').forEach(function (btn) {
-      btn.addEventListener('click', exportArticle);
-    });
-
-    ribbon.querySelectorAll('[data-action="toggle-theme"]').forEach(function (btn) {
-      btn.addEventListener('click', toggleTheme);
-    });
+    const themeToggleBtn = ribbon.querySelector('[data-action="toggle-theme-menu"]');
+    const themePopover = ribbon.querySelector('.theme-popover');
+    if (themeToggleBtn && themePopover) {
+      setupThemePopover(themeToggleBtn, themePopover);
+    }
 
     const kebabBtn = ribbon.querySelector('[data-action="toggle-menu"]');
     const menu = ribbon.querySelector('.ribbon-menu');
