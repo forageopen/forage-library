@@ -293,6 +293,7 @@ html[data-theme="dark"] .ribbon-theme-toggle .icon-dark { display: block; }
   border: 2px dashed var(--border);
   border-radius: 10px;
 }
+.vault-dropzone[hidden] { display: none; }
 .vault-dropzone--active { border-color: var(--teal); background: var(--teal-bg); }
 .vault-dropzone-label { text-align: center; font-size: 15px; color: var(--text-soft); cursor: pointer; }
 
