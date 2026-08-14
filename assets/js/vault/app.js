@@ -50,4 +50,17 @@ document.addEventListener('DOMContentLoaded', () => {
       splitView.getActivePane().startNewNote();
     }
   });
+
+  /* Clicking the ribbon, or a blank part of the nav pane (not a file
+     link — that already re-highlights its target pane on its own),
+     deselects the active-pane highlight in split view. It stays purely
+     visual: `activePane` itself doesn't change, so sidebar opens and
+     "new note" keep landing in the same pane until the user clicks into
+     a pane again. */
+  const ribbonEl = document.querySelector('.ribbon');
+  document.addEventListener('click', (e) => {
+    const inRibbon = ribbonEl && ribbonEl.contains(e.target);
+    const inBlankSidebar = sidebarEl && sidebarEl.contains(e.target) && !e.target.closest('.vault-tree-file-btn');
+    if (inRibbon || inBlankSidebar) splitView.clearActiveHighlight();
+  });
 });

@@ -5,12 +5,19 @@
   <script>(function(){var VALID=['sakura','cherry','forest-brew','tea-mist','blueberry','kokoblu','dubai'];try{var t=localStorage.getItem('forage-theme');document.documentElement.setAttribute('data-theme',VALID.indexOf(t)!==-1?t:'cherry');}catch(e){document.documentElement.setAttribute('data-theme','cherry');}})();</script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Forage Library</title>
+  <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg" />
   <link rel="stylesheet" href="assets/css/forage.css" />
   <script src="https://cdn.jsdelivr.net/npm/marked@18.0.9/lib/marked.umd.js" integrity="sha384-kyb7rY2xnKgiRpRdAeNJxQ8e2SiGZy1m+FK9yME6M0eGJpg7EFaGGvf7+JSirgqE" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/mammoth@1.12.1/mammoth.browser.min.js" integrity="sha384-HDD+X9TzmVU2HzA3VYqphTtip2QgcmmSAuKTMkFv709AUMZ6LPn0ysDRZeQIL31w" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js" integrity="sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3.4.13/dist/purify.min.js" integrity="sha384-ZuC+DIACqSIZTsp+7YF57cR5Y+6qXa7YFbEKdA/EHA/R0T+41dtorqucYl71Zp+t" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js" integrity="sha384-4xaIisuLEy2lo2HkB2C4rEf7v8jbTb2kuogX6TkuEt9feTWKBSFSOzsqNNbV+sKh" crossorigin="anonymous"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" integrity="sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" integrity="sha384-ZZ1pncU3bQe8y31yfZdMFdSpttDoPmOZg2wguVK9almUodir1PghgT0eY7Mrty8H" crossorigin="anonymous"></script>
+  <!-- pdf.js (pdfjs-dist@6.2.108) is loaded lazily via dynamic import in
+       render-pdf.js, not here — it's ESM-only (no classic-script build)
+       and large enough that most visits, which never open a PDF, shouldn't
+       pay for it. -->
 </head>
 <body>
 
@@ -61,6 +68,9 @@
                 <li role="menuitem" data-action="pane-export-markdown">Export as Markdown</li>
                 <li role="menuitem" data-action="pane-export-docx">Export as Word (.docx)</li>
                 <li role="menuitem" data-action="pane-export-json">Export as JSON</li>
+                <li role="menuitem" data-action="pane-export-text">Export as Text</li>
+                <li role="menuitem" data-action="pane-export-csv">Export as CSV</li>
+                <li role="menuitem" data-action="pane-export-jpeg">Export as JPEG</li>
               </ul>
             </div>
             <button type="button" class="vault-pane-header-btn" data-action="pane-close" aria-label="Close file" title="Close file">
@@ -68,13 +78,16 @@
             </button>
           </div>
         </div>
+        <div class="vault-pane-stats-bar" data-vault-pane-stats-bar hidden>
+          <span class="vault-pane-stats" data-vault-pane-stats></span>
+        </div>
         <div class="vault-pane-body">
           <div class="vault-pane-main">
             <div class="vault-dropzone" data-vault-dropzone>
               <div class="vault-dropzone-message">
                 <label class="vault-dropzone-label">
                   Choose files or drop files here
-                  <input type="file" class="vault-dropzone-input" accept=".md,.txt,.docx,.pptx" hidden>
+                  <input type="file" class="vault-dropzone-input" accept=".md,.txt,.docx,.pptx,.pdf,.xlsx,.csv" hidden>
                 </label>
                 <button type="button" class="vault-dropzone-new-note" data-action="new-note">or click to start a new note</button>
               </div>
@@ -89,12 +102,7 @@
               <button type="button" class="vault-sidenote-btn" data-cmd="italic" aria-label="Italic" title="Italic"><i>I</i></button>
               <button type="button" class="vault-sidenote-btn" data-cmd="underline" aria-label="Underline" title="Underline"><u>U</u></button>
               <button type="button" class="vault-sidenote-btn" data-cmd="strikeThrough" aria-label="Strikethrough" title="Strikethrough"><s>S</s></button>
-              <span class="vault-sidenote-highlights">
-                <button type="button" class="vault-sidenote-highlight" data-highlight="#fff3a3" style="background:#fff3a3" aria-label="Yellow highlight" title="Yellow highlight"></button>
-                <button type="button" class="vault-sidenote-highlight" data-highlight="#ffd6d6" style="background:#ffd6d6" aria-label="Red highlight" title="Red highlight"></button>
-                <button type="button" class="vault-sidenote-highlight" data-highlight="#d6ffe0" style="background:#d6ffe0" aria-label="Green highlight" title="Green highlight"></button>
-                <button type="button" class="vault-sidenote-highlight vault-sidenote-highlight--none" data-highlight="none" aria-label="Remove highlight" title="Remove highlight">✕</button>
-              </span>
+              <span class="vault-sidenote-highlights" data-vault-sidenote-highlights></span>
             </div>
             <div class="vault-sidenote-input" data-vault-sidenote-input contenteditable="true" data-placeholder="Notes on this page…"></div>
           </aside>
@@ -112,7 +120,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           </button>
           <div class="vault-pane-export-wrap">
-            <button type="button" class="vault-pane-header-btn" data-action="pane-export-menu" aria-haspopup="true" aria-expanded="false" aria-label="Export">
+            <button type="button" class="vault-pane-header-btn" data-action="pane-export-menu" aria-haspopup="true" aria-expanded="false" aria-label="Export" title="Export options">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
             </button>
             <ul class="vault-pane-export-menu" role="menu" hidden>
@@ -121,12 +129,18 @@
               <li role="menuitem" data-action="pane-export-markdown">Export as Markdown</li>
               <li role="menuitem" data-action="pane-export-docx">Export as Word (.docx)</li>
               <li role="menuitem" data-action="pane-export-json">Export as JSON</li>
+              <li role="menuitem" data-action="pane-export-text">Export as Text</li>
+              <li role="menuitem" data-action="pane-export-csv">Export as CSV</li>
+              <li role="menuitem" data-action="pane-export-jpeg">Export as JPEG</li>
             </ul>
           </div>
-          <button type="button" class="vault-pane-header-btn" data-action="pane-close" aria-label="Close file">
+          <button type="button" class="vault-pane-header-btn" data-action="pane-close" aria-label="Close file" title="Close file">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>
+      </div>
+      <div class="vault-pane-stats-bar" data-vault-pane-stats-bar hidden>
+        <span class="vault-pane-stats" data-vault-pane-stats></span>
       </div>
       <div class="vault-pane-body">
         <div class="vault-pane-main">
@@ -134,7 +148,7 @@
             <div class="vault-dropzone-message">
               <label class="vault-dropzone-label">
                 Choose files or drop files here
-                <input type="file" class="vault-dropzone-input" accept=".md,.txt,.docx,.pptx" hidden>
+                <input type="file" class="vault-dropzone-input" accept=".md,.txt,.docx,.pptx,.pdf,.xlsx,.csv" hidden>
               </label>
               <button type="button" class="vault-dropzone-new-note" data-action="new-note">or click to start a new note</button>
             </div>
@@ -145,16 +159,11 @@
         <aside class="vault-sidenote" data-vault-sidenote hidden>
           <h2>Sidenote</h2>
           <div class="vault-sidenote-toolbar" data-vault-sidenote-toolbar>
-            <button type="button" class="vault-sidenote-btn" data-cmd="bold" aria-label="Bold"><b>B</b></button>
-            <button type="button" class="vault-sidenote-btn" data-cmd="italic" aria-label="Italic"><i>I</i></button>
-            <button type="button" class="vault-sidenote-btn" data-cmd="underline" aria-label="Underline"><u>U</u></button>
-            <button type="button" class="vault-sidenote-btn" data-cmd="strikeThrough" aria-label="Strikethrough"><s>S</s></button>
-            <span class="vault-sidenote-highlights">
-              <button type="button" class="vault-sidenote-highlight" data-highlight="#fff3a3" style="background:#fff3a3" aria-label="Yellow highlight"></button>
-              <button type="button" class="vault-sidenote-highlight" data-highlight="#ffd6d6" style="background:#ffd6d6" aria-label="Red highlight"></button>
-              <button type="button" class="vault-sidenote-highlight" data-highlight="#d6ffe0" style="background:#d6ffe0" aria-label="Green highlight"></button>
-              <button type="button" class="vault-sidenote-highlight vault-sidenote-highlight--none" data-highlight="none" aria-label="Remove highlight">✕</button>
-            </span>
+            <button type="button" class="vault-sidenote-btn" data-cmd="bold" aria-label="Bold" title="Bold"><b>B</b></button>
+            <button type="button" class="vault-sidenote-btn" data-cmd="italic" aria-label="Italic" title="Italic"><i>I</i></button>
+            <button type="button" class="vault-sidenote-btn" data-cmd="underline" aria-label="Underline" title="Underline"><u>U</u></button>
+            <button type="button" class="vault-sidenote-btn" data-cmd="strikeThrough" aria-label="Strikethrough" title="Strikethrough"><s>S</s></button>
+            <span class="vault-sidenote-highlights" data-vault-sidenote-highlights></span>
           </div>
           <div class="vault-sidenote-input" data-vault-sidenote-input contenteditable="true" data-placeholder="Notes on this page…"></div>
         </aside>

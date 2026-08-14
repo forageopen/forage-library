@@ -11,10 +11,11 @@
   "license": "CC-BY-NC-SA-4.0",
   "devDependencies": {
     "@xmldom/xmldom": "^0.9.11",
-    "jszip": "^3.10.1",
+    "docx": "^8.5.0",
     "dompurify": "^3.4.13",
     "jsdom": "^24.1.0",
-    "docx": "^8.5.0",
-    "marked": "^18.0.9"
+    "jszip": "^3.10.1",
+    "marked": "^18.0.9",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   }
 }

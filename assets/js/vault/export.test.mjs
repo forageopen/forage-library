@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { withExtension, buildStandaloneHtml, blocksToJson } from './export.js';
+import { withExtension, buildStandaloneHtml, blocksToJson, rowsToCsv } from './export.js';
 
 test('withExtension replaces an existing extension', () => {
   assert.equal(withExtension('Report.md', 'html'), 'Report.html');
@@ -37,4 +37,18 @@ test('blocksToJson wraps blocks with a version number, pretty-printed', () => {
   const json = blocksToJson(blocks);
   assert.deepEqual(JSON.parse(json), { version: 1, blocks });
   assert.match(json, /\n  "version": 1,\n/); // pretty-printed, not minified
+});
+
+test('rowsToCsv joins plain fields with commas and rows with CRLF', () => {
+  assert.equal(rowsToCsv([['a', 'b'], ['c', 'd']]), 'a,b\r\nc,d');
+});
+
+test('rowsToCsv quotes and escapes a field containing a comma, quote, or newline', () => {
+  const row = ['has,comma', 'has"quote', 'has\nnewline'];
+  const expected = ['"has,comma"', '"has""quote"', '"has\nnewline"'].join(',');
+  assert.equal(rowsToCsv([row]), expected);
+});
+
+test('rowsToCsv treats null/undefined cells as empty strings', () => {
+  assert.equal(rowsToCsv([[null, undefined, 'x']]), ',,x');
 });

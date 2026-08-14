@@ -9,8 +9,8 @@ test('extensionOf lowercases and strips the leading dot', () => {
   assert.equal(extensionOf('noext'), '');
 });
 
-test('SUPPORTED_EXTENSIONS lists all four handled types', () => {
-  assert.deepEqual(SUPPORTED_EXTENSIONS, ['md', 'txt', 'docx', 'pptx']);
+test('SUPPORTED_EXTENSIONS lists all seven handled types', () => {
+  assert.deepEqual(SUPPORTED_EXTENSIONS, ['md', 'txt', 'docx', 'pptx', 'pdf', 'xlsx', 'csv']);
 });
 
 test('dispatches .md to the markdown renderer as prose', async () => {
@@ -33,6 +33,21 @@ test('dispatches .docx to the docx renderer as prose', async () => {
 test('dispatches .pptx to the pptx renderer as a deck', async () => {
   const result = await renderFile('deck.pptx', new ArrayBuffer(0), { renderPptx: async () => '<section></section>' });
   assert.deepEqual(result, { kind: 'deck', html: '<section></section>' });
+});
+
+test('dispatches .pdf to the pdf renderer as a deck', async () => {
+  const result = await renderFile('scan.pdf', new ArrayBuffer(0), { renderPdf: async () => '<section></section>' });
+  assert.deepEqual(result, { kind: 'deck', html: '<section></section>' });
+});
+
+test('dispatches .xlsx to the spreadsheet renderer as prose', async () => {
+  const result = await renderFile('data.xlsx', new ArrayBuffer(0), { renderSpreadsheet: (buf, name) => `<table data-name="${name}"></table>` });
+  assert.deepEqual(result, { kind: 'prose', html: '<table data-name="data.xlsx"></table>' });
+});
+
+test('dispatches .csv to the spreadsheet renderer as prose', async () => {
+  const result = await renderFile('data.csv', new ArrayBuffer(0), { renderSpreadsheet: (buf, name) => `<table data-name="${name}"></table>` });
+  assert.deepEqual(result, { kind: 'prose', html: '<table data-name="data.csv"></table>' });
 });
 
 test('throws a clear error for an unsupported extension', async () => {

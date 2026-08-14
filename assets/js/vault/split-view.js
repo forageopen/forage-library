@@ -27,6 +27,15 @@ export function initSplitView(panesContainer, template) {
     panes.forEach((p) => p.el.classList.toggle('vault-pane--active', p === activePane));
   }
 
+  /* Clears the visual highlight only — `activePane` itself is untouched,
+     so sidebar file-opens and "new note" still land somewhere sane even
+     after the user has clicked away to deselect. Re-clicking a pane (or
+     opening a file into one) brings the highlight straight back via
+     markActive(). */
+  function clearActiveHighlight() {
+    panes.forEach((p) => p.el.classList.remove('vault-pane--active'));
+  }
+
   let activePane;
   markActive(wrapExisting(panesContainer.querySelector('.vault-pane')));
 
@@ -90,6 +99,7 @@ export function initSplitView(panesContainer, template) {
     isSplit: () => panes.length >= 2,
     openInSplit: openSplit,
     closeSplit,
+    clearActiveHighlight,
     toggleSplit() {
       if (panes.length >= 2) closeSplit();
       else openSplit();

@@ -1,3 +1,18 @@
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/* Pure: 'yyyy-mm-dd' (the manifest's `date` field) -> 'Mon D, YYYY'. Ported
+   from ribbon.js's article-date formatter so both surfaces read the same
+   way. Falls back to the raw string for anything non-ISO rather than
+   throwing, since a malformed manifest shouldn't break the whole tree. */
+export function formatDate(raw) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
+  if (!match) return raw;
+  const year = Number(match[1]);
+  const month = Number(match[2]) - 1;
+  const day = Number(match[3]);
+  return `${MONTHS[month]} ${day}, ${year}`;
+}
+
 function renderNode(node) {
   if (node.type === 'folder') {
     const li = document.createElement('li');
@@ -21,6 +36,7 @@ function renderNode(node) {
   button.textContent = node.title;
   button.dataset.path = node.path;
   button.dataset.name = node.name;
+  if (node.date) button.title = `Published ${formatDate(node.date)}`;
   li.appendChild(button);
   return li;
 }

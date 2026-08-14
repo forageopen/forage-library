@@ -112,3 +112,33 @@ export function blocksToJson(blocks) {
 export function exportJson(title, blocks, doc = document) {
   downloadBlob(withExtension(title, 'json'), blocksToJson(blocks), 'application/json', doc);
 }
+
+/** DOM: download the rendered content as plain text (formatting stripped —
+ * the caller passes already-extracted text, e.g. `element.innerText`). */
+export function exportPlainText(title, text, doc = document) {
+  downloadBlob(withExtension(title, 'txt'), text, 'text/plain', doc);
+}
+
+/**
+ * .csv export: rows are a plain 2D array of strings — the caller is
+ * responsible for extracting them (from a rendered <table>, or straight
+ * from spreadsheet source data). RFC 4180-ish escaping: a field is quoted
+ * only when it contains a comma, quote, or newline, matching what every
+ * common spreadsheet app produces and expects on import.
+ */
+
+/** Pure: escape a single CSV field. */
+function csvField(value) {
+  const str = String(value ?? '');
+  return /[",\r\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
+}
+
+/** Pure: serialize rows into CSV text. */
+export function rowsToCsv(rows) {
+  return rows.map((row) => row.map(csvField).join(',')).join('\r\n');
+}
+
+/** DOM: build + download the .csv export. */
+export function exportCsv(title, rows, doc = document) {
+  downloadBlob(withExtension(title, 'csv'), rowsToCsv(rows), 'text/csv', doc);
+}

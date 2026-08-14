@@ -398,7 +398,7 @@ th { font-weight: 600; background: var(--panel); font-size: 11px; text-transform
      pane" marker in the DOM/CSS to key off of, so scoping print to just
      one pane isn't done here. */
   .vault-layout { height: auto; display: block; }
-  .vault-sidebar, .vault-dropzone, .vault-sidenote, .vault-slide-rail, .vault-editor-toolbar, .vault-resize-handle, .vault-pane-header { display: none !important; }
+  .vault-sidebar, .vault-dropzone, .vault-sidenote, .vault-slide-rail, .vault-editor-toolbar, .vault-resize-handle, .vault-pane-header, .vault-pane-stats-bar { display: none !important; }
   .vault-panes { display: block; }
   .vault-pane, .vault-pane-body { display: block; }
   .vault-pane-main { overflow: visible; padding: 0; background: #fff; }
@@ -563,6 +563,19 @@ body.vault-resizing { cursor: col-resize; user-select: none; }
 .vault-pane-export-menu li { padding: 8px 10px; font-size: 13px; border-radius: 5px; cursor: pointer; color: var(--text); white-space: nowrap; }
 .vault-pane-export-menu li:hover, .vault-pane-export-menu li:focus-visible { background: var(--ribbon-hover); }
 
+/* Word count / reading time — a full-width bar under the pane header,
+   text right-aligned, colors pulled from the active theme like every
+   other chrome piece on the page. */
+.vault-pane-stats-bar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 4px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--ribbon-bg);
+}
+.vault-pane-stats-bar[hidden] { display: none; }
+.vault-pane-stats { font-size: 12pt; color: var(--text-soft); }
+
 .vault-dropzone {
   height: 100%;
   display: flex;
@@ -599,10 +612,31 @@ body.vault-resizing { cursor: col-resize; user-select: none; }
 .vault-editor-toolbar {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 6px;
   margin-bottom: 20px;
   padding-bottom: 12px;
   border-bottom: 1px solid var(--border);
+}
+.vault-editor-format {
+  height: 30px;
+  padding: 0 8px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+}
+/* The closed <select> box inherits theme colors fine, but its native
+   open-dropdown option list does NOT inherit `background: transparent` —
+   without this it falls back to the browser's default white popup, which
+   made light-on-dark themes like Cherry (near-white --text on that white
+   popup) render invisible text. Explicit background here fixes contrast
+   for every theme, not just the ones that happened to have dark text. */
+.vault-editor-format option {
+  background: var(--panel);
+  color: var(--text);
 }
 .vault-editor-btn {
   width: 30px;
@@ -618,7 +652,9 @@ body.vault-resizing { cursor: col-resize; user-select: none; }
   cursor: pointer;
 }
 .vault-editor-btn:hover, .vault-editor-btn:focus-visible { background: var(--ribbon-hover); }
-.vault-editor-highlights { display: inline-flex; align-items: center; gap: 5px; margin-left: 8px; }
+/* flex-wrap since 18 colors + "none" no longer fit on one row next to the
+   B/I/U/S buttons — wraps onto its own line(s) instead of overflowing. */
+.vault-editor-highlights { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 5px; margin-left: 8px; max-width: 100%; }
 .vault-editor-highlight {
   width: 20px;
   height: 20px;
@@ -627,7 +663,9 @@ body.vault-resizing { cursor: col-resize; user-select: none; }
   cursor: pointer;
 }
 .vault-editor-highlight--none { background: var(--page-bg); font-size: 11px; line-height: 1; color: var(--subtitle); }
-.vault-editor-title { font-size: 13px; color: var(--subtitle); margin-bottom: 12px; }
+.vault-editor-title { font-size: 13px; color: var(--subtitle); margin-bottom: 12px; cursor: text; }
+.vault-editor-title:hover { color: var(--text); }
+.vault-editor-title:focus { outline: none; color: var(--text); }
 .vault-editor-body {
   min-height: 400px;
   font-size: 14px;
@@ -679,7 +717,7 @@ body.vault-resizing { cursor: col-resize; user-select: none; }
   cursor: pointer;
 }
 .vault-sidenote-btn:hover, .vault-sidenote-btn:focus-visible { background: var(--ribbon-hover); }
-.vault-sidenote-highlights { display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; }
+.vault-sidenote-highlights { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 4px; margin-left: 6px; max-width: 100%; }
 .vault-sidenote-highlight {
   width: 18px;
   height: 18px;
