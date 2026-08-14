@@ -40,8 +40,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target.closest('[data-action="toggle-sidenote"]')) {
       splitView.getActivePane().toggleSidenote();
     }
-    if (e.target.closest('[data-action="open-split"]')) {
-      splitView.openInSplit();
+    const splitMenuItem = e.target.closest('[data-action="open-split"]');
+    if (splitMenuItem) {
+      splitView.toggleSplit();
+      splitMenuItem.textContent = splitView.isSplit() ? 'Close split' : 'Open in split';
     }
     // Export: applies to every open pane (both tabs in split view) for
     // the file-download formats, since each pane can hold a different
