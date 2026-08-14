@@ -61,6 +61,15 @@ jobs:
           mkdir -p _site
           cp -r index.html sw.js assets vault _site/
 
+      - name: Stamp service worker cache name with this deploy's commit
+        # Gives sw.js a byte-level diff on every deploy — without this,
+        # browsers have no signal to re-check a visitor's already-
+        # installed service worker for updates, so anyone who'd opted
+        # into offline mode would stay pinned to whatever was cached the
+        # day they clicked it, forever. See sw.js's own comments for the
+        # rest of the update story (network-first navigations).
+        run: sed -i "s/__DEPLOY_ID__/${GITHUB_SHA::12}/" _site/sw.js
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 

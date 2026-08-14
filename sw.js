@@ -28,9 +28,22 @@
  * added — precaching all of it would mean re-fetching the whole vault on
  * every deploy) and so are not guaranteed available offline unless the
  * browser's own HTTP cache already has them.
+ *
+ * One exception: page navigations go network-first (see the fetch
+ * handler below), so an online visitor always gets the current deploy's
+ * HTML/JS rather than being permanently pinned to whatever was cached
+ * the day they opted into offline mode.
+ *
+ * CACHE_NAME's suffix is stamped with the deploy's commit SHA by
+ * publish.yml at build time (this file's own copy keeps a placeholder,
+ * for local dev and so this file has a value at all outside CI) —
+ * without a byte-level change to sw.js itself, browsers never even
+ * re-check it for updates, so a static name here would mean this whole
+ * file, including the network-first fix, never gets picked up by anyone
+ * already registered from an older deploy.
  */
 
-const CACHE_NAME = 'forage-shell-v1';
+const CACHE_NAME = 'forage-shell-__DEPLOY_ID__';
 
 const SHELL_PATHS = [
   '',
@@ -101,6 +114,35 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+
+  /* Navigations (loading the page itself) go network-first, falling back
+     to cache only when offline. Everything else in the shell stays
+     cache-first as before. Without this, a visitor who'd ever clicked
+     "make available offline" would keep being served the exact HTML/JS
+     snapshot from whenever they clicked it, forever — CACHE_NAME alone
+     doesn't help here, since nothing prompts the browser to even notice
+     this file changed unless the byte content of sw.js itself differs,
+     which CI now stamps per-deploy (see publish.yml), but that update
+     still requires a network trip to be *detected* in the first place.
+     Network-first for navigations closes that gap directly: online
+     visitors always get the current app shell; offline visitors still
+     get the last cached one. */
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      (async () => {
+        try {
+          const fresh = await fetch(event.request);
+          const cache = await caches.open(CACHE_NAME);
+          cache.put(event.request, fresh.clone());
+          return fresh;
+        } catch (err) {
+          const cached = await caches.match(event.request);
+          return cached || Response.error();
+        }
+      })()
+    );
+    return;
+  }
 
   event.respondWith(
     (async () => {

@@ -625,6 +625,8 @@ body.vault-resizing { cursor: col-resize; user-select: none; }
   cursor: pointer;
 }
 .vault-dropzone-new-note:hover, .vault-dropzone-new-note:focus-visible { color: var(--teal); }
+.vault-dropzone-error { color: var(--error); font-size: 15px; cursor: pointer; }
+.vault-dropzone-error-hint { margin-top: 8px; font-size: 13px; color: var(--subtitle); cursor: pointer; }
 
 .vault-pane-content { max-width: 720px; margin: 0 auto; }
 .vault-content h1, .vault-content h2, .vault-content h3 { margin-top: 1em; margin-bottom: 0.4em; }

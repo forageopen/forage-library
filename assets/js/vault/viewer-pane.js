@@ -82,8 +82,13 @@ function currentSlideIndex(container, slides) {
   return index;
 }
 
+function escapeHtml(str) {
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 export function createViewerPane(paneEl) {
   const dropzone = paneEl.querySelector('[data-vault-dropzone]');
+  const dropzoneMessage = paneEl.querySelector('.vault-dropzone-message');
   const contentEl = paneEl.querySelector('[data-vault-pane-content]');
   const paneMain = paneEl.querySelector('.vault-pane-main');
   const sidenoteEl = paneEl.querySelector('[data-vault-sidenote]');
@@ -157,6 +162,7 @@ export function createViewerPane(paneEl) {
   }
 
   function renderLoading(name) {
+    resetDropzoneMessage();
     showContent();
     contentEl.className = 'vault-pane-content';
     contentEl.innerHTML = '';
@@ -166,14 +172,35 @@ export function createViewerPane(paneEl) {
     contentEl.appendChild(div);
   }
 
+  /* An unopenable file (wrong type, fetch failure, parse error) keeps the
+     DROPZONE showing rather than switching to the content pane — a failed
+     open used to hide the dropzone entirely, silently killing drag-and-drop
+     for any further attempt until the pane was closed and reopened. The
+     error replaces the dropzone's own prompt text in place, so the same
+     element stays the live drop target; clicking it (or successfully
+     dropping/opening another file) restores the normal prompt. */
+  const defaultDropzoneMessageHtml = dropzoneMessage ? dropzoneMessage.innerHTML : '';
+  let dropzoneShowingError = false;
+
+  function resetDropzoneMessage() {
+    if (!dropzoneMessage || !dropzoneShowingError) return;
+    dropzoneShowingError = false;
+    dropzoneMessage.innerHTML = defaultDropzoneMessageHtml;
+  }
+
   function renderError(name, message) {
-    showContent();
-    contentEl.className = 'vault-pane-content';
-    contentEl.innerHTML = '';
-    const div = document.createElement('div');
-    div.className = 'vault-status vault-status--error';
-    div.textContent = `Couldn't open ${name}: ${message}`;
-    contentEl.appendChild(div);
+    contentEl.hidden = true;
+    dropzone.hidden = false;
+    if (dropzoneMessage) {
+      dropzoneShowingError = true;
+      dropzoneMessage.innerHTML =
+        `<p class="vault-dropzone-error">Couldn't open ${escapeHtml(name)}: ${escapeHtml(message)}</p>` +
+        '<p class="vault-dropzone-error-hint">Click, or drop another file, to try again</p>';
+    }
+  }
+
+  if (dropzoneMessage) {
+    dropzone.addEventListener('click', () => resetDropzoneMessage());
   }
 
   async function openSource(name, arrayBuffer, path) {
@@ -469,6 +496,7 @@ export function createViewerPane(paneEl) {
       contentEl.innerHTML = '';
       contentEl.className = 'vault-pane-content';
       dropzone.hidden = false;
+      resetDropzoneMessage();
       updateHeader();
       updateStats();
     },
