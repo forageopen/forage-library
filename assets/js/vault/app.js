@@ -1,17 +1,21 @@
-import { createViewerPane } from './viewer-pane.js';
 import { initSidebar } from './sidebar.js';
+import { initSplitView } from './split-view.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-  const paneEl = document.querySelector('.vault-pane');
-  const pane = createViewerPane(paneEl);
+  const panesEl = document.querySelector('[data-vault-panes]');
+  const template = document.querySelector('[data-vault-pane-template]');
+  const splitView = initSplitView(panesEl, template);
 
   initSidebar(document.querySelector('[data-vault-sidebar]'), (path, name) => {
-    pane.openVaultFile(path, name);
+    splitView.getActivePane().openVaultFile(path, name);
   });
 
   document.addEventListener('click', (e) => {
     if (e.target.closest('[data-action="toggle-sidenote"]')) {
-      pane.toggleSidenote();
+      splitView.getActivePane().toggleSidenote();
+    }
+    if (e.target.closest('[data-action="open-split"]')) {
+      splitView.openInSplit();
     }
   });
 });
