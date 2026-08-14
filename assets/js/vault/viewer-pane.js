@@ -12,15 +12,15 @@ const NEW_DOCUMENT_NAME = 'Untitled.docx';
 
 const EDITOR_TOOLBAR_HTML = `
   <div class="vault-editor-toolbar">
-    <button type="button" class="vault-editor-btn" data-cmd="bold" aria-label="Bold"><b>B</b></button>
-    <button type="button" class="vault-editor-btn" data-cmd="italic" aria-label="Italic"><i>I</i></button>
-    <button type="button" class="vault-editor-btn" data-cmd="underline" aria-label="Underline"><u>U</u></button>
-    <button type="button" class="vault-editor-btn" data-cmd="strikeThrough" aria-label="Strikethrough"><s>S</s></button>
+    <button type="button" class="vault-editor-btn" data-cmd="bold" aria-label="Bold" title="Bold"><b>B</b></button>
+    <button type="button" class="vault-editor-btn" data-cmd="italic" aria-label="Italic" title="Italic"><i>I</i></button>
+    <button type="button" class="vault-editor-btn" data-cmd="underline" aria-label="Underline" title="Underline"><u>U</u></button>
+    <button type="button" class="vault-editor-btn" data-cmd="strikeThrough" aria-label="Strikethrough" title="Strikethrough"><s>S</s></button>
     <span class="vault-editor-highlights">
-      <button type="button" class="vault-editor-highlight" data-highlight="#fff3a3" style="background:#fff3a3" aria-label="Yellow highlight"></button>
-      <button type="button" class="vault-editor-highlight" data-highlight="#ffd6d6" style="background:#ffd6d6" aria-label="Red highlight"></button>
-      <button type="button" class="vault-editor-highlight" data-highlight="#d6ffe0" style="background:#d6ffe0" aria-label="Green highlight"></button>
-      <button type="button" class="vault-editor-highlight vault-editor-highlight--none" data-highlight="none" aria-label="Remove highlight">✕</button>
+      <button type="button" class="vault-editor-highlight" data-highlight="#fff3a3" style="background:#fff3a3" aria-label="Yellow highlight" title="Yellow highlight"></button>
+      <button type="button" class="vault-editor-highlight" data-highlight="#ffd6d6" style="background:#ffd6d6" aria-label="Red highlight" title="Red highlight"></button>
+      <button type="button" class="vault-editor-highlight" data-highlight="#d6ffe0" style="background:#d6ffe0" aria-label="Green highlight" title="Green highlight"></button>
+      <button type="button" class="vault-editor-highlight vault-editor-highlight--none" data-highlight="none" aria-label="Remove highlight" title="Remove highlight">✕</button>
     </span>
   </div>
 `;
@@ -32,10 +32,20 @@ export function createViewerPane(paneEl) {
   const sidenoteInput = paneEl.querySelector('[data-vault-sidenote-input]');
   const sidenoteToolbar = paneEl.querySelector('[data-vault-sidenote-toolbar]');
   const sidenoteResizeHandle = paneEl.querySelector('[data-resize="sidenote"]');
+  const headerEl = paneEl.querySelector('[data-vault-pane-header]');
+  const nameEl = paneEl.querySelector('[data-vault-pane-name]');
+  const exportMenuBtn = paneEl.querySelector('[data-action="pane-export-menu"]');
+  const exportMenu = paneEl.querySelector('.vault-pane-export-menu');
 
   let currentPath = null;
   let currentName = null;
   let currentSourceText = null; // only set for .md/.txt — the raw source, for "export as Markdown"
+
+  function updateHeader() {
+    if (!headerEl) return;
+    headerEl.hidden = !currentName;
+    if (nameEl) nameEl.textContent = currentName || '';
+  }
 
   function showContent() {
     dropzone.hidden = true;
@@ -80,11 +90,13 @@ export function createViewerPane(paneEl) {
           sidenoteInput.innerHTML = '';
         }
       }
+      updateHeader();
     } catch (err) {
       currentPath = null;
       currentName = null;
       currentSourceText = null;
       renderError(name, err.message);
+      updateHeader();
     }
   }
 
@@ -202,7 +214,48 @@ export function createViewerPane(paneEl) {
     });
   }
 
-  return {
+  function setExportMenuOpen(open) {
+    if (!exportMenu || !exportMenuBtn) return;
+    exportMenu.hidden = !open;
+    exportMenuBtn.setAttribute('aria-expanded', String(open));
+  }
+
+  /* Per-pane header — lives inside this pane's own DOM subtree, so every
+     action here is inherently scoped to THIS pane, not "whichever pane is
+     active" (the old global-kebab behavior the user found confusing in
+     split view). */
+  if (headerEl) {
+    headerEl.addEventListener('click', (e) => {
+      if (e.target.closest('[data-action="pane-sidenote"]')) {
+        if (sidenoteEl) sidenoteEl.hidden = !sidenoteEl.hidden;
+        return;
+      }
+      if (e.target.closest('[data-action="pane-export-menu"]')) {
+        e.stopPropagation();
+        setExportMenuOpen(exportMenu ? exportMenu.hidden : false);
+        return;
+      }
+      if (e.target.closest('[data-action="pane-export-html"]')) { api.exportHtml(); setExportMenuOpen(false); return; }
+      if (e.target.closest('[data-action="pane-export-pdf"]')) { api.exportPdf(); setExportMenuOpen(false); return; }
+      if (e.target.closest('[data-action="pane-export-markdown"]')) { api.exportMarkdown(); setExportMenuOpen(false); return; }
+      if (e.target.closest('[data-action="pane-export-docx"]')) { api.exportDocx(); setExportMenuOpen(false); return; }
+      if (e.target.closest('[data-action="pane-export-json"]')) { api.exportJson(); setExportMenuOpen(false); return; }
+      if (e.target.closest('[data-action="pane-close"]')) {
+        api.closeFile();
+        return;
+      }
+    });
+    document.addEventListener('click', (e) => {
+      if (exportMenu && !exportMenu.hidden && !exportMenu.contains(e.target) && e.target !== exportMenuBtn && !exportMenuBtn.contains(e.target)) {
+        setExportMenuOpen(false);
+      }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && exportMenu && !exportMenu.hidden) setExportMenuOpen(false);
+    });
+  }
+
+  const api = {
     el: paneEl,
     openVaultFile,
     openLocalFile,
@@ -225,6 +278,21 @@ export function createViewerPane(paneEl) {
         + '<div class="vault-content vault-editor-body" contenteditable="true" data-placeholder="Start typing…"></div>';
       const body = contentEl.querySelector('.vault-editor-body');
       if (body) body.focus();
+      updateHeader();
+    },
+    /* Clears this pane back to its empty, default state — the "no clarity
+       how to get back to the picker" gap the user flagged. Sidenote is
+       left exactly as-is (same rationale as startNewNote: closing the
+       main content shouldn't disturb an independent panel). */
+    closeFile() {
+      currentPath = null;
+      currentName = null;
+      currentSourceText = null;
+      contentEl.hidden = true;
+      contentEl.innerHTML = '';
+      contentEl.className = 'vault-pane-content';
+      dropzone.hidden = false;
+      updateHeader();
     },
     exportHtml() {
       if (!currentName) return;
@@ -253,4 +321,6 @@ export function createViewerPane(paneEl) {
       exportJson(currentName, blocks);
     },
   };
+
+  return api;
 }

@@ -36,35 +36,15 @@ document.addEventListener('DOMContentLoaded', () => {
     sidebarToggleBtn.addEventListener('click', () => applyCollapsed(!collapsed));
   }
 
+  // Export and Sidenote are now per-pane header controls (each button
+  // lives inside its own pane's DOM subtree, so it's inherently scoped to
+  // that pane) — only the split-view toggle and "start a new note" stay
+  // global, since they act on "whichever pane you last clicked into."
   document.addEventListener('click', (e) => {
-    if (e.target.closest('[data-action="toggle-sidenote"]')) {
-      splitView.getActivePane().toggleSidenote();
-    }
     const splitMenuItem = e.target.closest('[data-action="open-split"]');
     if (splitMenuItem) {
       splitView.toggleSplit();
       splitMenuItem.textContent = splitView.isSplit() ? 'Close split' : 'Open in split';
-    }
-    // Export: applies to every open pane (both tabs in split view) for
-    // the file-download formats, since each pane can hold a different
-    // file. PDF is the one exception — window.print() renders the whole
-    // visible page in one pass (the print stylesheet already un-stacks
-    // every open pane), so calling it once already covers all panes;
-    // calling it per-pane would just queue up duplicate print dialogs.
-    if (e.target.closest('[data-action="export-html"]')) {
-      splitView.getAllPanes().forEach((pane) => pane.exportHtml());
-    }
-    if (e.target.closest('[data-action="export-pdf"]')) {
-      splitView.getActivePane().exportPdf();
-    }
-    if (e.target.closest('[data-action="export-markdown"]')) {
-      splitView.getAllPanes().forEach((pane) => pane.exportMarkdown());
-    }
-    if (e.target.closest('[data-action="export-docx"]')) {
-      splitView.getAllPanes().forEach((pane) => pane.exportDocx());
-    }
-    if (e.target.closest('[data-action="export-json"]')) {
-      splitView.getAllPanes().forEach((pane) => pane.exportJson());
     }
     if (e.target.closest('[data-action="new-note"]')) {
       splitView.getActivePane().startNewNote();

@@ -18,13 +18,23 @@ export function initSplitView(panesContainer, template) {
     return wrapExisting(paneEl);
   }
 
-  let activePane = wrapExisting(panesContainer.querySelector('.vault-pane'));
+  /* Visually marks which pane is "active" (the one sidebar clicks and the
+     new-note button will target) — only meaningful once split, since a
+     single pane is trivially the active one. Without this, split view
+     gave no cue for which of the two panes an action would land in. */
+  function markActive(pane) {
+    activePane = pane;
+    panes.forEach((p) => p.el.classList.toggle('vault-pane--active', p === activePane));
+  }
+
+  let activePane;
+  markActive(wrapExisting(panesContainer.querySelector('.vault-pane')));
 
   panesContainer.addEventListener('click', (e) => {
     const paneEl = e.target.closest('.vault-pane');
     if (paneEl) {
       const match = panes.find((p) => p.el === paneEl);
-      if (match) activePane = match;
+      if (match) markActive(match);
     }
   });
 
@@ -45,7 +55,7 @@ export function initSplitView(panesContainer, template) {
     splitHandle.tabIndex = 0;
     panesContainer.insertBefore(splitHandle, firstPaneEl.nextSibling);
 
-    activePane = addClonedPane();
+    markActive(addClonedPane());
 
     const containerWidth = panesContainer.getBoundingClientRect().width;
     initResizeHandle(splitHandle, firstPaneEl, {
@@ -71,7 +81,7 @@ export function initSplitView(panesContainer, template) {
     }
     panesContainer.classList.remove('vault-panes--split');
     panes[0].el.style.width = ''; // inline width from resizing is inert now, but clear it for cleanliness
-    activePane = panes[0];
+    markActive(panes[0]);
   }
 
   return {
