@@ -6,58 +6,116 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Forage Library</title>
   <link rel="stylesheet" href="assets/css/forage.css" />
+  <script src="https://cdn.jsdelivr.net/npm/marked@18.0.9/lib/marked.umd.js" integrity="sha384-kyb7rY2xnKgiRpRdAeNJxQ8e2SiGZy1m+FK9yME6M0eGJpg7EFaGGvf7+JSirgqE" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mammoth@1.12.1/mammoth.browser.min.js" integrity="sha384-HDD+X9TzmVU2HzA3VYqphTtip2QgcmmSAuKTMkFv709AUMZ6LPn0ysDRZeQIL31w" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js" integrity="sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.4.13/dist/purify.min.js" integrity="sha384-ZuC+DIACqSIZTsp+7YF57cR5Y+6qXa7YFbEKdA/EHA/R0T+41dtorqucYl71Zp+t" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js" integrity="sha384-4xaIisuLEy2lo2HkB2C4rEf7v8jbTb2kuogX6TkuEt9feTWKBSFSOzsqNNbV+sKh" crossorigin="anonymous"></script>
 </head>
 <body>
 
-  <header class="ribbon" data-published="2026-08-05">
+  <header class="ribbon" data-published="">
     <span class="ribbon-title">Forage Library</span>
     <div class="ribbon-actions">
-      <span class="ribbon-meta">Published on <time class="ribbon-date"></time></span>
-
-      <button class="ribbon-btn ribbon-share" type="button" aria-label="Share">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.6" x2="15.4" y2="6.4"/><line x1="8.6" y1="13.4" x2="15.4" y2="17.6"/></svg>
-        <span>Share</span>
-      </button>
-
-      <button class="ribbon-btn ribbon-icon" type="button" data-action="copy-link" aria-label="Copy link">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07L11.5 4.5"/><path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07L12.5 19.5"/></svg>
-      </button>
-
       <div class="ribbon-theme-wrap">
         <button class="ribbon-btn ribbon-icon ribbon-theme-toggle" type="button" data-action="toggle-theme-menu" aria-haspopup="true" aria-expanded="false" aria-label="Theme">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
         </button>
         <ul class="theme-popover" role="menu" hidden></ul>
       </div>
-
       <button class="ribbon-btn ribbon-icon" type="button" data-action="make-offline" aria-label="Make this site available offline"></button>
-
       <div class="ribbon-kebab-wrap">
         <button class="ribbon-btn ribbon-icon" type="button" data-action="toggle-menu" aria-haspopup="true" aria-expanded="false" aria-label="More options">
           <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
         </button>
         <ul class="ribbon-menu" role="menu" hidden>
-          <li role="menuitem" data-action="copy-link">Copy link</li>
-          <li role="menuitem" data-action="copy-content">Copy page content</li>
+          <li role="menuitem" data-action="toggle-sidenote">Sidenote</li>
+          <li role="menuitem" data-action="open-split">Open in split</li>
+          <li role="menuitem" data-action="export-html">Export as HTML</li>
+          <li role="menuitem" data-action="export-pdf">Export as PDF</li>
+          <li role="menuitem" data-action="export-markdown">Export as Markdown</li>
+          <li role="menuitem" data-action="export-docx">Export as Word (.docx)</li>
+          <li role="menuitem" data-action="export-json">Export as JSON</li>
         </ul>
       </div>
     </div>
   </header>
 
-  <main class="page-wrap">
-    <div class="page">
-      <h1>Forage Library</h1>
-      <div class="subtitle">A forkable, HTML-first knowledge repository.</div>
-      <div class="intro">
-        <p>Every piece here lives as a raw file in the <a href="vault/">vault</a> — markdown, Word docs, PowerPoint decks, plain text — browsed and rendered client-side, restyled into one consistent look. Fork it, drop your own files into <code>vault/</code>, push.</p>
+  <div class="vault-layout">
+    <nav class="vault-sidebar" data-vault-sidebar aria-label="Vault folders"></nav>
+    <div class="vault-resize-handle" data-resize="sidebar" role="separator" aria-orientation="vertical" aria-label="Resize navigation" tabindex="0"></div>
+    <main class="vault-panes" data-vault-panes>
+      <section class="vault-pane">
+        <div class="vault-pane-main">
+          <div class="vault-dropzone" data-vault-dropzone>
+            <div class="vault-dropzone-message">
+              <label class="vault-dropzone-label">
+                Choose files or drop files here
+                <input type="file" class="vault-dropzone-input" accept=".md,.txt,.docx,.pptx" hidden>
+              </label>
+              <button type="button" class="vault-dropzone-new-note" data-action="new-note">or click to start a new note</button>
+            </div>
+          </div>
+          <div class="vault-pane-content" data-vault-pane-content hidden></div>
+        </div>
+        <div class="vault-resize-handle vault-resize-handle--sidenote" data-resize="sidenote" role="separator" aria-orientation="vertical" aria-label="Resize sidenote" tabindex="0"></div>
+        <aside class="vault-sidenote" data-vault-sidenote hidden>
+          <h2>Sidenote</h2>
+          <div class="vault-sidenote-toolbar" data-vault-sidenote-toolbar>
+            <button type="button" class="vault-sidenote-btn" data-cmd="bold" aria-label="Bold"><b>B</b></button>
+            <button type="button" class="vault-sidenote-btn" data-cmd="italic" aria-label="Italic"><i>I</i></button>
+            <button type="button" class="vault-sidenote-btn" data-cmd="underline" aria-label="Underline"><u>U</u></button>
+            <button type="button" class="vault-sidenote-btn" data-cmd="strikeThrough" aria-label="Strikethrough"><s>S</s></button>
+            <span class="vault-sidenote-highlights">
+              <button type="button" class="vault-sidenote-highlight" data-highlight="#fff3a3" style="background:#fff3a3" aria-label="Yellow highlight"></button>
+              <button type="button" class="vault-sidenote-highlight" data-highlight="#ffd6d6" style="background:#ffd6d6" aria-label="Red highlight"></button>
+              <button type="button" class="vault-sidenote-highlight" data-highlight="#d6ffe0" style="background:#d6ffe0" aria-label="Green highlight"></button>
+              <button type="button" class="vault-sidenote-highlight vault-sidenote-highlight--none" data-highlight="none" aria-label="Remove highlight">✕</button>
+            </span>
+          </div>
+          <div class="vault-sidenote-input" data-vault-sidenote-input contenteditable="true" data-placeholder="Notes on this page…"></div>
+        </aside>
+      </section>
+    </main>
+  </div>
+
+  <template data-vault-pane-template>
+    <section class="vault-pane">
+      <div class="vault-pane-main">
+        <div class="vault-dropzone" data-vault-dropzone>
+          <div class="vault-dropzone-message">
+            <label class="vault-dropzone-label">
+              Choose files or drop files here
+              <input type="file" class="vault-dropzone-input" accept=".md,.txt,.docx,.pptx" hidden>
+            </label>
+            <button type="button" class="vault-dropzone-new-note" data-action="new-note">or click to start a new note</button>
+          </div>
+        </div>
+        <div class="vault-pane-content" data-vault-pane-content hidden></div>
       </div>
-      <p><a href="vault/">Open the vault →</a></p>
-      <p><a href="https://forage.goatcounter.com" target="_blank" rel="noopener">Visitor stats</a></p>
-    </div>
-  </main>
+      <div class="vault-resize-handle vault-resize-handle--sidenote" data-resize="sidenote" role="separator" aria-orientation="vertical" aria-label="Resize sidenote" tabindex="0"></div>
+      <aside class="vault-sidenote" data-vault-sidenote hidden>
+        <h2>Sidenote</h2>
+        <div class="vault-sidenote-toolbar" data-vault-sidenote-toolbar>
+          <button type="button" class="vault-sidenote-btn" data-cmd="bold" aria-label="Bold"><b>B</b></button>
+          <button type="button" class="vault-sidenote-btn" data-cmd="italic" aria-label="Italic"><i>I</i></button>
+          <button type="button" class="vault-sidenote-btn" data-cmd="underline" aria-label="Underline"><u>U</u></button>
+          <button type="button" class="vault-sidenote-btn" data-cmd="strikeThrough" aria-label="Strikethrough"><s>S</s></button>
+          <span class="vault-sidenote-highlights">
+            <button type="button" class="vault-sidenote-highlight" data-highlight="#fff3a3" style="background:#fff3a3" aria-label="Yellow highlight"></button>
+            <button type="button" class="vault-sidenote-highlight" data-highlight="#ffd6d6" style="background:#ffd6d6" aria-label="Red highlight"></button>
+            <button type="button" class="vault-sidenote-highlight" data-highlight="#d6ffe0" style="background:#d6ffe0" aria-label="Green highlight"></button>
+            <button type="button" class="vault-sidenote-highlight vault-sidenote-highlight--none" data-highlight="none" aria-label="Remove highlight">✕</button>
+          </span>
+        </div>
+        <div class="vault-sidenote-input" data-vault-sidenote-input contenteditable="true" data-placeholder="Notes on this page…"></div>
+      </aside>
+    </section>
+  </template>
 
   <script src="assets/js/ribbon.js"></script>
   <script src="assets/js/offline.js"></script>
   <script src="assets/js/visitor-counter.js"></script>
+  <script type="module" src="assets/js/vault/app.js"></script>
 </body>
 </html>

@@ -4,15 +4,19 @@ import { initDropzone } from './dropzone.js';
 import { exportHtml as downloadStandaloneHtml, exportMarkdownSource, exportJson, withExtension, downloadBlob } from './export.js';
 import { blocksToDocxBlob } from './export-docx.js';
 import { blocksFromTokens, blocksFromElement } from './document-model.js';
+import { initResizeHandle } from './resize.js';
 
 const TEXT_DECODER = new TextDecoder('utf-8');
 const MARKDOWN_SOURCE_EXTENSIONS = new Set(['md', 'txt']);
+const UNTITLED_NOTE_KEY = 'untitled-note';
 
 export function createViewerPane(paneEl) {
   const dropzone = paneEl.querySelector('[data-vault-dropzone]');
   const contentEl = paneEl.querySelector('[data-vault-pane-content]');
   const sidenoteEl = paneEl.querySelector('[data-vault-sidenote]');
   const sidenoteInput = paneEl.querySelector('[data-vault-sidenote-input]');
+  const sidenoteToolbar = paneEl.querySelector('[data-vault-sidenote-toolbar]');
+  const sidenoteResizeHandle = paneEl.querySelector('[data-resize="sidenote"]');
 
   let currentPath = null;
   let currentName = null;
@@ -56,9 +60,9 @@ export function createViewerPane(paneEl) {
         : null;
       if (sidenoteInput) {
         try {
-          sidenoteInput.value = getNote(localStorage, currentPath);
+          sidenoteInput.innerHTML = getNote(localStorage, currentPath);
         } catch (err) {
-          sidenoteInput.value = '';
+          sidenoteInput.innerHTML = '';
         }
       }
     } catch (err) {
@@ -72,7 +76,7 @@ export function createViewerPane(paneEl) {
   async function openVaultFile(path, name) {
     renderLoading(name);
     try {
-      const res = await fetch('../' + path);
+      const res = await fetch(path);
       if (!res.ok) {
         renderError(name, `${res.status} ${res.statusText}`);
         return;
@@ -124,11 +128,43 @@ export function createViewerPane(paneEl) {
     sidenoteInput.addEventListener('input', () => {
       if (currentPath) {
         try {
-          setNote(localStorage, currentPath, sidenoteInput.value);
+          setNote(localStorage, currentPath, sidenoteInput.innerHTML);
         } catch (err) {
           // Persistence is best-effort; ignore storage failures.
         }
       }
+    });
+  }
+
+  /* Sidenote rich-text toolbar — Bold/Italic/Underline/Strikethrough plus
+     a small highlighter palette, ported from Noted's Edit tab (scoped to
+     this one toolbar rather than Noted's full paragraph-style picker).
+     execCommand is deprecated but still the only DOM API for driving a
+     contenteditable region — the same tradeoff Noted's own Edit tab makes. */
+  if (sidenoteToolbar && sidenoteInput) {
+    sidenoteToolbar.addEventListener('click', (e) => {
+      const cmdBtn = e.target.closest('[data-cmd]');
+      if (cmdBtn) {
+        sidenoteInput.focus();
+        document.execCommand(cmdBtn.dataset.cmd);
+        sidenoteInput.dispatchEvent(new Event('input', { bubbles: true }));
+        return;
+      }
+      const highlightBtn = e.target.closest('[data-highlight]');
+      if (highlightBtn) {
+        sidenoteInput.focus();
+        const color = highlightBtn.dataset.highlight === 'none' ? 'transparent' : highlightBtn.dataset.highlight;
+        document.execCommand('hiliteColor', false, color);
+        sidenoteInput.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    });
+  }
+
+  if (sidenoteResizeHandle && sidenoteEl) {
+    initResizeHandle(sidenoteResizeHandle, sidenoteEl, {
+      storageKey: 'forage-vault-sidenote-width',
+      defaultWidth: 260,
+      direction: -1, // sidenote sits on the right; dragging left grows it
     });
   }
 
@@ -138,6 +174,24 @@ export function createViewerPane(paneEl) {
     openLocalFile,
     toggleSidenote() {
       if (sidenoteEl) sidenoteEl.hidden = !sidenoteEl.hidden;
+    },
+    /* "…or click to start a new note" in the dropzone — opens the
+       sidenote panel with a blank, unfiled note when no file is loaded
+       yet. Keyed by a fixed sentinel path (rather than a real vault path)
+       since there's no file to key it against. */
+    startNewNote() {
+      if (!currentPath) {
+        currentPath = UNTITLED_NOTE_KEY;
+      }
+      if (sidenoteEl) sidenoteEl.hidden = false;
+      if (sidenoteInput) {
+        try {
+          sidenoteInput.innerHTML = getNote(localStorage, currentPath);
+        } catch (err) {
+          sidenoteInput.innerHTML = '';
+        }
+        sidenoteInput.focus();
+      }
     },
     exportHtml() {
       if (!currentName) return;

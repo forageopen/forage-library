@@ -5,15 +5,15 @@
  * (assets/js/offline.js wires it). Not auto-registered on any visit —
  * registration only happens when a visitor explicitly clicks, so "no
  * surprise background network activity" holds. Ported from Noted's
- * src/sw.ts, adapted to this repo's file layout (root landing page +
- * /vault/ instead of a single-page app).
+ * src/sw.ts. This repo is a single-page app (index.html is the vault
+ * viewer itself; vault/ holds only data — manifest.json and content
+ * files, no page of its own), so this precache list is simpler than an
+ * intermediate version of this file that had to cover two separate pages.
  *
  * Lives at the SITE ROOT (not e.g. assets/js/sw.js) — load-bearing, not
  * stylistic: a service worker's own script location caps the max scope it
  * can ever control to that script's directory, unless the server sends a
- * `Service-Worker-Allowed` header, which GitHub Pages does not. Registering
- * from assets/js/ would cap the scope to assets/js/, unable to control
- * /vault/ at all.
+ * `Service-Worker-Allowed` header, which GitHub Pages does not.
  *
  * Precache paths are resolved against `registration.scope`, not hardcoded
  * absolute paths, so this stays correct whether deployed at the repo root,
@@ -40,17 +40,18 @@ const SHELL_PATHS = [
   'assets/js/visitor-counter.js',
   'assets/js/offline.js',
   'sw.js',
-  'vault/',
-  'vault/index.html',
   'vault/manifest.json',
   'assets/js/vault/app.js',
   'assets/js/vault/dropzone.js',
   'assets/js/vault/export.js',
+  'assets/js/vault/export-docx.js',
+  'assets/js/vault/document-model.js',
   'assets/js/vault/render-core.js',
   'assets/js/vault/render-docx.js',
   'assets/js/vault/render-markdown.js',
   'assets/js/vault/render-text.js',
   'assets/js/vault/renderers.js',
+  'assets/js/vault/resize.js',
   'assets/js/vault/sanitize.js',
   'assets/js/vault/sidebar.js',
   'assets/js/vault/sidenote-store.js',
@@ -64,12 +65,13 @@ const SHELL_PATHS = [
 /* CDN rendering libraries — cross-origin, but jsdelivr sends
    access-control-allow-origin: *, so these fetch as normal (non-opaque)
    "cors" responses that the Cache API can store and later serve. Pinned
-   to the exact versions vault/index.html loads. */
+   to the exact versions index.html loads. */
 const CDN_URLS = [
   'https://cdn.jsdelivr.net/npm/marked@18.0.9/lib/marked.umd.js',
   'https://cdn.jsdelivr.net/npm/mammoth@1.12.1/mammoth.browser.min.js',
   'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js',
   'https://cdn.jsdelivr.net/npm/dompurify@3.4.13/dist/purify.min.js',
+  'https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js',
 ];
 
 function shellUrls() {

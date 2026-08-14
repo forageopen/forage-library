@@ -29,7 +29,7 @@ export async function initSidebar(root, onOpen, fetchImpl = fetch) {
   root.innerHTML = '<div class="vault-status vault-status--loading">Loading vault…</div>';
   let manifest;
   try {
-    const res = await fetchImpl('manifest.json');
+    const res = await fetchImpl('vault/manifest.json');
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     manifest = await res.json();
   } catch (err) {
