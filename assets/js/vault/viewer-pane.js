@@ -42,14 +42,18 @@ export function createViewerPane(paneEl) {
   }
 
   async function openVaultFile(path, name) {
-    const res = await fetch('../' + path);
-    if (!res.ok) {
-      renderLoading(name);
-      renderError(name, `${res.status} ${res.statusText}`);
-      return;
+    renderLoading(name);
+    try {
+      const res = await fetch('../' + path);
+      if (!res.ok) {
+        renderError(name, `${res.status} ${res.statusText}`);
+        return;
+      }
+      const arrayBuffer = await res.arrayBuffer();
+      await openSource(name, arrayBuffer, path);
+    } catch (err) {
+      renderError(name, err.message);
     }
-    const arrayBuffer = await res.arrayBuffer();
-    await openSource(name, arrayBuffer, path);
   }
 
   async function openLocalFile(file) {
@@ -58,8 +62,13 @@ export function createViewerPane(paneEl) {
       renderError(file.name, `unsupported file type — use one of: ${SUPPORTED_EXTENSIONS.join(', ')}`);
       return;
     }
-    const arrayBuffer = await file.arrayBuffer();
-    await openSource(file.name, arrayBuffer, 'local:' + file.name);
+    renderLoading(file.name);
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      await openSource(file.name, arrayBuffer, 'local:' + file.name);
+    } catch (err) {
+      renderError(file.name, err.message);
+    }
   }
 
   initDropzone(dropzone, openLocalFile);
