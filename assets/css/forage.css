@@ -269,6 +269,8 @@ th { font-weight: 600; background: var(--panel); font-size: 11px; text-transform
   border-bottom: 1px solid var(--ribbon-border);
 }
 
+.ribbon-title-group { display: flex; align-items: center; gap: 8px; min-width: 0; }
+
 .ribbon-title {
   font-size: 14px;
   font-weight: 600;
@@ -396,10 +398,9 @@ th { font-weight: 600; background: var(--panel); font-size: 11px; text-transform
      pane" marker in the DOM/CSS to key off of, so scoping print to just
      one pane isn't done here. */
   .vault-layout { height: auto; display: block; }
-  .vault-sidebar, .vault-dropzone, .vault-sidenote, .vault-slide-rail { display: none !important; }
+  .vault-sidebar, .vault-dropzone, .vault-sidenote, .vault-slide-rail, .vault-editor-toolbar, .vault-resize-handle { display: none !important; }
   .vault-panes { display: block; }
   .vault-pane { display: block; }
-  .vault-panes--split .vault-pane { border-right: none; }
   .vault-pane-main { overflow: visible; padding: 0; background: #fff; }
   .vault-pane-content { max-width: none; color: #111; }
   .vault-deck { gap: 0; }
@@ -417,12 +418,50 @@ th { font-weight: 600; background: var(--panel); font-size: 11px; text-transform
 
 .vault-sidebar {
   width: 240px;
+  min-width: 160px;
+  max-width: 480px;
   flex-shrink: 0;
   overflow-y: auto;
   padding: 16px 12px;
-  border-right: 1px solid var(--ribbon-border);
   background: var(--bg);
 }
+/* Collapsed via the ribbon's toggle-sidebar icon — hide its resize handle
+   too (a sibling combinator, not :has(), since the handle comes AFTER the
+   sidebar in the DOM here, unlike the sidenote's handle which precedes it). */
+.vault-sidebar[hidden] ~ .vault-resize-handle[data-resize="sidebar"] { display: none; }
+
+/* Drag-to-resize handles — one between sidebar/viewer, one between
+   viewer/sidenote (assets/js/vault/resize.js wires the drag behavior;
+   this is purely the visual affordance). */
+.vault-resize-handle {
+  width: 7px;
+  flex-shrink: 0;
+  cursor: col-resize;
+  position: relative;
+  background: transparent;
+}
+.vault-resize-handle::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 3px;
+  width: 1px;
+  background: var(--ribbon-border);
+}
+.vault-resize-handle:hover::after,
+.vault-resize-handle:focus-visible::after {
+  left: 2px;
+  width: 3px;
+  background: var(--teal);
+  border-radius: 2px;
+}
+.vault-resize-handle:focus-visible { outline: none; }
+body.vault-resizing { cursor: col-resize; user-select: none; }
+/* Hide the sidenote's own resize handle while the sidenote itself is
+   closed — nothing to resize, and it'd otherwise show as a stray divider
+   at the pane's edge. */
+.vault-resize-handle:has(+ .vault-sidenote[hidden]) { display: none; }
 
 .vault-tree, .vault-tree-children { list-style: none; }
 .vault-tree-children { padding-left: 14px; }
@@ -454,10 +493,13 @@ th { font-weight: 600; background: var(--panel); font-size: 11px; text-transform
 .vault-tree-file-btn:hover, .vault-tree-file-btn:focus-visible { background: var(--ribbon-hover); }
 
 .vault-panes { flex: 1; display: flex; overflow: hidden; }
-.vault-panes--split .vault-pane { border-right: 1px solid var(--ribbon-border); }
-.vault-panes--split .vault-pane:last-child { border-right: none; }
 
 .vault-pane { flex: 1; display: flex; min-width: 0; }
+/* In split view the first pane becomes a fixed, resizable width (set by
+   the drag handle split-view.js inserts between the two panes) instead
+   of flex:1 — the second pane keeps flex:1 and fills whatever's left, so
+   the split isn't locked 50/50. */
+.vault-panes--split .vault-pane:first-child { flex: 0 0 auto; min-width: 200px; }
 .vault-pane-main { flex: 1; overflow-y: auto; padding: 40px; background: var(--panel); }
 
 .vault-dropzone {
@@ -470,34 +512,167 @@ th { font-weight: 600; background: var(--panel); font-size: 11px; text-transform
 }
 .vault-dropzone[hidden] { display: none; }
 .vault-dropzone--active { border-color: var(--teal); background: var(--teal-bg); }
-.vault-dropzone-label { text-align: center; font-size: 15px; color: var(--text-soft); cursor: pointer; }
+.vault-dropzone-message { text-align: center; }
+.vault-dropzone-label { display: block; font-size: 15px; color: var(--text-soft); cursor: pointer; }
+.vault-dropzone-new-note {
+  display: inline-block;
+  margin-top: 14px;
+  background: transparent;
+  border: none;
+  color: var(--blue);
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.vault-dropzone-new-note:hover, .vault-dropzone-new-note:focus-visible { color: var(--teal); }
 
 .vault-pane-content { max-width: 720px; margin: 0 auto; }
 .vault-content h1, .vault-content h2, .vault-content h3 { margin-top: 1em; margin-bottom: 0.4em; }
 .vault-content p { font-size: 14px; line-height: 1.7; color: var(--text-soft); margin-bottom: 14px; }
 .vault-table-wrap { overflow-x: auto; margin: 1em 0; }
 
+/* ---------- Main-pane document editor ("…or click to start a new note") ----------
+   A blank, editable document in the main viewer pane — distinct from the
+   Sidenote panel's own small toolbar (same idea, different scope: this one
+   IS the document, not an annotation on top of one). */
+.vault-editor-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.vault-editor-btn {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+}
+.vault-editor-btn:hover, .vault-editor-btn:focus-visible { background: var(--ribbon-hover); }
+.vault-editor-highlights { display: inline-flex; align-items: center; gap: 5px; margin-left: 8px; }
+.vault-editor-highlight {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  cursor: pointer;
+}
+.vault-editor-highlight--none { background: var(--page-bg); font-size: 11px; line-height: 1; color: var(--subtitle); }
+.vault-editor-title { font-size: 13px; color: var(--subtitle); margin-bottom: 12px; }
+.vault-editor-body {
+  min-height: 400px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text);
+}
+.vault-editor-body:focus { outline: none; }
+.vault-editor-body:empty::before {
+  content: attr(data-placeholder);
+  color: var(--subtitle);
+}
+
 .vault-status { padding: 24px; font-size: 13px; color: var(--subtitle); text-align: center; }
 .vault-status--error { color: var(--error); }
 
 .vault-sidenote {
   width: 260px;
+  min-width: 200px;
+  max-width: 480px;
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
   padding: 16px;
-  border-left: 1px solid var(--ribbon-border);
   background: var(--bg);
 }
+.vault-sidenote[hidden] { display: none; }
 .vault-sidenote h2 { font-size: 13px; margin-bottom: 10px; }
+
+/* Rich-text toolbar — Bold/Italic/Underline/Strikethrough + a highlighter
+   palette, scoped down from Noted's fuller Edit tab (see viewer-pane.js). */
+.vault-sidenote-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.vault-sidenote-btn {
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text);
+  font-size: 12px;
+  cursor: pointer;
+}
+.vault-sidenote-btn:hover, .vault-sidenote-btn:focus-visible { background: var(--ribbon-hover); }
+.vault-sidenote-highlights { display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; }
+.vault-sidenote-highlight {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  cursor: pointer;
+}
+.vault-sidenote-highlight--none { background: var(--page-bg); font-size: 10px; line-height: 1; color: var(--subtitle); }
+
 .vault-sidenote-input {
+  flex: 1;
   width: 100%;
   min-height: 200px;
-  resize: vertical;
+  overflow-y: auto;
   border: 1px solid var(--border);
   border-radius: 6px;
   padding: 10px;
   font-size: 13px;
+  line-height: 1.6;
   color: var(--text);
   background: var(--page-bg);
+}
+.vault-sidenote-input:focus { outline: 2px solid var(--teal); outline-offset: -1px; }
+.vault-sidenote-input:empty::before {
+  content: attr(data-placeholder);
+  color: var(--subtitle);
+}
+
+/* ---------- Themed scrollbars ----------
+   Scrollbar color follows the selected theme's own tokens, so it re-themes
+   automatically whenever the theme popover changes --teal/--panel. */
+.vault-sidebar, .vault-pane-main, .vault-sidenote, .vault-sidenote-input {
+  scrollbar-width: thin;
+  scrollbar-color: var(--teal) var(--panel);
+}
+.vault-sidebar::-webkit-scrollbar,
+.vault-pane-main::-webkit-scrollbar,
+.vault-sidenote::-webkit-scrollbar,
+.vault-sidenote-input::-webkit-scrollbar {
+  width: 10px;
+}
+.vault-sidebar::-webkit-scrollbar-track,
+.vault-pane-main::-webkit-scrollbar-track,
+.vault-sidenote::-webkit-scrollbar-track,
+.vault-sidenote-input::-webkit-scrollbar-track {
+  background: var(--panel);
+}
+.vault-sidebar::-webkit-scrollbar-thumb,
+.vault-pane-main::-webkit-scrollbar-thumb,
+.vault-sidenote::-webkit-scrollbar-thumb,
+.vault-sidenote-input::-webkit-scrollbar-thumb {
+  background: var(--teal);
+  border-radius: 6px;
+  border: 2px solid var(--panel);
 }
 
 /* ---------- PPTX slide deck ---------- */
@@ -528,7 +703,11 @@ th { font-weight: 600; background: var(--panel); font-size: 11px; text-transform
 
 @media (max-width: 900px) {
   .vault-layout { flex-direction: column; height: auto; }
-  .vault-sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--ribbon-border); }
+  /* !important: overrides the inline width a desktop resize may have left
+     in localStorage/style — stacked mobile layout always goes full-width. */
+  .vault-sidebar { width: 100% !important; max-width: none; border-bottom: 1px solid var(--ribbon-border); }
+  .vault-sidenote { width: 100% !important; max-width: none; border-top: 1px solid var(--ribbon-border); }
+  .vault-resize-handle { display: none; }
   .vault-panes--split { flex-direction: column; }
   .vault-panes--split .vault-pane { border-right: none; border-bottom: 1px solid var(--ribbon-border); }
 }

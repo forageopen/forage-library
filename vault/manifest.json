@@ -4,19 +4,20 @@
   "path": "vault",
   "children": [
     {
-      "name": "Welcome",
-      "type": "folder",
-      "path": "vault/Welcome",
-      "children": [
-        {
-          "name": "generative-ai-documentation-process.md",
-          "type": "file",
-          "path": "vault/Welcome/generative-ai-documentation-process.md",
-          "fileType": "md",
-          "title": "Generative AI Documentation Process",
-          "date": "2026-08-14"
-        }
-      ]
+      "name": "00-welcome-note.md",
+      "type": "file",
+      "path": "vault/00-welcome-note.md",
+      "fileType": "md",
+      "title": "Welcome Note",
+      "date": "2026-08-14"
+    },
+    {
+      "name": "generative-ai-documentation-process.md",
+      "type": "file",
+      "path": "vault/generative-ai-documentation-process.md",
+      "fileType": "md",
+      "title": "Generative AI Documentation Process",
+      "date": "2026-08-14"
     }
   ]
 }

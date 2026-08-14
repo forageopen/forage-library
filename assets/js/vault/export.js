@@ -94,3 +94,21 @@ export function exportHtml(title, bodyHtml, theme, doc = document) {
 export function exportMarkdownSource(title, sourceText, doc = document) {
   downloadBlob(withExtension(title, 'md'), sourceText, 'text/markdown', doc);
 }
+
+/**
+ * .json export: serializes the shared document IR (document-model.js) as
+ * pretty-printed JSON — ported from Noted's src/export/json.ts. Uses the
+ * exact same IR the .docx exporter consumes, so .json export is a
+ * lossless dump of "what was parsed," useful for round-tripping or
+ * feeding into other tools — not a rendering format the way .html/.pdf are.
+ */
+
+/** Pure: serialize IR blocks into a pretty-printed JSON string. */
+export function blocksToJson(blocks) {
+  return JSON.stringify({ version: 1, blocks }, null, 2);
+}
+
+/** DOM: build + download the .json export. */
+export function exportJson(title, blocks, doc = document) {
+  downloadBlob(withExtension(title, 'json'), blocksToJson(blocks), 'application/json', doc);
+}

@@ -59,7 +59,7 @@ jobs:
       - name: Prepare site directory
         run: |
           mkdir -p _site
-          cp -r index.html assets vault _site/
+          cp -r index.html sw.js assets vault _site/
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

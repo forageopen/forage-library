@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { withExtension, buildStandaloneHtml } from './export.js';
+import { withExtension, buildStandaloneHtml, blocksToJson } from './export.js';
 
 test('withExtension replaces an existing extension', () => {
   assert.equal(withExtension('Report.md', 'html'), 'Report.html');
@@ -30,4 +30,11 @@ test('buildStandaloneHtml escapes the title but not the body', () => {
 test('buildStandaloneHtml falls back to the sakura palette for an unknown theme', () => {
   const html = buildStandaloneHtml('T', '<p>x</p>', 'not-a-real-theme');
   assert.match(html, /background: #fff0f5/);
+});
+
+test('blocksToJson wraps blocks with a version number, pretty-printed', () => {
+  const blocks = [{ kind: 'paragraph', runs: [{ text: 'Hi' }] }];
+  const json = blocksToJson(blocks);
+  assert.deepEqual(JSON.parse(json), { version: 1, blocks });
+  assert.match(json, /\n  "version": 1,\n/); // pretty-printed, not minified
 });
