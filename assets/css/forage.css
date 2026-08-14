@@ -574,7 +574,7 @@ body.vault-resizing { cursor: col-resize; user-select: none; }
   background: var(--ribbon-bg);
 }
 .vault-pane-stats-bar[hidden] { display: none; }
-.vault-pane-stats { font-size: 7pt; color: var(--text-soft); }
+.vault-pane-stats { font-size: 9pt; color: var(--text-soft); }
 
 .vault-dropzone {
   height: 100%;
