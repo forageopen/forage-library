@@ -388,6 +388,22 @@ th { font-weight: 600; background: var(--panel); font-size: 11px; text-transform
   .page-wrap { padding: 0; }
   .page { margin: 0; box-shadow: none; }
   .ribbon, .no-print { display: none !important; }
+
+  /* Vault: print the rendered content, not the sidebar/dropzone/sidenote
+     chrome, and let it flow across as many printed pages as it needs (the
+     on-screen scroll container must not clip it to one viewport-height).
+     In split view this prints both panes stacked — there's no "active
+     pane" marker in the DOM/CSS to key off of, so scoping print to just
+     one pane isn't done here. */
+  .vault-layout { height: auto; display: block; }
+  .vault-sidebar, .vault-dropzone, .vault-sidenote, .vault-slide-rail { display: none !important; }
+  .vault-panes { display: block; }
+  .vault-pane { display: block; }
+  .vault-panes--split .vault-pane { border-right: none; }
+  .vault-pane-main { overflow: visible; padding: 0; background: #fff; }
+  .vault-pane-content { max-width: none; color: #111; }
+  .vault-deck { gap: 0; }
+  .vault-slide { box-shadow: none; border: 1px solid #ccc; page-break-after: always; }
 }
 
 @media (max-width: 900px) {

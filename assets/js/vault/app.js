@@ -17,5 +17,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target.closest('[data-action="open-split"]')) {
       splitView.openInSplit();
     }
+    if (e.target.closest('[data-action="export-html"]')) {
+      splitView.getActivePane().exportHtml();
+    }
+    if (e.target.closest('[data-action="export-pdf"]')) {
+      splitView.getActivePane().exportPdf();
+    }
+    if (e.target.closest('[data-action="export-markdown"]')) {
+      splitView.getActivePane().exportMarkdown();
+    }
   });
 });

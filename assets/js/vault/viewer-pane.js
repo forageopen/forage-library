@@ -1,6 +1,10 @@
 import { renderFile, SUPPORTED_EXTENSIONS, extensionOf } from './renderers.js';
 import { getNote, setNote } from './sidenote-store.js';
 import { initDropzone } from './dropzone.js';
+import { exportHtml as downloadStandaloneHtml, exportMarkdownSource } from './export.js';
+
+const TEXT_DECODER = new TextDecoder('utf-8');
+const MARKDOWN_SOURCE_EXTENSIONS = new Set(['md', 'txt']);
 
 export function createViewerPane(paneEl) {
   const dropzone = paneEl.querySelector('[data-vault-dropzone]');
@@ -9,6 +13,8 @@ export function createViewerPane(paneEl) {
   const sidenoteInput = paneEl.querySelector('[data-vault-sidenote-input]');
 
   let currentPath = null;
+  let currentName = null;
+  let currentSourceText = null; // only set for .md/.txt — the raw source, for "export as Markdown"
 
   function showContent() {
     dropzone.hidden = true;
@@ -42,6 +48,10 @@ export function createViewerPane(paneEl) {
       contentEl.innerHTML = result.html;
       contentEl.className = 'vault-pane-content vault-pane-content--' + result.kind;
       currentPath = path;
+      currentName = name;
+      currentSourceText = MARKDOWN_SOURCE_EXTENSIONS.has(extensionOf(name))
+        ? TEXT_DECODER.decode(arrayBuffer)
+        : null;
       if (sidenoteInput) {
         try {
           sidenoteInput.value = getNote(localStorage, currentPath);
@@ -51,6 +61,8 @@ export function createViewerPane(paneEl) {
       }
     } catch (err) {
       currentPath = null;
+      currentName = null;
+      currentSourceText = null;
       renderError(name, err.message);
     }
   }
@@ -105,6 +117,19 @@ export function createViewerPane(paneEl) {
     openLocalFile,
     toggleSidenote() {
       if (sidenoteEl) sidenoteEl.hidden = !sidenoteEl.hidden;
+    },
+    exportHtml() {
+      if (!currentName) return;
+      const theme = document.documentElement.getAttribute('data-theme') || 'sakura';
+      downloadStandaloneHtml(currentName, contentEl.innerHTML, theme);
+    },
+    exportPdf() {
+      if (!currentName) return;
+      window.print();
+    },
+    exportMarkdown() {
+      if (!currentName || currentSourceText === null) return;
+      exportMarkdownSource(currentName, currentSourceText);
     },
   };
 }
