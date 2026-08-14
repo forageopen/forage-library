@@ -18,6 +18,7 @@
   --blue: #2596be;
   --panel: #f3f4f6;
   --arrow: #9ca3af;
+  --error: #c0392b;
 
   --ribbon-bg: #ffffff;
   --ribbon-text: #111827;
@@ -40,6 +41,7 @@ html[data-theme="dark"] {
   --blue: #4fb3d9;
   --panel: #1f2226;
   --arrow: #6b7280;
+  --error: #f0766a;
 
   --ribbon-bg: #0d0f12;
   --ribbon-text: #e8e9ec;
@@ -300,7 +302,7 @@ html[data-theme="dark"] .ribbon-theme-toggle .icon-dark { display: block; }
 .vault-table-wrap { overflow-x: auto; margin: 1em 0; }
 
 .vault-status { padding: 24px; font-size: 13px; color: var(--subtitle); text-align: center; }
-.vault-status--error { color: #c0392b; }
+.vault-status--error { color: var(--error); }
 
 .vault-sidenote {
   width: 260px;
