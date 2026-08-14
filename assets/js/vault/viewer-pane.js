@@ -1,7 +1,9 @@
 import { renderFile, SUPPORTED_EXTENSIONS, extensionOf } from './renderers.js';
 import { getNote, setNote } from './sidenote-store.js';
 import { initDropzone } from './dropzone.js';
-import { exportHtml as downloadStandaloneHtml, exportMarkdownSource } from './export.js';
+import { exportHtml as downloadStandaloneHtml, exportMarkdownSource, exportJson, withExtension, downloadBlob } from './export.js';
+import { blocksToDocxBlob } from './export-docx.js';
+import { blocksFromTokens, blocksFromElement } from './document-model.js';
 
 const TEXT_DECODER = new TextDecoder('utf-8');
 const MARKDOWN_SOURCE_EXTENSIONS = new Set(['md', 'txt']);
@@ -97,6 +99,25 @@ export function createViewerPane(paneEl) {
     }
   }
 
+  /* Compute the structural IR (document-model.js) for the currently-loaded
+     file, when possible — only .md (from its raw source, via marked's
+     token tree) and .docx (from the already-rendered, sanitized content
+     DOM) have a meaningful IR; .txt/.pptx return null and .docx/.json
+     export are simply not offered for those. */
+  function getBlocks() {
+    if (!currentName) return null;
+    const ext = extensionOf(currentName);
+    if (ext === 'md' && currentSourceText !== null) {
+      if (!globalThis.marked) return null;
+      return blocksFromTokens(globalThis.marked.lexer(currentSourceText));
+    }
+    if (ext === 'docx') {
+      const root = contentEl.querySelector('.vault-content');
+      return root ? blocksFromElement(root) : null;
+    }
+    return null;
+  }
+
   initDropzone(dropzone, openLocalFile);
 
   if (sidenoteInput) {
@@ -130,6 +151,17 @@ export function createViewerPane(paneEl) {
     exportMarkdown() {
       if (!currentName || currentSourceText === null) return;
       exportMarkdownSource(currentName, currentSourceText);
+    },
+    async exportDocx() {
+      const blocks = getBlocks();
+      if (!blocks) return;
+      const blob = await blocksToDocxBlob(blocks);
+      downloadBlob(withExtension(currentName, 'docx'), blob, blob.type);
+    },
+    exportJson() {
+      const blocks = getBlocks();
+      if (!blocks) return;
+      exportJson(currentName, blocks);
     },
   };
 }

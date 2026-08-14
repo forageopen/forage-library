@@ -26,5 +26,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target.closest('[data-action="export-markdown"]')) {
       splitView.getActivePane().exportMarkdown();
     }
+    if (e.target.closest('[data-action="export-docx"]')) {
+      splitView.getActivePane().exportDocx();
+    }
+    if (e.target.closest('[data-action="export-json"]')) {
+      splitView.getActivePane().exportJson();
+    }
   });
 });
