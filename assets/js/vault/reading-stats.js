@@ -21,3 +21,12 @@ export function formatReadingStats(text, wordsPerMinute = 200) {
   const minutes = readingTimeMinutes(words, wordsPerMinute);
   return `${words.toLocaleString()} words · ${minutes} min read`;
 }
+
+/** Pure: "3/12 pages" — the PDF viewer's stats-bar fallback, since a PDF
+ * page is a rendered image with no text to count words in. `current` is
+ * 1-based. Returns null for a document with no pages (caller hides the
+ * bar the same way it does for zero words). */
+export function formatPageStats(current, total) {
+  if (!total) return null;
+  return `${current}/${total} pages`;
+}

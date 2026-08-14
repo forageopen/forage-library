@@ -16,7 +16,7 @@ import { blocksFromTokens, blocksFromElement } from './document-model.js';
 import { initResizeHandle } from './resize.js';
 import { highlightSwatchesHtml } from './highlight-colors.js';
 import { contrastTextColor } from './contrast.js';
-import { formatReadingStats } from './reading-stats.js';
+import { formatReadingStats, formatPageStats } from './reading-stats.js';
 
 const TEXT_DECODER = new TextDecoder('utf-8');
 const MARKDOWN_SOURCE_EXTENSIONS = new Set(['md', 'txt']);
@@ -68,9 +68,24 @@ function applyHighlight(hex, targetEl) {
   document.execCommand('styleWithCSS', false, false);
 }
 
+/* Which slide/page is "current" while scrolling a deck — the last one
+   whose top has crossed the vertical midpoint of the scroll container.
+   Used for the PDF viewer's "x/y pages" stat, since a PDF page has no
+   text to derive a word count from. */
+function currentSlideIndex(container, slides) {
+  const containerTop = container.getBoundingClientRect().top;
+  const midpoint = container.clientHeight / 2;
+  let index = 0;
+  slides.forEach((slide, i) => {
+    if (slide.getBoundingClientRect().top - containerTop < midpoint) index = i;
+  });
+  return index;
+}
+
 export function createViewerPane(paneEl) {
   const dropzone = paneEl.querySelector('[data-vault-dropzone]');
   const contentEl = paneEl.querySelector('[data-vault-pane-content]');
+  const paneMain = paneEl.querySelector('.vault-pane-main');
   const sidenoteEl = paneEl.querySelector('[data-vault-sidenote]');
   const sidenoteInput = paneEl.querySelector('[data-vault-sidenote-input]');
   const sidenoteToolbar = paneEl.querySelector('[data-vault-sidenote-toolbar]');
@@ -98,11 +113,20 @@ export function createViewerPane(paneEl) {
   /* Word count / reading time bar — reads whatever's actually on screen
      (`innerText`, so it reflects rendered text, not markup) rather than
      tracking a separate copy of the content. Hidden entirely when there's
-     no text yet, same convention as the header. */
+     no text yet, same convention as the header. PDFs are the exception:
+     a page is a rendered image with no text to count, so it shows
+     "x/y pages" instead, tracking scroll position through the deck. */
   function updateStats() {
     if (!statsBar || !statsEl) return;
     if (!currentName) {
       statsBar.hidden = true;
+      return;
+    }
+    if (extensionOf(currentName) === 'pdf') {
+      const slides = Array.from(contentEl.querySelectorAll('.vault-slide'));
+      const stats = paneMain ? formatPageStats(currentSlideIndex(paneMain, slides) + 1, slides.length) : null;
+      statsBar.hidden = !stats;
+      statsEl.textContent = stats || '';
       return;
     }
     const editorBody = contentEl.querySelector('.vault-editor-body');
@@ -155,6 +179,15 @@ export function createViewerPane(paneEl) {
         }
       }
       updateHeader();
+      /* For a PDF deck, the "x/y pages" stat depends on each page image's
+         real rendered height (see currentSlideIndex) — computing it before
+         the images decode would measure them all at ~0 height, collapsing
+         every page's top to nearly the same offset and always reporting
+         the last one. img.decode() waits for that to finish first. */
+      if (extensionOf(name) === 'pdf') {
+        const imgs = Array.from(contentEl.querySelectorAll('img'));
+        await Promise.all(imgs.map((img) => img.decode().catch(() => {})));
+      }
       updateStats();
     } catch (err) {
       currentPath = null;
@@ -281,6 +314,15 @@ export function createViewerPane(paneEl) {
   });
 
   initDropzone(dropzone, openLocalFile);
+
+  /* Keeps the PDF "x/y pages" stat in sync while scrolling through the
+     deck. No-ops for every other format (updateStats() only reads scroll
+     position when a PDF is open), so this is cheap to leave attached. */
+  if (paneMain) {
+    paneMain.addEventListener('scroll', () => {
+      if (currentName && extensionOf(currentName) === 'pdf') updateStats();
+    });
+  }
 
   if (sidenoteInput) {
     sidenoteInput.addEventListener('input', () => {

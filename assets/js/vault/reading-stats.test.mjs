@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { wordCount, readingTimeMinutes, formatReadingStats } from './reading-stats.js';
+import { wordCount, readingTimeMinutes, formatReadingStats, formatPageStats } from './reading-stats.js';
 
 test('wordCount counts whitespace-separated words', () => {
   assert.equal(wordCount('The quick brown fox'), 4);
@@ -30,4 +30,12 @@ test('formatReadingStats formats with a thousands separator and a "min read" suf
 
 test('formatReadingStats returns null for empty text', () => {
   assert.equal(formatReadingStats(''), null);
+});
+
+test('formatPageStats formats a 1-based current page over the total', () => {
+  assert.equal(formatPageStats(3, 12), '3/12 pages');
+});
+
+test('formatPageStats returns null when there are no pages', () => {
+  assert.equal(formatPageStats(0, 0), null);
 });

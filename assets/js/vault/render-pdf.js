@@ -6,16 +6,27 @@
    substitute — jsdelivr serves immutable content per version, so this
    URL's contents can never silently change. Loaded lazily (only when a
    PDF is actually opened) since the library is large and most visits
-   never touch one. */
+   never touch one.
+
+   The WORKER script, unlike the main library, is vendored into this repo
+   (assets/vendor/pdf.worker.min.mjs) rather than pointed at the CDN:
+   `new Worker(url)` throws a SecurityError for a cross-origin URL — that
+   restriction applies to Worker construction itself, independent of the
+   target's CORS headers, unlike `import()` or `fetch()`. Without a
+   same-origin worker, page.render() hangs forever instead of erroring
+   (pdf.js's own fallback doesn't trigger cleanly here). Resolved against
+   this module's own URL (not the page's), so it keeps working regardless
+   of which page imports it or what subpath the site is deployed under. */
 const PDFJS_VERSION = '6.2.108';
 const PDFJS_BASE = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VERSION}/build`;
+const WORKER_SRC = new URL('../../vendor/pdf.worker.min.mjs', import.meta.url).href;
 
 let pdfjsLibPromise = null;
 
 function loadPdfjs() {
   if (!pdfjsLibPromise) {
     pdfjsLibPromise = import(`${PDFJS_BASE}/pdf.min.mjs`).then((lib) => {
-      lib.GlobalWorkerOptions.workerSrc = `${PDFJS_BASE}/pdf.worker.min.mjs`;
+      lib.GlobalWorkerOptions.workerSrc = WORKER_SRC;
       return lib;
     });
   }

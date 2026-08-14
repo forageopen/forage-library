@@ -798,6 +798,7 @@ body.vault-resizing { cursor: col-resize; user-select: none; }
 .vault-slide:has(> .vault-slide-image:only-child) {
   padding: 0;
   overflow: hidden;
+  border-radius: 0;
 }
 .vault-slide:has(> .vault-slide-image:only-child) .vault-slide-image {
   display: block;
