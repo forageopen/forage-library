@@ -18,13 +18,21 @@ export function createViewerPane(paneEl) {
   function renderLoading(name) {
     showContent();
     contentEl.className = 'vault-pane-content';
-    contentEl.innerHTML = `<div class="vault-status vault-status--loading">Loading ${name}…</div>`;
+    contentEl.innerHTML = '';
+    const div = document.createElement('div');
+    div.className = 'vault-status vault-status--loading';
+    div.textContent = `Loading ${name}…`;
+    contentEl.appendChild(div);
   }
 
   function renderError(name, message) {
     showContent();
     contentEl.className = 'vault-pane-content';
-    contentEl.innerHTML = `<div class="vault-status vault-status--error">Couldn't open ${name}: ${message}</div>`;
+    contentEl.innerHTML = '';
+    const div = document.createElement('div');
+    div.className = 'vault-status vault-status--error';
+    div.textContent = `Couldn't open ${name}: ${message}`;
+    contentEl.appendChild(div);
   }
 
   async function openSource(name, arrayBuffer, path) {
@@ -34,7 +42,13 @@ export function createViewerPane(paneEl) {
       contentEl.innerHTML = result.html;
       contentEl.className = 'vault-pane-content vault-pane-content--' + result.kind;
       currentPath = path;
-      if (sidenoteInput) sidenoteInput.value = getNote(localStorage, currentPath);
+      if (sidenoteInput) {
+        try {
+          sidenoteInput.value = getNote(localStorage, currentPath);
+        } catch (err) {
+          sidenoteInput.value = '';
+        }
+      }
     } catch (err) {
       currentPath = null;
       renderError(name, err.message);
@@ -75,7 +89,13 @@ export function createViewerPane(paneEl) {
 
   if (sidenoteInput) {
     sidenoteInput.addEventListener('input', () => {
-      if (currentPath) setNote(localStorage, currentPath, sidenoteInput.value);
+      if (currentPath) {
+        try {
+          setNote(localStorage, currentPath, sidenoteInput.value);
+        } catch (err) {
+          // Persistence is best-effort; ignore storage failures.
+        }
+      }
     });
   }
 

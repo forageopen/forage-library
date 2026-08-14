@@ -1,6 +1,6 @@
 # Forage Library
 
-Forkable, HTML-first knowledge repository. HTML is the canonical layer — every article is a permanent, version-controlled file. PDF is generated from it automatically. Nothing here depends on a closed platform or a paid CMS.
+Forkable, HTML-first knowledge repository. HTML is the canonical layer — every article is a permanent, version-controlled file. Nothing here depends on a closed platform or a paid CMS.
 
 ## One-time setup (do this before the first push)
 
@@ -37,13 +37,11 @@ forage-library/
 
 ## The ribbon
 
-Every page gets the same top bar: title flush left; on the right, the published date, a Share button, a Copy Link icon, a light/dark toggle, and a kebab menu (Copy link / Copy page content / Export).
-
-"Export" tries to open the pre-built `.pdf` next to the page first. If that doesn't exist yet (e.g. previewing locally before the first push), it falls back to the browser's native print dialog — which, because the print stylesheet is already correct, still produces a clean A4 PDF.
+Every page gets the same top bar: title flush left; on the right, a light/dark toggle and a kebab menu. On the landing page (`index.html`) that top bar also has the published date, a Share button, and a Copy Link icon, and the kebab menu has Copy link / Copy page content. The vault viewer (`vault/index.html`) swaps the kebab menu for vault-specific actions instead: Sidenote (toggle the per-file notes panel) and Open in split (view two files side by side).
 
 ## Light / dark mode
 
-Light is the default. The toggle button sets `data-theme` on `<html>` and remembers the choice in `localStorage` (`forage-theme`) — persists across pages and visits. A small inline script in `<head>`, before the stylesheet loads, applies the saved theme immediately so there's no flash of the wrong mode. PDFs always render light regardless of the reader's toggle state — `@media print` forces it, since that's what prints cleanly.
+Light is the default. The toggle button sets `data-theme` on `<html>` and remembers the choice in `localStorage` (`forage-theme`) — persists across pages and visits. A small inline script in `<head>`, before the stylesheet loads, applies the saved theme immediately so there's no flash of the wrong mode.
 
 Tokens are CSS custom properties in `assets/css/forage.css` (`:root` = light, `html[data-theme="dark"]` = dark). Palette is lifted from the "Generative AI Documentation Process" sample — teal `#167D6B` / blue `#2596be` on white for light, lightened teal `#35c9ac` / blue `#4fb3d9` on near-black for dark. Not the Forage brand-skill tokens — that's parked for now per your instruction.
 
@@ -66,4 +64,4 @@ git branch -M main
 git push -u origin main
 ```
 
-Then do the Pages source step above. First push will take a minute longer than normal — that's Puppeteer downloading Chromium in the Action runner.
+Then do the Pages source step above.
