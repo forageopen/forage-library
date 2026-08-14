@@ -574,7 +574,7 @@ body.vault-resizing { cursor: col-resize; user-select: none; }
   background: var(--ribbon-bg);
 }
 .vault-pane-stats-bar[hidden] { display: none; }
-.vault-pane-stats { font-size: 12pt; color: var(--text-soft); }
+.vault-pane-stats { font-size: 7pt; color: var(--text-soft); }
 
 .vault-dropzone {
   height: 100%;
@@ -789,6 +789,22 @@ body.vault-resizing { cursor: col-resize; user-select: none; }
 .vault-slide-bullets { list-style: none; text-align: left; max-width: 480px; margin: 16px auto 0; }
 .vault-slide-bullets li { font-size: 14px; padding: 6px 0; color: var(--text-soft); }
 .vault-slide-image { max-width: 100%; margin-top: 16px; border-radius: 6px; }
+/* A slide/page that's ENTIRELY an image (every PDF page, and any PPTX
+   slide with no title/bullets) doesn't need the 48px padding meant for
+   text layout — it just frames the image in a colored margin and makes
+   the doc render smaller than it needs to. Only the image-only case is
+   affected: slides that mix a title/bullets with an image keep the
+   padding, since that's still text layout. */
+.vault-slide:has(> .vault-slide-image:only-child) {
+  padding: 0;
+  overflow: hidden;
+}
+.vault-slide:has(> .vault-slide-image:only-child) .vault-slide-image {
+  display: block;
+  width: 100%;
+  margin-top: 0;
+  border-radius: 0;
+}
 
 .vault-slide-rail {
   position: sticky;
