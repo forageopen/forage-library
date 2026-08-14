@@ -8,7 +8,22 @@ import { initResizeHandle } from './resize.js';
 
 const TEXT_DECODER = new TextDecoder('utf-8');
 const MARKDOWN_SOURCE_EXTENSIONS = new Set(['md', 'txt']);
-const UNTITLED_NOTE_KEY = 'untitled-note';
+const NEW_DOCUMENT_NAME = 'Untitled.docx';
+
+const EDITOR_TOOLBAR_HTML = `
+  <div class="vault-editor-toolbar">
+    <button type="button" class="vault-editor-btn" data-cmd="bold" aria-label="Bold"><b>B</b></button>
+    <button type="button" class="vault-editor-btn" data-cmd="italic" aria-label="Italic"><i>I</i></button>
+    <button type="button" class="vault-editor-btn" data-cmd="underline" aria-label="Underline"><u>U</u></button>
+    <button type="button" class="vault-editor-btn" data-cmd="strikeThrough" aria-label="Strikethrough"><s>S</s></button>
+    <span class="vault-editor-highlights">
+      <button type="button" class="vault-editor-highlight" data-highlight="#fff3a3" style="background:#fff3a3" aria-label="Yellow highlight"></button>
+      <button type="button" class="vault-editor-highlight" data-highlight="#ffd6d6" style="background:#ffd6d6" aria-label="Red highlight"></button>
+      <button type="button" class="vault-editor-highlight" data-highlight="#d6ffe0" style="background:#d6ffe0" aria-label="Green highlight"></button>
+      <button type="button" class="vault-editor-highlight vault-editor-highlight--none" data-highlight="none" aria-label="Remove highlight">✕</button>
+    </span>
+  </div>
+`;
 
 export function createViewerPane(paneEl) {
   const dropzone = paneEl.querySelector('[data-vault-dropzone]');
@@ -122,6 +137,25 @@ export function createViewerPane(paneEl) {
     return null;
   }
 
+  /* Main-pane document editor toolbar — event-delegated on contentEl
+     itself (rather than bound at creation time) since the toolbar's
+     markup is injected fresh each time startNewNote() runs. */
+  contentEl.addEventListener('click', (e) => {
+    const editorBody = contentEl.querySelector('.vault-editor-body');
+    if (!editorBody) return;
+    const cmdBtn = e.target.closest('[data-cmd]');
+    if (cmdBtn) {
+      editorBody.focus();
+      document.execCommand(cmdBtn.dataset.cmd);
+      return;
+    }
+    const highlightBtn = e.target.closest('[data-highlight]');
+    if (highlightBtn) {
+      editorBody.focus();
+      document.execCommand('hiliteColor', false, highlightBtn.dataset.highlight === 'none' ? 'transparent' : highlightBtn.dataset.highlight);
+    }
+  });
+
   initDropzone(dropzone, openLocalFile);
 
   if (sidenoteInput) {
@@ -175,28 +209,29 @@ export function createViewerPane(paneEl) {
     toggleSidenote() {
       if (sidenoteEl) sidenoteEl.hidden = !sidenoteEl.hidden;
     },
-    /* "…or click to start a new note" in the dropzone — opens the
-       sidenote panel with a blank, unfiled note when no file is loaded
-       yet. Keyed by a fixed sentinel path (rather than a real vault path)
-       since there's no file to key it against. */
+    /* "…or click to start a new note" in the dropzone — opens a blank,
+       editable document directly in the MAIN pane (same place an opened
+       file renders), not the Sidenote panel — Sidenote stays exactly as
+       it was, untouched, whatever it was already showing. `currentPath`
+       is deliberately left alone too, so Sidenote's own file-scoped
+       identity doesn't shift just because the main content did. */
     startNewNote() {
-      if (!currentPath) {
-        currentPath = UNTITLED_NOTE_KEY;
-      }
-      if (sidenoteEl) sidenoteEl.hidden = false;
-      if (sidenoteInput) {
-        try {
-          sidenoteInput.innerHTML = getNote(localStorage, currentPath);
-        } catch (err) {
-          sidenoteInput.innerHTML = '';
-        }
-        sidenoteInput.focus();
-      }
+      showContent();
+      currentName = NEW_DOCUMENT_NAME;
+      currentSourceText = null;
+      contentEl.className = 'vault-pane-content vault-pane-content--editor';
+      contentEl.innerHTML = EDITOR_TOOLBAR_HTML
+        + `<div class="vault-editor-title">${NEW_DOCUMENT_NAME}</div>`
+        + '<div class="vault-content vault-editor-body" contenteditable="true" data-placeholder="Start typing…"></div>';
+      const body = contentEl.querySelector('.vault-editor-body');
+      if (body) body.focus();
     },
     exportHtml() {
       if (!currentName) return;
+      const editorBody = contentEl.querySelector('.vault-editor-body');
+      const html = editorBody ? editorBody.outerHTML : contentEl.innerHTML;
       const theme = document.documentElement.getAttribute('data-theme') || 'sakura';
-      downloadStandaloneHtml(currentName, contentEl.innerHTML, theme);
+      downloadStandaloneHtml(currentName, html, theme);
     },
     exportPdf() {
       if (!currentName) return;

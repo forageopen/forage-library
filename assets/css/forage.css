@@ -396,7 +396,7 @@ th { font-weight: 600; background: var(--panel); font-size: 11px; text-transform
      pane" marker in the DOM/CSS to key off of, so scoping print to just
      one pane isn't done here. */
   .vault-layout { height: auto; display: block; }
-  .vault-sidebar, .vault-dropzone, .vault-sidenote, .vault-slide-rail { display: none !important; }
+  .vault-sidebar, .vault-dropzone, .vault-sidenote, .vault-slide-rail, .vault-editor-toolbar { display: none !important; }
   .vault-panes { display: block; }
   .vault-pane { display: block; }
   .vault-panes--split .vault-pane { border-right: none; }
@@ -522,6 +522,54 @@ body.vault-resizing { cursor: col-resize; user-select: none; }
 .vault-content h1, .vault-content h2, .vault-content h3 { margin-top: 1em; margin-bottom: 0.4em; }
 .vault-content p { font-size: 14px; line-height: 1.7; color: var(--text-soft); margin-bottom: 14px; }
 .vault-table-wrap { overflow-x: auto; margin: 1em 0; }
+
+/* ---------- Main-pane document editor ("…or click to start a new note") ----------
+   A blank, editable document in the main viewer pane — distinct from the
+   Sidenote panel's own small toolbar (same idea, different scope: this one
+   IS the document, not an annotation on top of one). */
+.vault-editor-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.vault-editor-btn {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+}
+.vault-editor-btn:hover, .vault-editor-btn:focus-visible { background: var(--ribbon-hover); }
+.vault-editor-highlights { display: inline-flex; align-items: center; gap: 5px; margin-left: 8px; }
+.vault-editor-highlight {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  cursor: pointer;
+}
+.vault-editor-highlight--none { background: var(--page-bg); font-size: 11px; line-height: 1; color: var(--subtitle); }
+.vault-editor-title { font-size: 13px; color: var(--subtitle); margin-bottom: 12px; }
+.vault-editor-body {
+  min-height: 400px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text);
+}
+.vault-editor-body:focus { outline: none; }
+.vault-editor-body:empty::before {
+  content: attr(data-placeholder);
+  color: var(--subtitle);
+}
 
 .vault-status { padding: 24px; font-size: 13px; color: var(--subtitle); text-align: center; }
 .vault-status--error { color: var(--error); }
