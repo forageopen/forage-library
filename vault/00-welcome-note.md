@@ -1,4 +1,4 @@
-# Forage Library
+# Welcome Note
 
 Over the years, through my work in research and development, product design, learning and development, creative work, and technology, I've come across a lot of knowledge that usually takes years to encounter properly. Some of it comes from research, some from working on real projects, and some from simply making enough mistakes to understand why something works the way it does.
 
