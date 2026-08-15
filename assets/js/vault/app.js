@@ -19,18 +19,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* Sidebar collapse — a single icon in the ribbon, independent of the
      resize handle (collapsing hides the sidebar entirely; resizing only
-     changes its width while visible). Persisted so a visitor's choice
-     survives reloads, same as the resize widths. */
+     changes its width while visible). Deliberately NOT persisted: every
+     landing on the page should show the full list of available docs, so
+     a visitor doesn't have to remember they collapsed it last time. The
+     toggle still works to collapse/expand within the current session. */
   const sidebarToggleBtn = document.querySelector('[data-action="toggle-sidebar"]');
   const sidebarEl = document.querySelector('[data-vault-sidebar]');
   if (sidebarToggleBtn && sidebarEl) {
     let collapsed = false;
-    try { collapsed = localStorage.getItem('forage-vault-sidebar-collapsed') === '1'; } catch (err) { /* ignore */ }
     const applyCollapsed = (next) => {
       collapsed = next;
       sidebarEl.hidden = collapsed;
       sidebarToggleBtn.setAttribute('aria-expanded', String(!collapsed));
-      try { localStorage.setItem('forage-vault-sidebar-collapsed', collapsed ? '1' : '0'); } catch (err) { /* ignore */ }
     };
     applyCollapsed(collapsed);
     sidebarToggleBtn.addEventListener('click', () => applyCollapsed(!collapsed));
