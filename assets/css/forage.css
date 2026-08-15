@@ -13,6 +13,18 @@
    Sakura (below, in :root) is the base/no-override theme.
    ============================================================ */
 
+/* Figtree SemiBold — the "Forage Library" wordmark only (.ribbon-title
+   below), not the site-wide --font stack. Self-hosted (SIL OFL, see
+   assets/fonts/Figtree-OFL.txt) rather than a CDN/Google Fonts link, same
+   reasoning as the vendored pdf.worker.min.mjs elsewhere in this repo. */
+@font-face {
+  font-family: "Figtree";
+  src: url("../fonts/Figtree-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   /* Sakura — light pink surfaces, burgundy text. */
   --bg: #ffe0eb;
@@ -272,8 +284,11 @@ th { font-weight: 600; background: var(--panel); font-size: 11px; text-transform
 .ribbon-title-group { display: flex; align-items: center; gap: 8px; min-width: 0; }
 
 .ribbon-title {
+  font-family: "Figtree", var(--font);
   font-size: 14px;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
