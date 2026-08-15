@@ -302,7 +302,7 @@ th { font-weight: 600; background: var(--panel); font-size: 11px; text-transform
   align-items: center;
   gap: 6px;
   background: transparent;
-  border: 1px solid var(--ribbon-border);
+  border: none;
   color: var(--ribbon-text);
   border-radius: 6px;
   padding: 6px 10px;
