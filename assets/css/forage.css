@@ -314,6 +314,7 @@ th { font-weight: 600; background: var(--panel); font-size: 11px; text-transform
 .ribbon-btn:hover, .ribbon-btn:focus-visible { background: var(--ribbon-hover); }
 .ribbon-btn.ribbon-icon { padding: 6px; }
 .ribbon-btn svg { width: 15px; height: 15px; display: block; }
+.ribbon-btn.ribbon-logo svg { width: 26px; height: 26px; }
 
 .ribbon-theme-wrap { position: relative; }
 
