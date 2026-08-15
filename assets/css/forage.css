@@ -561,6 +561,11 @@ body.vault-resizing { cursor: col-resize; user-select: none; }
 .vault-pane-export-menu[hidden] { display: none; }
 .vault-pane-export-menu li { padding: 8px 10px; font-size: 13px; border-radius: 5px; cursor: pointer; color: var(--text); white-space: nowrap; }
 .vault-pane-export-menu li:hover, .vault-pane-export-menu li:focus-visible { background: var(--ribbon-hover); }
+/* An export format that wouldn't produce anything meaningful for the
+   currently-open file (e.g. CSV export with no table on screen) — greyed
+   out and inert rather than clickable-but-silently-a-no-op. */
+.vault-pane-export-menu li[aria-disabled="true"] { color: var(--text-soft); opacity: 0.5; cursor: not-allowed; }
+.vault-pane-export-menu li[aria-disabled="true"]:hover, .vault-pane-export-menu li[aria-disabled="true"]:focus-visible { background: none; }
 
 /* Word count / reading time — a full-width bar under the pane header,
    text right-aligned, colors pulled from the active theme like every

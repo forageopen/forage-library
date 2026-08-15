@@ -45,15 +45,25 @@ test('buildTree builds a nested folder/file tree, skipping unsupported extension
   const dir = mkdtempSync(path.join(tmpdir(), 'vault-test-'));
   mkdirSync(path.join(dir, 'Sub'));
   writeFileSync(path.join(dir, 'Sub', 'a.md'), '# A\n');
-  writeFileSync(path.join(dir, 'ignored.png'), 'not text');
+  writeFileSync(path.join(dir, 'ignored.gif'), 'not text');
   const tree = buildTree(dir, '');
   assert.equal(tree.length, 1);
   const folder = tree.find((n) => n.type === 'folder');
-  const skipped = tree.find((n) => n.name === 'ignored.png');
+  const skipped = tree.find((n) => n.name === 'ignored.gif');
   assert.equal(folder.name, 'Sub');
   assert.equal(folder.children[0].fileType, 'md');
   assert.equal(folder.children[0].title, 'A');
   assert.equal(skipped, undefined);
+  rmSync(dir, { recursive: true, force: true });
+});
+
+test('buildTree includes .jpg/.jpeg/.png files, tagged with their fileType', () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'vault-test-'));
+  writeFileSync(path.join(dir, 'photo.jpg'), 'not real image bytes');
+  writeFileSync(path.join(dir, 'photo.jpeg'), 'not real image bytes');
+  writeFileSync(path.join(dir, 'photo.png'), 'not real image bytes');
+  const tree = buildTree(dir, '');
+  assert.deepEqual(tree.map((n) => n.fileType).sort(), ['jpeg', 'jpg', 'png']);
   rmSync(dir, { recursive: true, force: true });
 });
 

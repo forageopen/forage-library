@@ -156,6 +156,43 @@ export function createViewerPane(paneEl) {
     statsEl.textContent = stats || '';
   }
 
+  function hasRenderedText() {
+    const editorBody = contentEl.querySelector('.vault-editor-body');
+    return ((editorBody || contentEl).innerText || '').trim().length > 0;
+  }
+
+  /* Greys out (rather than silently no-op'ing, the prior behavior) each
+     export menu item that wouldn't produce anything meaningful for the
+     file currently open — e.g. "Export as CSV" for a file with no table,
+     or "Export as Text" for a bare image, which has no text to extract.
+     Each check mirrors the precondition the matching export method (below)
+     already guards itself with, so "greyed out" and "would no-op" never
+     drift apart. Re-run on every open/close/edit, since relevance depends
+     on actual rendered content (a table, real text, a parseable IR), not
+     the extension alone — a .md file with no table still shouldn't offer
+     CSV export. */
+  function updateExportMenu() {
+    if (!exportMenu) return;
+    const open = !!currentName;
+    const relevant = {
+      html: open,
+      pdf: open,
+      markdown: currentSourceText !== null,
+      docx: open && !!getBlocks(),
+      json: open && !!getBlocks(),
+      text: open && hasRenderedText(),
+      csv: open && !!contentEl.querySelector('table'),
+      jpeg: open,
+    };
+    exportMenu.querySelectorAll('[role="menuitem"]').forEach((item) => {
+      const format = (item.dataset.action || '').replace('pane-export-', '');
+      if (!(format in relevant)) return;
+      const isRelevant = relevant[format];
+      item.classList.toggle('vault-pane-export-menu-item--disabled', !isRelevant);
+      item.setAttribute('aria-disabled', String(!isRelevant));
+    });
+  }
+
   function showContent() {
     dropzone.hidden = true;
     contentEl.hidden = false;
@@ -232,6 +269,7 @@ export function createViewerPane(paneEl) {
         await Promise.all(imgs.map((img) => img.decode().catch(() => {})));
       }
       updateStats();
+      updateExportMenu();
     } catch (err) {
       currentPath = null;
       currentName = null;
@@ -239,6 +277,7 @@ export function createViewerPane(paneEl) {
       renderError(name, err.message);
       updateHeader();
       updateStats();
+      updateExportMenu();
     }
   }
 
@@ -342,6 +381,7 @@ export function createViewerPane(paneEl) {
     titleEl.textContent = currentName;
     updateHeader();
     updateStats();
+    updateExportMenu();
   });
   contentEl.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && e.target.closest('[data-editor-title]')) {
@@ -353,7 +393,10 @@ export function createViewerPane(paneEl) {
   /* Live word count while typing in the main-pane editor — the stats bar
      would otherwise only reflect the state at open/save time. */
   contentEl.addEventListener('input', (e) => {
-    if (e.target.closest('.vault-editor-body')) updateStats();
+    if (e.target.closest('.vault-editor-body')) {
+      updateStats();
+      updateExportMenu();
+    }
   });
 
   initDropzone(dropzone, openLocalFile);
@@ -435,6 +478,8 @@ export function createViewerPane(paneEl) {
         setExportMenuOpen(exportMenu ? exportMenu.hidden : false);
         return;
       }
+      const exportItem = e.target.closest('.vault-pane-export-menu [role="menuitem"]');
+      if (exportItem && exportItem.getAttribute('aria-disabled') === 'true') return;
       if (e.target.closest('[data-action="pane-export-html"]')) { api.exportHtml(); setExportMenuOpen(false); return; }
       if (e.target.closest('[data-action="pane-export-pdf"]')) { api.exportPdf(); setExportMenuOpen(false); return; }
       if (e.target.closest('[data-action="pane-export-markdown"]')) { api.exportMarkdown(); setExportMenuOpen(false); return; }
@@ -483,6 +528,7 @@ export function createViewerPane(paneEl) {
       if (body) body.focus();
       updateHeader();
       updateStats();
+      updateExportMenu();
     },
     /* Clears this pane back to its empty, default state — the "no clarity
        how to get back to the picker" gap the user flagged. Sidenote is
@@ -499,6 +545,7 @@ export function createViewerPane(paneEl) {
       resetDropzoneMessage();
       updateHeader();
       updateStats();
+      updateExportMenu();
     },
     exportHtml() {
       if (!currentName) return;

@@ -19,7 +19,16 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const ROOT = path.resolve(__dirname, '..');
 export const VAULT_DIR = path.join(ROOT, 'vault');
 
-const FILE_TYPES = { '.md': 'md', '.docx': 'docx', '.pptx': 'pptx', '.txt': 'txt' };
+/* Kept in sync with SUPPORTED_EXTENSIONS in assets/js/vault/renderers.js —
+   anything the viewer can render should also be indexable from the vault
+   sidebar. .pdf/.xlsx/.csv were previously missing here (viewable if
+   opened locally, but invisible in the sidebar for anything committed to
+   vault/); .jpg/.jpeg/.png are new. */
+const FILE_TYPES = {
+  '.md': 'md', '.docx': 'docx', '.pptx': 'pptx', '.txt': 'txt',
+  '.pdf': 'pdf', '.xlsx': 'xlsx', '.csv': 'csv',
+  '.jpg': 'jpg', '.jpeg': 'jpeg', '.png': 'png',
+};
 
 export function prettifyFilename(filename) {
   const base = filename.replace(/\.[^.]+$/, '');

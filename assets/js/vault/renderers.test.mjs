@@ -9,8 +9,8 @@ test('extensionOf lowercases and strips the leading dot', () => {
   assert.equal(extensionOf('noext'), '');
 });
 
-test('SUPPORTED_EXTENSIONS lists all seven handled types', () => {
-  assert.deepEqual(SUPPORTED_EXTENSIONS, ['md', 'txt', 'docx', 'pptx', 'pdf', 'xlsx', 'csv']);
+test('SUPPORTED_EXTENSIONS lists all ten handled types', () => {
+  assert.deepEqual(SUPPORTED_EXTENSIONS, ['md', 'txt', 'docx', 'pptx', 'pdf', 'xlsx', 'csv', 'jpg', 'jpeg', 'png']);
 });
 
 test('dispatches .md to the markdown renderer as prose', async () => {
@@ -50,6 +50,13 @@ test('dispatches .csv to the spreadsheet renderer as prose', async () => {
   assert.deepEqual(result, { kind: 'prose', html: '<table data-name="data.csv"></table>' });
 });
 
+test('dispatches .jpg/.jpeg/.png to the image renderer as an image', async () => {
+  const deps = { renderImage: (buf, name) => `<img data-name="${name}">` };
+  assert.deepEqual(await renderFile('photo.jpg', new ArrayBuffer(0), deps), { kind: 'image', html: '<img data-name="photo.jpg">' });
+  assert.deepEqual(await renderFile('photo.jpeg', new ArrayBuffer(0), deps), { kind: 'image', html: '<img data-name="photo.jpeg">' });
+  assert.deepEqual(await renderFile('photo.png', new ArrayBuffer(0), deps), { kind: 'image', html: '<img data-name="photo.png">' });
+});
+
 test('throws a clear error for an unsupported extension', async () => {
-  await assert.rejects(() => renderFile('image.png', new ArrayBuffer(0), {}), /Unsupported file type: \.png/);
+  await assert.rejects(() => renderFile('image.gif', new ArrayBuffer(0), {}), /Unsupported file type: \.gif/);
 });

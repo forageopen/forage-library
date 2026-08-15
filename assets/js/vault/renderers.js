@@ -4,10 +4,11 @@ import { renderDocx } from './render-docx.js';
 import { renderPptx } from './pptx/render-pptx.js';
 import { renderPdf } from './render-pdf.js';
 import { renderSpreadsheet } from './render-spreadsheet.js';
+import { renderImage } from './render-image.js';
 
 const TEXT_DECODER = new TextDecoder('utf-8');
 
-export const SUPPORTED_EXTENSIONS = ['md', 'txt', 'docx', 'pptx', 'pdf', 'xlsx', 'csv'];
+export const SUPPORTED_EXTENSIONS = ['md', 'txt', 'docx', 'pptx', 'pdf', 'xlsx', 'csv', 'jpg', 'jpeg', 'png'];
 
 export function extensionOf(filename) {
   const match = /\.([^.]+)$/.exec(filename);
@@ -23,6 +24,7 @@ export async function renderFile(filename, arrayBuffer, deps = {}) {
     renderPptx: pptx = renderPptx,
     renderPdf: pdf = renderPdf,
     renderSpreadsheet: sheet = renderSpreadsheet,
+    renderImage: image = renderImage,
   } = deps;
 
   switch (ext) {
@@ -39,6 +41,10 @@ export async function renderFile(filename, arrayBuffer, deps = {}) {
     case 'xlsx':
     case 'csv':
       return { kind: 'prose', html: sheet(arrayBuffer, filename) };
+    case 'jpg':
+    case 'jpeg':
+    case 'png':
+      return { kind: 'image', html: image(arrayBuffer, filename) };
     default:
       throw new Error(`Unsupported file type: .${ext || 'unknown'}`);
   }

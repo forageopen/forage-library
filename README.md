@@ -1,6 +1,6 @@
 # Forage Library
 
-Forkable, HTML-first knowledge repository — a "public Obsidian." One page, one vault: drop `.md`/`.docx`/`.pptx`/`.txt` files into `vault/`, they're rendered client-side, restyled into one consistent look. Nothing here depends on a closed platform or a paid CMS.
+Forkable, HTML-first knowledge repository — a "public Obsidian." One page, one vault: drop `.md`/`.docx`/`.pptx`/`.txt`/`.pdf`/`.xlsx`/`.csv`/`.jpg`/`.jpeg`/`.png` files into `vault/`, they're rendered client-side, restyled into one consistent look. Nothing here depends on a closed platform or a paid CMS.
 
 ## One-time setup (do this before the first push)
 
@@ -9,14 +9,14 @@ Forkable, HTML-first knowledge repository — a "public Obsidian." One page, one
 
 ## Adding content to the vault
 
-1. Drop a `.md`, `.docx`, `.pptx`, or `.txt` file anywhere under `vault/` (create folders freely — the sidebar mirrors whatever tree you build; files at the top level of `vault/` show up at the top level of the sidebar, no wrapper folder needed).
+1. Drop a `.md`, `.docx`, `.pptx`, `.txt`, `.pdf`, `.xlsx`, `.csv`, `.jpg`/`.jpeg`, or `.png` file anywhere under `vault/` (create folders freely — the sidebar mirrors whatever tree you build; files at the top level of `vault/` show up at the top level of the sidebar, no wrapper folder needed).
 2. Commit and push (or let GitHub Desktop do it).
 
 Push triggers everything else: CI regenerates `vault/manifest.json` (the index the sidebar reads, since GitHub Pages can't list directories on its own) and deploys the site. No template to copy, no link to add anywhere by hand.
 
-`index.html` is the vault viewer — the whole site is one page. It renders `.md`/`.docx`/`.pptx`/`.txt` client-side, sanitized (DOMPurify) and restyled into Forage's own look rather than each format's native appearance. It also supports a private mode: drop any file onto the empty viewer state, or click "start a new note," to read/write in your browser without it touching the repo or being visible to anyone else. Per-file reading notes (the "Sidenote" panel — a small rich-text editor: bold/italic/underline/strikethrough plus a highlighter) are private too — stored only in your own browser's `localStorage`, never committed or shared. The navigation sidebar, viewer, and sidenote panel are all independently resizable by dragging the divider between them.
+`index.html` is the vault viewer — the whole site is one page. It renders `.md`/`.docx`/`.pptx`/`.txt`/`.pdf`/`.xlsx`/`.csv`/`.jpg`/`.jpeg`/`.png` client-side, sanitized (DOMPurify) and restyled into Forage's own look rather than each format's native appearance. It also supports a private mode: drop any file onto the empty viewer state, or click "start a new note," to read/write in your browser without it touching the repo or being visible to anyone else. Per-file reading notes (the "Sidenote" panel — a small rich-text editor: bold/italic/underline/strikethrough plus a highlighter) are private too — stored only in your own browser's `localStorage`, never committed or shared. The navigation sidebar, viewer, and sidenote panel are all independently resizable by dragging the divider between them.
 
-Export a file as `.html`, `.pdf` (browser print), `.md` (original source, `.md`/`.txt` only), `.docx`, or `.json` (`.md`/`.docx` only — `.docx`/`.json` need real document structure, which plain text/slide decks don't have) from the kebab menu.
+Export a file as `.html`, `.pdf` (browser print), `.md` (original source, `.md`/`.txt` only), `.docx`, `.json` (`.md`/`.docx` only — `.docx`/`.json` need real document structure, which plain text/slide decks don't have), `.txt`, `.csv` (only when there's a table on screen), or `.jpeg` from each pane's export menu — options that wouldn't produce anything meaningful for the open file (e.g. CSV export with no table, or Markdown-source export for a `.docx`) are greyed out rather than silently doing nothing.
 
 ## Repository structure
 
@@ -42,7 +42,7 @@ forage-library/
 
 ## The ribbon
 
-Title flush left; on the right, a theme popover, an offline-mode toggle, and a kebab menu (Sidenote, Open in split, and the five export formats).
+Title flush left; on the right, a theme popover, an offline-mode toggle, and a kebab menu (Open in split). Per-file actions — Sidenote and the export menu — live in each pane's own header instead.
 
 ## Themes
 
