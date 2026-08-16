@@ -281,6 +281,48 @@ th { font-weight: 600; background: var(--panel); font-size: 11px; text-transform
   border-bottom: 1px solid var(--ribbon-border);
 }
 
+/* ---------- Site footer (bottom taskbar) ---------- */
+
+.site-footer {
+  /* Auto-hide, taskbar-style: pinned over the bottom edge, mostly
+     translated off-screen except for an 8px sliver — enough to show
+     something's there and stay grabbable/hoverable, since a fully
+     offscreen element can't receive the hover that's meant to bring it
+     back. :hover reveals it; JS (assets/js/footer.js) only toggles
+     .footer-locked on click, so it stays open without hovering —
+     unlocking it hands control back to plain :hover with no extra JS, so
+     "click again while not hovering" auto-hides for free. Ported from
+     github.com/forageopen/Noted's .app-footer (styles.css). */
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 150;
+  transform: translateY(calc(100% - 8px));
+  transition: transform 0.2s ease;
+  cursor: pointer;
+  text-align: center;
+  padding: 6px;
+  font-size: 12px;
+  color: var(--ribbon-muted);
+  border-top: 1px solid var(--ribbon-border);
+  background: var(--ribbon-bg);
+}
+
+.site-footer:hover,
+.site-footer.footer-locked {
+  transform: translateY(0);
+}
+
+.site-footer a {
+  color: var(--teal);
+  text-decoration: none;
+}
+
+.site-footer a:hover {
+  text-decoration: underline;
+}
+
 .ribbon-title-group { display: flex; align-items: center; gap: 8px; min-width: 0; }
 
 .ribbon-title {
