@@ -33,6 +33,22 @@ test('deriveTitle uses the prettified filename for non-markdown types', () => {
   rmSync(dir, { recursive: true, force: true });
 });
 
+test('deriveTitle reads <title> from html content', () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'vault-test-'));
+  const file = path.join(dir, 'doc.html');
+  writeFileSync(file, '<!doctype html><html><head><title>Real Title</title></head><body></body></html>\n');
+  assert.equal(deriveTitle(file, 'html', 'doc.html'), 'Real Title');
+  rmSync(dir, { recursive: true, force: true });
+});
+
+test('deriveTitle falls back to the prettified filename when html has no <title>', () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'vault-test-'));
+  const file = path.join(dir, 'no-title.html');
+  writeFileSync(file, '<!doctype html><html><body>No title here.</body></html>\n');
+  assert.equal(deriveTitle(file, 'html', 'no-title.html'), 'No Title');
+  rmSync(dir, { recursive: true, force: true });
+});
+
 test('deriveDate returns an ISO yyyy-mm-dd date', () => {
   const dir = mkdtempSync(path.join(tmpdir(), 'vault-test-'));
   const file = path.join(dir, 'note.md');
@@ -64,6 +80,15 @@ test('buildTree includes .jpg/.jpeg/.png files, tagged with their fileType', () 
   writeFileSync(path.join(dir, 'photo.png'), 'not real image bytes');
   const tree = buildTree(dir, '');
   assert.deepEqual(tree.map((n) => n.fileType).sort(), ['jpeg', 'jpg', 'png']);
+  rmSync(dir, { recursive: true, force: true });
+});
+
+test('buildTree includes .html/.htm files, tagged with their fileType', () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'vault-test-'));
+  writeFileSync(path.join(dir, 'page.html'), '<!doctype html><title>Page</title>');
+  writeFileSync(path.join(dir, 'page.htm'), '<!doctype html><title>Page</title>');
+  const tree = buildTree(dir, '');
+  assert.deepEqual(tree.map((n) => n.fileType).sort(), ['htm', 'html']);
   rmSync(dir, { recursive: true, force: true });
 });
 

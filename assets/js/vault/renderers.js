@@ -8,7 +8,7 @@ import { renderImage } from './render-image.js';
 
 const TEXT_DECODER = new TextDecoder('utf-8');
 
-export const SUPPORTED_EXTENSIONS = ['md', 'txt', 'docx', 'pptx', 'pdf', 'xlsx', 'csv', 'jpg', 'jpeg', 'png'];
+export const SUPPORTED_EXTENSIONS = ['md', 'txt', 'docx', 'pptx', 'pdf', 'xlsx', 'csv', 'jpg', 'jpeg', 'png', 'html', 'htm'];
 
 export function extensionOf(filename) {
   const match = /\.([^.]+)$/.exec(filename);
@@ -45,6 +45,18 @@ export async function renderFile(filename, arrayBuffer, deps = {}) {
     case 'jpeg':
     case 'png':
       return { kind: 'image', html: image(arrayBuffer, filename) };
+    case 'html':
+    case 'htm':
+      /* Raw, unmodified, *unsanitized* source — deliberately not run
+         through sanitize.js. Safe only because the caller renders 'iframe'
+         kind into a sandboxed <iframe sandbox="allow-scripts"> (no
+         allow-same-origin) via srcdoc rather than innerHTML, so the loaded
+         HTML can't read/write anything in this app's own origin no matter
+         what it contains — ported from Noted's src/file-loader.ts
+         (see its ADR-011 reference) rather than flattening to sanitized
+         Markdown, which would throw away the CSS/SVG-driven layout that
+         makes a hand-authored .html file worth opening as HTML at all. */
+      return { kind: 'iframe', html: TEXT_DECODER.decode(arrayBuffer) };
     default:
       throw new Error(`Unsupported file type: .${ext || 'unknown'}`);
   }

@@ -9,8 +9,8 @@ test('extensionOf lowercases and strips the leading dot', () => {
   assert.equal(extensionOf('noext'), '');
 });
 
-test('SUPPORTED_EXTENSIONS lists all ten handled types', () => {
-  assert.deepEqual(SUPPORTED_EXTENSIONS, ['md', 'txt', 'docx', 'pptx', 'pdf', 'xlsx', 'csv', 'jpg', 'jpeg', 'png']);
+test('SUPPORTED_EXTENSIONS lists all twelve handled types', () => {
+  assert.deepEqual(SUPPORTED_EXTENSIONS, ['md', 'txt', 'docx', 'pptx', 'pdf', 'xlsx', 'csv', 'jpg', 'jpeg', 'png', 'html', 'htm']);
 });
 
 test('dispatches .md to the markdown renderer as prose', async () => {
@@ -55,6 +55,13 @@ test('dispatches .jpg/.jpeg/.png to the image renderer as an image', async () =>
   assert.deepEqual(await renderFile('photo.jpg', new ArrayBuffer(0), deps), { kind: 'image', html: '<img data-name="photo.jpg">' });
   assert.deepEqual(await renderFile('photo.jpeg', new ArrayBuffer(0), deps), { kind: 'image', html: '<img data-name="photo.jpeg">' });
   assert.deepEqual(await renderFile('photo.png', new ArrayBuffer(0), deps), { kind: 'image', html: '<img data-name="photo.png">' });
+});
+
+test('dispatches .html/.htm to an unmodified iframe payload, not sanitized/parsed', async () => {
+  const source = '<!doctype html><html><body><style>*{margin:0}</style><h1>Hi</h1></body></html>';
+  const buffer = textEncoder.encode(source).buffer;
+  assert.deepEqual(await renderFile('doc.html', buffer, {}), { kind: 'iframe', html: source });
+  assert.deepEqual(await renderFile('doc.htm', buffer, {}), { kind: 'iframe', html: source });
 });
 
 test('throws a clear error for an unsupported extension', async () => {

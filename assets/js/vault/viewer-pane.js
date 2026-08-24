@@ -124,6 +124,7 @@ export function createViewerPane(paneEl) {
   let currentPath = null;
   let currentName = null;
   let currentSourceText = null; // only set for .md/.txt — the raw source, for "export as Markdown"
+  let currentRawHtml = null; // only set for .html/.htm — the raw source, for re-download on "export as HTML"
 
   function updateHeader() {
     if (!headerEl) return;
@@ -176,7 +177,11 @@ export function createViewerPane(paneEl) {
     const open = !!currentName;
     const relevant = {
       html: open,
-      pdf: open,
+      // A raw .html file renders into an isolated sandboxed iframe (see
+      // openSource) — window.print() can't reliably capture cross-document
+      // content, so PDF export is withheld the same way Noted's html mode
+      // is view-only / .html-export-only.
+      pdf: open && currentRawHtml === null,
       markdown: currentSourceText !== null,
       docx: open && !!getBlocks(),
       json: open && !!getBlocks(),
@@ -244,10 +249,28 @@ export function createViewerPane(paneEl) {
     renderLoading(name);
     try {
       const result = await renderFile(name, arrayBuffer);
-      contentEl.innerHTML = result.html;
       contentEl.className = 'vault-pane-content vault-pane-content--' + result.kind;
+      if (result.kind === 'iframe') {
+        /* A hand-authored .html file's raw markup can carry its own
+           <style>/<script> — dropping that into contentEl.innerHTML like
+           every other kind would leak page-global CSS resets straight into
+           the rest of this app. A sandboxed iframe with no
+           "allow-same-origin" keeps it fully isolated instead, so the
+           unsanitized srcdoc below is safe — see renderFile's 'html'/'htm'
+           case in renderers.js. */
+        contentEl.innerHTML = '';
+        const frame = document.createElement('iframe');
+        frame.className = 'vault-html-frame';
+        frame.setAttribute('sandbox', 'allow-scripts');
+        frame.setAttribute('title', name);
+        contentEl.appendChild(frame);
+        frame.srcdoc = result.html;
+      } else {
+        contentEl.innerHTML = result.html;
+      }
       currentPath = path;
       currentName = name;
+      currentRawHtml = result.kind === 'iframe' ? result.html : null;
       currentSourceText = MARKDOWN_SOURCE_EXTENSIONS.has(extensionOf(name))
         ? TEXT_DECODER.decode(arrayBuffer)
         : null;
@@ -538,6 +561,7 @@ export function createViewerPane(paneEl) {
       currentPath = null;
       currentName = null;
       currentSourceText = null;
+      currentRawHtml = null;
       contentEl.hidden = true;
       contentEl.innerHTML = '';
       contentEl.className = 'vault-pane-content';
@@ -549,6 +573,13 @@ export function createViewerPane(paneEl) {
     },
     exportHtml() {
       if (!currentName) return;
+      // A raw .html file's original bytes are the export — re-serializing
+      // its sandboxed iframe wrapper via contentEl.innerHTML would produce
+      // an empty shell, not the loaded document (see openSource).
+      if (currentRawHtml !== null) {
+        downloadBlob(currentName, currentRawHtml, 'text/html');
+        return;
+      }
       const editorBody = contentEl.querySelector('.vault-editor-body');
       const html = editorBody ? editorBody.outerHTML : contentEl.innerHTML;
       const theme = document.documentElement.getAttribute('data-theme') || 'sakura';

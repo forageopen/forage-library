@@ -23,11 +23,12 @@ export const VAULT_DIR = path.join(ROOT, 'vault');
    anything the viewer can render should also be indexable from the vault
    sidebar. .pdf/.xlsx/.csv were previously missing here (viewable if
    opened locally, but invisible in the sidebar for anything committed to
-   vault/); .jpg/.jpeg/.png are new. */
+   vault/); .jpg/.jpeg/.png are new. .html/.htm are also new. */
 const FILE_TYPES = {
   '.md': 'md', '.docx': 'docx', '.pptx': 'pptx', '.txt': 'txt',
   '.pdf': 'pdf', '.xlsx': 'xlsx', '.csv': 'csv',
   '.jpg': 'jpg', '.jpeg': 'jpeg', '.png': 'png',
+  '.html': 'html', '.htm': 'htm',
 };
 
 export function prettifyFilename(filename) {
@@ -45,6 +46,11 @@ export function deriveTitle(absPath, fileType, filename) {
   if (fileType === 'md') {
     const content = readFileSync(absPath, 'utf8');
     const match = /^#\s+(.+)$/m.exec(content);
+    if (match) return match[1].trim();
+  }
+  if (fileType === 'html' || fileType === 'htm') {
+    const content = readFileSync(absPath, 'utf8');
+    const match = /<title[^>]*>([^<]+)<\/title>/i.exec(content);
     if (match) return match[1].trim();
   }
   return prettifyFilename(filename);

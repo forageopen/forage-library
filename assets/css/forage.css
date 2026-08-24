@@ -696,6 +696,12 @@ body.vault-resizing { cursor: col-resize; user-select: none; }
 .vault-content p { font-size: 14px; line-height: 1.7; color: var(--text-soft); margin-bottom: 14px; }
 .vault-table-wrap { overflow-x: auto; margin: 1em 0; }
 
+/* A raw .html file's own layout/CSS shouldn't be squeezed into the
+   720px prose column — the sandboxed iframe (see viewer-pane.js) fills
+   the full pane width and most of the viewport height instead. */
+.vault-pane-content--iframe { max-width: none; margin: 0; }
+.vault-html-frame { display: block; width: 100%; height: calc(100vh - 160px); border: none; background: #fff; border-radius: 6px; }
+
 /* ---------- Main-pane document editor ("…or click to start a new note") ----------
    A blank, editable document in the main viewer pane — distinct from the
    Sidenote panel's own small toolbar (same idea, different scope: this one

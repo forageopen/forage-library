@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Generative AI Documentation Process</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Inter,Segoe UI,Arial,sans-serif;
+}
+
+body{
+    background:#e5e7eb;
+    padding:40px;
+    color:#111827;
+}
+
+
+.page{
+
+    width:210mm;
+    min-height:297mm;
+
+    margin:auto;
+    margin-bottom:40px;
+
+    background:white;
+
+    padding:18mm;
+
+    box-shadow:0 10px 30px rgba(0,0,0,.12);
+
+    page-break-after:always;
+
+}
+
+
+h1{
+
+    font-size:28px;
+    margin-bottom:6px;
+
+}
+
+
+.subtitle{
+
+    font-size:14px;
+    color:#6b7280;
+    margin-bottom:28px;
+
+}
+
+
+h2{
+
+    font-size:16px;
+    margin-bottom:5px;
+
+}
+
+
+h3{
+
+    font-size:15px;
+    margin-bottom:12px;
+
+}
+
+
+p{
+
+    font-size:13.5px;
+    line-height:1.7;
+    color:#374151;
+    margin-bottom:16px;
+
+}
+
+
+
+/* INTRO */
+
+.intro{
+
+    margin-bottom:25px;
+
+}
+
+
+
+/* WORKFLOW */
+
+.workflow-title{
+
+    font-size:15px;
+    font-weight:600;
+    margin-bottom:12px;
+
+}
+
+
+.workflow{
+
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:30px;
+
+}
+
+
+.card{
+
+    flex:1;
+
+    border:1px solid #d1d5db;
+
+    border-radius:10px;
+
+    padding:14px;
+
+    min-height:150px;
+
+}
+
+
+.highlight{
+
+    border:2px solid #167D6B;
+
+    background:#f5fbfa;
+
+}
+
+
+.number{
+
+    width:28px;
+    height:28px;
+
+    border-radius:50%;
+
+    background:#2596be;
+
+    color:white;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    font-size:12px;
+
+    font-weight:bold;
+
+    margin-bottom:10px;
+
+}
+
+
+
+.role{
+
+    font-size:11px;
+
+    color:#2596be;
+
+    font-weight:600;
+
+    margin-bottom:8px;
+
+}
+
+
+ul{
+
+    padding-left:15px;
+
+    font-size:12px;
+
+    line-height:1.6;
+
+    color:#374151;
+
+}
+
+
+.note{
+
+    margin-top:12px;
+
+    padding-top:10px;
+
+    border-top:1px solid #167D6B;
+
+    font-size:11px;
+
+    line-height:1.5;
+
+    color:#167D6B;
+
+    font-style:italic;
+
+}
+
+
+.arrow{
+
+    color:#9ca3af;
+
+    font-size:20px;
+
+}
+
+
+
+/* SECTION */
+
+.section{
+
+    margin-top:28px;
+
+}
+
+
+.questions{
+
+    background:#f3f4f6;
+
+    border-radius:8px;
+
+    padding:14px;
+
+}
+
+
+
+.questions ul{
+
+    margin:0;
+
+}
+
+
+
+/* FOOTER */
+
+.footer{
+
+    margin-top:20px;
+
+}
+
+
+.footer p{
+
+    margin-bottom:16px;
+
+}
+
+
+.signature{
+
+    margin-top:30px;
+
+    font-weight:600;
+
+    color:#167D6B;
+
+}
+
+
+
+@media print{
+
+body{
+
+    background:white;
+    padding:0;
+
+}
+
+
+.page{
+
+    margin:0;
+
+    box-shadow:none;
+
+}
+
+}
+
+
+
+@media(max-width:900px){
+
+.workflow{
+
+    flex-direction:column;
+
+}
+
+
+.arrow{
+
+    transform:rotate(90deg);
+
+}
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+
+<div class="page">
+
+
+<h1>
+Generative AI Documentation Process
+</h1>
+
+
+<div class="subtitle">
+My process of converting AI conversation into my own understanding.
+</div>
+
+
+
+<div class="intro">
+
+<p>
+
+I would simply use this:
+
+Talk to AI model.
+
+The purpose is not to immediately create documentation. It is to explore ideas, think out loud, challenge assumptions, and capture the whole thinking process.
+
+This can happen through text chat or voice conversation.
+
+</p>
+
+</div>
+
+
+
+
+<div class="workflow-title">
+Workflow
+</div>
+
+
+
+<div class="workflow">
+
+
+<div class="card">
+
+<div class="number">01</div>
+
+<h2>
+Talk To AI
+</h2>
+
+<div class="role">
+Ideation exploration
+</div>
+
+
+<ul>
+<li>Text chat + voice chat</li>
+<li>Explore ideas</li>
+<li>Ask questions</li>
+<li>Stress-test hypotheses</li>
+<li>Capture conversation</li>
+</ul>
+
+</div>
+
+
+
+<div class="arrow">→</div>
+
+
+
+<div class="card">
+
+<div class="number">02</div>
+
+<h2>
+Second AI
+</h2>
+
+<div class="role">
+Structure thinking
+</div>
+
+
+<ul>
+<li>Copy whole conversation</li>
+<li>Save TXT / MD file</li>
+<li>Give it to another AI model</li>
+<li>Organize thoughts</li>
+<li>Surface important points</li>
+<li>Find patterns</li>
+</ul>
+
+</div>
+
+
+
+<div class="arrow">→</div>
+
+
+
+<div class="card highlight">
+
+<div class="number">03</div>
+
+<h2>
+Human Review
+</h2>
+
+<div class="role">
+First principles filter
+</div>
+
+
+<ul>
+<li>Cross check original conversation</li>
+<li>Ask if this is what I pursued</li>
+<li>Remove AI assumptions</li>
+<li>Discard unnecessary parts</li>
+</ul>
+
+
+<div class="note">
+
+This is the most important step. AI can structure information, but only human reasoning can decide what is true, useful, and meaningful.
+
+</div>
+
+</div>
+
+
+
+<div class="arrow">→</div>
+
+
+
+<div class="card">
+
+<div class="number">04</div>
+
+<h2>
+Write Myself
+</h2>
+
+<div class="role">
+Final compression
+</div>
+
+
+<ul>
+<li>Use own words</li>
+<li>Keep necessary information</li>
+<li>Simple language</li>
+<li>No noise</li>
+</ul>
+
+</div>
+
+
+</div>
+
+
+
+
+
+<div class="section">
+
+<h3>
+The Review Process
+</h3>
+
+
+<p>
+
+After the second AI generates the response, I would read & review it while cross checking with the conversation I had with the first AI.
+
+</p>
+
+
+<p>
+
+I would ask myself:
+
+</p>
+
+
+<div class="questions">
+
+<ul>
+
+<li>Is this what I was intuitively pursuing?</li>
+<li>Is this actually my thinking?</li>
+<li>Did AI add something I never meant?</li>
+<li>Is this necessary?</li>
+<li>Can this be compressed further?</li>
+
+</ul>
+
+</div>
+
+</div>
+
+
+
+
+<div class="section">
+
+<h3>
+First Principles Filtering
+</h3>
+
+
+<p>
+
+I want to rigorously strip down all AI generated writing using my first principles reasoning.
+
+</p>
+
+
+<p>
+
+Anything that contains fallacy, unnecessary inclusion, exaggeration, repetition, or second-hand interpretation will be removed.
+
+</p>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+<div class="page">
+
+
+<h1>
+Note
+</h1>
+
+
+
+<div class="section">
+
+
+<p>
+
+What I want is a simple human language, relevant, straight to the point compression of information.
+
+</p>
+
+
+<p>
+
+Not an elaborate AI document.
+
+Not second-hand interpretation.
+
+Not noise.
+
+Only the necessary understanding.
+
+</p>
+
+
+</div>
+
+
+
+
+
+<div class="footer">
+
+
+<p>
+AI is used as an ideation and structuring tool. The precaution is not to let AI think for you. It is to explore ideation, stress-test hypotheses, surface possibilities, and organize information before human reasoning takes over. But at the end of the day, you don't want the AI to own you.
+</p>
+
+
+<p>
+Using AI will not make you a sudden millionaire. It's not a divine revelation from God. AI only amplifies the mindset you currently have.
+</p>
+
+
+<p>
+If you approach AI like everybody else, you will most likely end up where most people end up, even though it looks like you are leading the trend. Alone, delusional, reinforced by attention seekers. Because the tool itself is not the advantage.
+</p>
+
+
+<p>
+That's why you see some so-called "tech advocates" literally start to sound the same, speak the same, and have no self-identity. Because everything that comes out of their thinking is borrowed. They are not using AI as a tool. The tool is shaping them.
+</p>
+
+
+<p>
+You-yourself must assert a place. You still need to make an effort to really develop your own comprehension of the work. You need to question, challenge, and rebuild the understanding yourself.
+
+Otherwise, you will slowly get trapped inside confirmation bias created by AI. You only see what reinforces your existing assumptions, instead of developing your own judgement.
+</p>
+
+
+<p>
+AI should expand your thinking. It should not replace the process of thinking.
+</p>
+
+
+<div class="signature">
+Adam Rosman
+</div>
+
+
+</div>
+
+
+</div>
+
+
+</body>
+
+</html>
