@@ -698,9 +698,14 @@ body.vault-resizing { cursor: col-resize; user-select: none; }
 
 /* A raw .html file's own layout/CSS shouldn't be squeezed into the
    720px prose column — the sandboxed iframe (see viewer-pane.js) fills
-   the full pane width and most of the viewport height instead. */
-.vault-pane-content--iframe { max-width: none; margin: 0; }
-.vault-html-frame { display: block; width: 100%; height: calc(100vh - 160px); border: none; background: #fff; border-radius: 6px; }
+   the full pane width and most of the viewport height instead. Negative
+   left/right margins bleed past .vault-pane-main's own 40px padding
+   (a block's auto width already fills container-width minus its
+   margins, so negating them is enough — no width math needed) so the
+   frame runs edge-to-edge instead of leaving a 40px gap on each side;
+   top/bottom padding is left alone. */
+.vault-pane-content--iframe { max-width: none; margin: 0 -40px; }
+.vault-html-frame { display: block; width: 100%; height: calc(100vh - 160px); border: none; background: #fff; }
 
 /* ---------- Main-pane document editor ("…or click to start a new note") ----------
    A blank, editable document in the main viewer pane — distinct from the
