@@ -515,6 +515,9 @@ th { font-weight: 600; background: var(--panel); font-size: 11px; text-transform
 }
 .vault-resize-handle:focus-visible { outline: none; }
 body.vault-resizing { cursor: col-resize; user-select: none; }
+/* Sits above everything, including any open .html file's iframe, for the
+   duration of a drag — see resize.js's onMouseDown handler. */
+.vault-resize-overlay { position: fixed; inset: 0; z-index: 1000; cursor: col-resize; }
 /* Hide the sidenote's own resize handle while the sidenote itself is
    closed — nothing to resize, and it'd otherwise show as a stray divider
    at the pane's edge. */
@@ -698,14 +701,21 @@ body.vault-resizing { cursor: col-resize; user-select: none; }
 
 /* A raw .html file's own layout/CSS shouldn't be squeezed into the
    720px prose column — the sandboxed iframe (see viewer-pane.js) fills
-   the full pane width and most of the viewport height instead. Negative
-   left/right margins bleed past .vault-pane-main's own 40px padding
-   (a block's auto width already fills container-width minus its
-   margins, so negating them is enough — no width math needed) so the
-   frame runs edge-to-edge instead of leaving a 40px gap on each side;
-   top/bottom padding is left alone. */
+   the full pane width instead. Negative left/right margins bleed past
+   .vault-pane-main's own 40px padding (a block's auto width already
+   fills container-width minus its margins, so negating them is enough —
+   no width math needed) so the frame runs edge-to-edge instead of
+   leaving a 40px gap on each side; top/bottom padding is left alone. */
 .vault-pane-content--iframe { max-width: none; margin: 0 -40px; }
-.vault-html-frame { display: block; width: 100%; height: calc(100vh - 160px); border: none; background: #fff; }
+/* Clips the iframe's scaled-down box (see applyHtmlFrameScale in
+   viewer-pane.js) so it doesn't leave dead space below at its own
+   unscaled height; JS sets this wrap's height to the scaled height once
+   the framed document reports its natural size. Until then (or if that
+   report never arrives — e.g. the loaded file's own CSP blocks the
+   measure script) it falls back to a fixed-height scrollable box, same
+   as before fit-to-width existed. */
+.vault-html-frame-wrap { width: 100%; height: calc(100vh - 160px); overflow: hidden; }
+.vault-html-frame { display: block; width: 100%; height: 100%; border: none; background: #fff; transform-origin: top left; }
 
 /* ---------- Main-pane document editor ("…or click to start a new note") ----------
    A blank, editable document in the main viewer pane — distinct from the

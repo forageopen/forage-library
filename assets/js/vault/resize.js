@@ -46,6 +46,7 @@ export function initResizeHandle(handle, targetEl, { storageKey, min = DEFAULT_M
   let dragging = false;
   let startX = 0;
   let startWidth = 0;
+  let overlay = null;
 
   function clamp(width) {
     return Math.min(max, Math.max(min, width));
@@ -61,6 +62,10 @@ export function initResizeHandle(handle, targetEl, { storageKey, min = DEFAULT_M
     if (!dragging) return;
     dragging = false;
     document.body.classList.remove('vault-resizing');
+    if (overlay) {
+      overlay.remove();
+      overlay = null;
+    }
     writeStoredWidth(storageKey, targetEl.getBoundingClientRect().width);
     document.removeEventListener('mousemove', onMouseMove);
     document.removeEventListener('mouseup', onMouseUp);
@@ -72,6 +77,15 @@ export function initResizeHandle(handle, targetEl, { storageKey, min = DEFAULT_M
     startX = e.clientX;
     startWidth = targetEl.getBoundingClientRect().width;
     document.body.classList.add('vault-resizing');
+    /* A pane can hold a raw .html file rendered into an iframe (a genuinely
+       separate document) — once the pointer crosses over it mid-drag, the
+       iframe's own document starts receiving mousemove instead of this one,
+       so the drag stalls/jumps until the pointer leaves it again. A
+       transparent overlay above everything (including iframes) keeps every
+       mousemove landing on this document for the whole drag. */
+    overlay = document.createElement('div');
+    overlay.className = 'vault-resize-overlay';
+    document.body.appendChild(overlay);
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
   });

@@ -17,6 +17,7 @@ import { initResizeHandle } from './resize.js';
 import { highlightSwatchesHtml } from './highlight-colors.js';
 import { contrastTextColor } from './contrast.js';
 import { formatReadingStats, formatPageStats } from './reading-stats.js';
+import { computeFitScale, isHtmlFrameSizeMessage, HTML_FRAME_MEASURE_SCRIPT } from './html-frame-fit.js';
 
 const TEXT_DECODER = new TextDecoder('utf-8');
 const MARKDOWN_SOURCE_EXTENSIONS = new Set(['md', 'txt']);
@@ -125,6 +126,48 @@ export function createViewerPane(paneEl) {
   let currentName = null;
   let currentSourceText = null; // only set for .md/.txt — the raw source, for "export as Markdown"
   let currentRawHtml = null; // only set for .html/.htm — the raw source, for re-download on "export as HTML"
+  let currentHtmlFrame = null; // the live iframe element, while a .html/.htm file is open
+  let currentHtmlFrameNaturalSize = null; // { width, height } reported by HTML_FRAME_MEASURE_SCRIPT, once known
+
+  /* Rescales the open .html frame's transform so its natural (unscaled)
+     pixel size fills the pane's current width exactly — recomputed on
+     every pane resize (see the ResizeObserver below) as well as on first
+     measurement, so toggling the sidebar, dragging a split, or resizing
+     the sidenote all keep it filling the pane instead of leaving the
+     fixed-layout content to overflow into a horizontal scrollbar. */
+  function applyHtmlFrameScale() {
+    if (!currentHtmlFrame || !currentHtmlFrameNaturalSize) return;
+    const wrap = currentHtmlFrame.parentElement;
+    if (!wrap) return;
+    const { width: naturalWidth, height: naturalHeight } = currentHtmlFrameNaturalSize;
+    const scale = computeFitScale(wrap.getBoundingClientRect().width, naturalWidth);
+    currentHtmlFrame.style.transform = `scale(${scale})`;
+    wrap.style.height = `${naturalHeight * scale}px`;
+  }
+
+  function handleHtmlFrameMessage(e) {
+    if (!currentHtmlFrame || e.source !== currentHtmlFrame.contentWindow) return;
+    if (!isHtmlFrameSizeMessage(e.data)) return;
+    const { width, height } = e.data;
+    const prev = currentHtmlFrameNaturalSize;
+    const sizeChanged = !prev || prev.width !== width || prev.height !== height;
+    currentHtmlFrameNaturalSize = { width, height };
+    if (sizeChanged) {
+      // Only touch the frame's own box on an actual content-size change —
+      // resizing it below unavoidably fires the framed document's own
+      // 'resize' listener once more (its viewport just changed), and
+      // re-setting identical values every time would turn that into a
+      // pointless (if self-terminating) ping-pong.
+      currentHtmlFrame.style.width = `${width}px`;
+      currentHtmlFrame.style.height = `${height}px`;
+    }
+    applyHtmlFrameScale();
+  }
+  window.addEventListener('message', handleHtmlFrameMessage);
+
+  if (typeof ResizeObserver !== 'undefined' && paneMain) {
+    new ResizeObserver(() => applyHtmlFrameScale()).observe(paneMain);
+  }
 
   function updateHeader() {
     if (!headerEl) return;
@@ -259,13 +302,23 @@ export function createViewerPane(paneEl) {
            unsanitized srcdoc below is safe — see renderFile's 'html'/'htm'
            case in renderers.js. */
         contentEl.innerHTML = '';
+        const wrap = document.createElement('div');
+        wrap.className = 'vault-html-frame-wrap';
         const frame = document.createElement('iframe');
         frame.className = 'vault-html-frame';
         frame.setAttribute('sandbox', 'allow-scripts');
         frame.setAttribute('title', name);
-        contentEl.appendChild(frame);
-        frame.srcdoc = result.html;
+        wrap.appendChild(frame);
+        contentEl.appendChild(wrap);
+        currentHtmlFrame = frame;
+        currentHtmlFrameNaturalSize = null;
+        // The measure script is view-only — appended to what's *displayed*,
+        // never to currentRawHtml (set below), which stays the untouched
+        // original bytes for re-download/export fidelity.
+        frame.srcdoc = result.html + HTML_FRAME_MEASURE_SCRIPT;
       } else {
+        currentHtmlFrame = null;
+        currentHtmlFrameNaturalSize = null;
         contentEl.innerHTML = result.html;
       }
       currentPath = path;
@@ -562,6 +615,8 @@ export function createViewerPane(paneEl) {
       currentName = null;
       currentSourceText = null;
       currentRawHtml = null;
+      currentHtmlFrame = null;
+      currentHtmlFrameNaturalSize = null;
       contentEl.hidden = true;
       contentEl.innerHTML = '';
       contentEl.className = 'vault-pane-content';
