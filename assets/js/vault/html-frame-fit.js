@@ -38,24 +38,37 @@ export function isHtmlFrameSizeMessage(data) {
 /** The script appended to a loaded .html file's srcdoc — view-only, never
  * appended to the raw bytes offered for re-download (see openSource /
  * exportHtml in viewer-pane.js). Measures the framed document's real
- * content size and reports it to the parent so it can compute the
- * fit-to-width scale above. Runs inside the sandbox (allow-scripts is
- * granted), posted with '*' since a sandboxed frame with no
- * allow-same-origin has an opaque origin and can't target the parent's
- * real one by name. */
+ * content size *once*, on load, and reports it to the parent so it can
+ * compute the fit-to-width scale above. Runs inside the sandbox
+ * (allow-scripts is granted), posted with '*' since a sandboxed frame
+ * with no allow-same-origin has an opaque origin and can't target the
+ * parent's real one by name.
+ *
+ * Deliberately does NOT also listen for the frame's own 'resize' event —
+ * the parent pins this frame to its measured natural pixel size right
+ * after receiving this message (see handleHtmlFrameMessage in
+ * viewer-pane.js), which itself fires 'resize' inside the frame again;
+ * re-measuring and re-posting from that would ping-pong indefinitely if
+ * the reported height so much as sub-pixel-jitters between the two
+ * measurements, which has been observed to hang the tab. One clean
+ * measurement per load is enough since nothing else changes this
+ * frame's size afterwards (only its CSS transform, which doesn't affect
+ * layout or fire 'resize'). */
 export const HTML_FRAME_MEASURE_SCRIPT = `
 <script>(function () {
+  var posted = false;
   function post() {
+    if (posted) return; // hard guard: at most one measurement per load, ever
     var docEl = document.documentElement;
     var body = document.body;
     var width = Math.max(docEl.scrollWidth, body ? body.scrollWidth : 0);
     var height = Math.max(docEl.scrollHeight, body ? body.scrollHeight : 0);
     if (width > 0 && height > 0) {
+      posted = true;
       parent.postMessage({ source: 'forage-html-frame', width: width, height: height }, '*');
     }
   }
   if (document.readyState === 'complete') post();
   else window.addEventListener('load', post);
-  window.addEventListener('resize', post);
 })();</script>
 `;
