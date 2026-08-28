@@ -33,19 +33,6 @@
       "fileType": "pdf",
       "title": "Creative Management Forage School Of Applied Intelligence",
       "date": "2026-08-28"
-    },
-    {
-      "name": "vault",
-      "type": "folder",
-      "path": "vault/vault",
-      "children": [
-        {
-          "name": "Articles",
-          "type": "folder",
-          "path": "vault/vault/Articles",
-          "children": []
-        }
-      ]
     }
   ]
 }
