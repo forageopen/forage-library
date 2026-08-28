@@ -39,6 +39,12 @@
       "children": []
     },
     {
+      "name": "Guides",
+      "type": "folder",
+      "path": "vault/Guides",
+      "children": []
+    },
+    {
       "name": "Lesson Learned",
       "type": "folder",
       "path": "vault/Lesson Learned",
