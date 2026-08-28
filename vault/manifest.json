@@ -33,6 +33,12 @@
       "children": []
     },
     {
+      "name": "Lesson Learned",
+      "type": "folder",
+      "path": "vault/Lesson Learned",
+      "children": []
+    },
+    {
       "name": "Slides",
       "type": "folder",
       "path": "vault/Slides",
