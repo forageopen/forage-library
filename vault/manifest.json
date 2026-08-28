@@ -27,6 +27,12 @@
       ]
     },
     {
+      "name": "Frameworks",
+      "type": "folder",
+      "path": "vault/Frameworks",
+      "children": []
+    },
+    {
       "name": "Slides",
       "type": "folder",
       "path": "vault/Slides",
