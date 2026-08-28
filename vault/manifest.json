@@ -33,6 +33,12 @@
       ]
     },
     {
+      "name": "Case Studies",
+      "type": "folder",
+      "path": "vault/Case Studies",
+      "children": []
+    },
+    {
       "name": "Frameworks",
       "type": "folder",
       "path": "vault/Frameworks",
