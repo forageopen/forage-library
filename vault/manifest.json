@@ -26,6 +26,19 @@
       "fileType": "html",
       "title": "Generative AI Documentation Process",
       "date": "2026-08-24"
+    },
+    {
+      "name": "vault",
+      "type": "folder",
+      "path": "vault/vault",
+      "children": [
+        {
+          "name": "Articles",
+          "type": "folder",
+          "path": "vault/vault/Articles",
+          "children": []
+        }
+      ]
     }
   ]
 }
