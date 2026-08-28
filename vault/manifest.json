@@ -27,12 +27,19 @@
       ]
     },
     {
-      "name": "Creative Management - Forage School of Applied Intelligence.pdf",
-      "type": "file",
-      "path": "vault/Creative Management - Forage School of Applied Intelligence.pdf",
-      "fileType": "pdf",
-      "title": "Creative Management Forage School Of Applied Intelligence",
-      "date": "2026-08-28"
+      "name": "Slides",
+      "type": "folder",
+      "path": "vault/Slides",
+      "children": [
+        {
+          "name": "Creative Management - Forage School of Applied Intelligence.pdf",
+          "type": "file",
+          "path": "vault/Slides/Creative Management - Forage School of Applied Intelligence.pdf",
+          "fileType": "pdf",
+          "title": "Creative Management Forage School Of Applied Intelligence",
+          "date": "2026-08-28"
+        }
+      ]
     }
   ]
 }
