@@ -12,6 +12,12 @@
       "date": "2026-08-15"
     },
     {
+      "name": "About Us",
+      "type": "folder",
+      "path": "vault/About Us",
+      "children": []
+    },
+    {
       "name": "Articles",
       "type": "folder",
       "path": "vault/Articles",
