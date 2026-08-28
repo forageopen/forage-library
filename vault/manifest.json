@@ -4,6 +4,21 @@
   "path": "vault",
   "children": [
     {
+      "name": "📝 Articles ",
+      "type": "folder",
+      "path": "vault/📝 Articles ",
+      "children": [
+        {
+          "name": "generative-ai-documentation-process.html",
+          "type": "file",
+          "path": "vault/📝 Articles /generative-ai-documentation-process.html",
+          "fileType": "html",
+          "title": "Generative AI Documentation Process",
+          "date": "2026-08-28"
+        }
+      ]
+    },
+    {
       "name": "00-welcome-note.md",
       "type": "file",
       "path": "vault/00-welcome-note.md",
@@ -16,21 +31,6 @@
       "type": "folder",
       "path": "vault/About Us",
       "children": []
-    },
-    {
-      "name": "Articles",
-      "type": "folder",
-      "path": "vault/Articles",
-      "children": [
-        {
-          "name": "generative-ai-documentation-process.html",
-          "type": "file",
-          "path": "vault/Articles/generative-ai-documentation-process.html",
-          "fileType": "html",
-          "title": "Generative AI Documentation Process",
-          "date": "2026-08-28"
-        }
-      ]
     },
     {
       "name": "Case Studies",
