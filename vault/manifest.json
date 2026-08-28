@@ -12,20 +12,27 @@
       "date": "2026-08-15"
     },
     {
+      "name": "Articles",
+      "type": "folder",
+      "path": "vault/Articles",
+      "children": [
+        {
+          "name": "generative-ai-documentation-process.html",
+          "type": "file",
+          "path": "vault/Articles/generative-ai-documentation-process.html",
+          "fileType": "html",
+          "title": "Generative AI Documentation Process",
+          "date": "2026-08-28"
+        }
+      ]
+    },
+    {
       "name": "Creative Management - Forage School of Applied Intelligence.pdf",
       "type": "file",
       "path": "vault/Creative Management - Forage School of Applied Intelligence.pdf",
       "fileType": "pdf",
       "title": "Creative Management Forage School Of Applied Intelligence",
       "date": "2026-08-28"
-    },
-    {
-      "name": "generative-ai-documentation-process.html",
-      "type": "file",
-      "path": "vault/generative-ai-documentation-process.html",
-      "fileType": "html",
-      "title": "Generative AI Documentation Process",
-      "date": "2026-08-24"
     },
     {
       "name": "vault",
