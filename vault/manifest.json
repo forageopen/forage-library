@@ -18,6 +18,14 @@
       "fileType": "html",
       "title": "Generative AI Documentation Process",
       "date": "2026-08-24"
-    }
+    },
+    {
+       "name":  "Creative Management",
+      "type": "file",
+      "path": "vault/generative-ai-documentation-process.html",
+      "fileType": "pdf",
+      "title": "vault/Creative%20Management%20-%20Forage%20School%20of%20Applied%20Intelligence.pdf"
+      "date": "2026-08-28"
+    {
   ]
 }
