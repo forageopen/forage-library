@@ -57,6 +57,12 @@
       "children": []
     },
     {
+      "name": "Research",
+      "type": "folder",
+      "path": "vault/Research",
+      "children": []
+    },
+    {
       "name": "Slides",
       "type": "folder",
       "path": "vault/Slides",
