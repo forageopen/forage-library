@@ -19,6 +19,7 @@ import { contrastTextColor } from './contrast.js';
 import { formatReadingStats, formatPageStats } from './reading-stats.js';
 import { computeFitScale, isHtmlFrameSizeMessage, HTML_FRAME_MEASURE_SCRIPT } from './html-frame-fit.js';
 import { createLoadingBar, MIN_VISIBLE_MS } from './loading-bar.js';
+import { createReadAloud } from './read-aloud.js';
 import {
   clampZoom,
   readStoredZoom,
@@ -114,6 +115,7 @@ export function createViewerPane(paneEl) {
   const exportMenuBtn = paneEl.querySelector('[data-action="pane-export-menu"]');
   const exportMenu = paneEl.querySelector('.vault-pane-export-menu');
   const darkBtn = paneEl.querySelector('[data-action="pane-dark"]');
+  const readBtn = paneEl.querySelector('[data-action="pane-read-aloud"]');
   const zoomMenuBtn = paneEl.querySelector('[data-action="pane-zoom-menu"]');
   const zoomMenu = paneEl.querySelector('.vault-pane-zoom-menu');
   const zoomRange = paneEl.querySelector('[data-pane-zoom-range]');
@@ -278,6 +280,11 @@ export function createViewerPane(paneEl) {
       darkBtn.hidden = !darkApplies;
       darkBtn.setAttribute('aria-pressed', String(docDark && darkApplies));
     }
+    // Read-along only makes sense for a genuinely text-based document —
+    // md/txt/docx render as 'prose'; xlsx/csv do too but are tables.
+    if (readBtn) {
+      readBtn.hidden = !(kind === 'prose' && ['md', 'txt', 'docx'].includes(extensionOf(currentName || '')));
+    }
     if (zoomRange) zoomRange.value = String(Math.round(userZoom * 100));
     if (zoomValueEl) zoomValueEl.textContent = `${Math.round(userZoom * 100)}%`;
   }
@@ -418,6 +425,56 @@ export function createViewerPane(paneEl) {
     setLoadProgress = () => {};
   }
 
+  /* Word-by-word "read along" (read-aloud.js). The reader is built lazily
+     on the first press for whatever prose is on screen, and torn down
+     (spans unwrapped) whenever that content is replaced — every place
+     destroyLoadingBar() is called, plus before an export. */
+  let activeReader = null;
+  const READ_ICONS = {
+    idle: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
+    playing: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>',
+    paused: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
+    done: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v4h4"/></svg>',
+  };
+
+  function renderReadState(state) {
+    if (!readBtn) return;
+    readBtn.innerHTML = READ_ICONS[state] || READ_ICONS.idle;
+    readBtn.setAttribute('aria-pressed', String(state === 'playing' || state === 'paused'));
+    readBtn.title = state === 'playing' ? 'Pause' : state === 'done' ? 'Read again' : 'Read along';
+  }
+
+  function destroyReader() {
+    if (activeReader) {
+      activeReader.destroy();
+      activeReader = null;
+    }
+    renderReadState('idle');
+  }
+
+  /* Single click toggles play/pause/resume; a quick double click resets.
+     The click is deferred ~200ms so the first click of a double doesn't
+     also fire a toggle. */
+  let readClickTimer = 0;
+  function onReadClick(e) {
+    if (e.detail > 1) return;
+    clearTimeout(readClickTimer);
+    readClickTimer = setTimeout(() => {
+      if (!activeReader) {
+        const body = contentEl.querySelector('.vault-content');
+        if (!body) return;
+        activeReader = createReadAloud(body, { onState: renderReadState, scrollTarget: paneMain });
+      }
+      activeReader.toggle();
+    }, 200);
+  }
+  if (readBtn) {
+    readBtn.addEventListener('dblclick', () => {
+      clearTimeout(readClickTimer);
+      if (activeReader) activeReader.reset();
+    });
+  }
+
   /* A light/cached doc renders in a few frames, so the bar would just
      flash and the fill animation never plays. Keep the finished bar up
      until it's been visible MIN_VISIBLE_MS — only for the animated WebGL
@@ -433,6 +490,7 @@ export function createViewerPane(paneEl) {
     resetDropzoneMessage();
     showContent();
     destroyLoadingBar();
+    destroyReader();
     contentEl.className = 'vault-pane-content';
     contentEl.innerHTML = '';
     loadingStartedAt = performance.now();
@@ -461,6 +519,7 @@ export function createViewerPane(paneEl) {
 
   function renderError(name, message) {
     destroyLoadingBar();
+    destroyReader();
     contentEl.hidden = true;
     dropzone.hidden = false;
     if (dropzoneMessage) {
@@ -494,6 +553,7 @@ export function createViewerPane(paneEl) {
       await holdLoadingBar();
       if (seq !== loadSeq) return; // a newer open superseded this one during the dwell
       destroyLoadingBar();
+      destroyReader();
       contentEl.className = 'vault-pane-content vault-pane-content--' + result.kind;
       if (result.kind === 'iframe') {
         /* A hand-authored .html file's raw markup can carry its own
@@ -788,6 +848,10 @@ export function createViewerPane(paneEl) {
      split view). */
   if (headerEl) {
     headerEl.addEventListener('click', (e) => {
+      if (e.target.closest('[data-action="pane-read-aloud"]')) {
+        onReadClick(e);
+        return;
+      }
       if (e.target.closest('[data-action="pane-sidenote"]')) {
         if (sidenoteEl) sidenoteEl.hidden = !sidenoteEl.hidden;
         return;
@@ -811,6 +875,7 @@ export function createViewerPane(paneEl) {
       }
       if (e.target.closest('[data-action="pane-export-menu"]')) {
         e.stopPropagation();
+        destroyReader(); // don't let an in-progress read leak its word spans into an export
         setExportMenuOpen(exportMenu ? exportMenu.hidden : false);
         return;
       }
@@ -869,6 +934,7 @@ export function createViewerPane(paneEl) {
     startNewNote() {
       showContent();
       destroyLoadingBar();
+      destroyReader();
       currentName = NEW_DOCUMENT_NAME;
       currentSourceText = null;
       contentEl.className = 'vault-pane-content vault-pane-content--editor';
@@ -888,6 +954,7 @@ export function createViewerPane(paneEl) {
        main content shouldn't disturb an independent panel). */
     closeFile() {
       destroyLoadingBar();
+      destroyReader();
       currentPath = null;
       currentName = null;
       currentSourceText = null;
