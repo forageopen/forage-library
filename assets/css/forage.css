@@ -664,18 +664,26 @@ body.vault-resizing { cursor: col-resize; user-select: none; }
 .vault-pane-zoom-row button:hover, .vault-pane-zoom-row button:focus-visible { background: var(--ribbon-hover); }
 .vault-pane-header-btn[aria-pressed="true"] { background: var(--ribbon-hover); color: var(--text); }
 
-/* Document dark mode for a PDF/PPTX page deck — invert only the slide
-   images (`invert(0.92)` charcoal + a 180deg hue-rotate that keeps hues
-   where they were). For a PDF that's the whole page render, so the page
-   goes dark; for a PPTX it's just the embedded pictures, leaving the
-   title/bullet text on its already theme-appropriate ground. The deck
-   chrome itself follows the site theme like every other rendered kind. A
-   rendered .html file gets its filter injected inside the sandboxed iframe
-   instead (see DOC_DARK_IFRAME_ADDON in doc-view.js) so a hue-rotate stays
-   GPU-composited over any animation it runs. The button hides for themed
-   prose, a bare image, and the editor (see applyDocView). */
-.vault-pane-content--dark.vault-pane-content--deck .vault-slide-image { filter: invert(0.92) hue-rotate(180deg); }
-@media print { .vault-pane-content--dark .vault-slide-image { filter: none !important; } }
+/* Document dark mode for a PDF deck: invert the page raster (`invert(0.92)`
+   charcoal + a 180deg hue-rotate that keeps hues where they were), then lay
+   an un-inverted crop of every detected photograph back over its own spot
+   (`.vault-slide-photo`, injected lazily by ensurePdfPhotoOverlays in
+   viewer-pane.js the first time dark mode is switched on for the file). So
+   the page ground, text and vector art go dark while photos — and anything
+   printed on top of one — stay true colour. A PPTX's embedded pictures are
+   plain `.vault-slide-image` (no `--page`) and are left untouched; its
+   title/bullet text follows the site theme like every other rendered kind.
+   A rendered .html file gets its filter injected inside the sandboxed
+   iframe instead (DOC_DARK_IFRAME_ADDON in doc-view.js). The dark button
+   hides for themed prose, a bare image, and the editor (see applyDocView). */
+.vault-slide--page { position: relative; }
+.vault-pane-content--dark.vault-pane-content--deck .vault-slide-page { filter: invert(0.92) hue-rotate(180deg); }
+.vault-slide-photo { position: absolute; display: none; pointer-events: none; }
+.vault-pane-content--dark.vault-pane-content--deck .vault-slide-photo { display: block; }
+@media print {
+  .vault-pane-content--dark .vault-slide-page { filter: none !important; }
+  .vault-slide-photo { display: none !important; }
+}
 
 /* Word count / reading time — a full-width bar under the pane header,
    text right-aligned, colors pulled from the active theme like every
@@ -990,11 +998,16 @@ body.vault-resizing { cursor: col-resize; user-select: none; }
    the doc render smaller than it needs to. Only the image-only case is
    affected: slides that mix a title/bullets with an image keep the
    padding, since that's still text layout. */
+/* .vault-slide--page (a rendered PDF page) is always image-only in this
+   sense — it just also carries lazily-added .vault-slide-photo overlays, so
+   the :only-child test alone no longer catches it. */
+.vault-slide--page,
 .vault-slide:has(> .vault-slide-image:only-child) {
   padding: 0;
   overflow: hidden;
   border-radius: 0;
 }
+.vault-slide--page .vault-slide-image,
 .vault-slide:has(> .vault-slide-image:only-child) .vault-slide-image {
   display: block;
   width: 100%;

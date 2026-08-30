@@ -148,6 +148,9 @@ export function createViewerPane(paneEl) {
   let currentRawHtml = null; // only set for .html/.htm — the raw source, for re-download on "export as HTML"
   let currentHtmlFrame = null; // the live iframe element, while a .html/.htm file is open
   let currentHtmlFrameNaturalSize = null; // { width, height } reported by HTML_FRAME_MEASURE_SCRIPT, once known
+  let currentPdfBuffer = null; // the raw bytes, while a .pdf is open — for the lazy photo-region pass
+  let pdfPhotoRegions = null;  // per-page photo rects once extractPhotoRegions has run
+  let pdfPhotoPass = null;     // the in-flight extractPhotoRegions promise (dedupes concurrent triggers)
 
   /* Rescales the open .html frame's transform so its natural (unscaled)
      pixel size fills the pane's current width exactly — recomputed on
@@ -180,6 +183,69 @@ export function createViewerPane(paneEl) {
     }
   }
 
+  /* Lazily works out where every embedded photograph sits on each PDF page
+     and hangs an un-inverted crop of it over that spot, so PDF dark mode
+     can invert the page ground / text / vector art but leave photos (and
+     anything printed on top of one) in true colour. Only runs the first
+     time dark mode is turned on for the open PDF — the normal open path is
+     untouched — and caches the result so toggling afterwards is instant.
+     Any failure just leaves the plain inverted page, exactly as before. */
+  function ensurePdfPhotoOverlays() {
+    if (!currentPdfBuffer || pdfPhotoRegions !== null || pdfPhotoPass) return;
+    const buffer = currentPdfBuffer;
+    pdfPhotoPass = (async () => {
+      const { extractPhotoRegions } = await import('./render-pdf.js');
+      return extractPhotoRegions(buffer, {
+        onProgress: (fraction, label) => {
+          if (progressBar && progressLabel && progressFill && currentPdfBuffer === buffer) {
+            progressBar.hidden = false;
+            progressLabel.textContent = label;
+            progressFill.style.width = `${Math.round((fraction || 0) * 100)}%`;
+          }
+        },
+      });
+    })();
+    pdfPhotoPass
+      .then((regions) => {
+        if (currentPdfBuffer !== buffer) return; // pane moved on to another file
+        pdfPhotoRegions = regions;
+        const sections = contentEl.querySelectorAll('.vault-slide--page');
+        sections.forEach((section, i) => {
+          const pageImg = section.querySelector('.vault-slide-page');
+          const rects = regions[i];
+          if (!pageImg || !rects || !rects.length || !pageImg.naturalWidth) return;
+          for (const r of rects) {
+            const sx = (r.xPct / 100) * pageImg.naturalWidth;
+            const sy = (r.yPct / 100) * pageImg.naturalHeight;
+            const sw = (r.wPct / 100) * pageImg.naturalWidth;
+            const sh = (r.hPct / 100) * pageImg.naturalHeight;
+            const crop = document.createElement('canvas');
+            crop.width = Math.max(1, Math.round(sw));
+            crop.height = Math.max(1, Math.round(sh));
+            try {
+              crop.getContext('2d').drawImage(pageImg, sx, sy, sw, sh, 0, 0, crop.width, crop.height);
+            } catch (err) {
+              continue;
+            }
+            const overlay = document.createElement('img');
+            overlay.className = 'vault-slide-photo';
+            overlay.alt = '';
+            overlay.src = crop.toDataURL('image/png');
+            overlay.style.cssText = `left:${r.xPct}%;top:${r.yPct}%;width:${r.wPct}%;height:${r.hPct}%`;
+            section.appendChild(overlay);
+          }
+        });
+      })
+      .catch(() => {
+        pdfPhotoRegions = []; // give up quietly; the page just inverts wholesale
+      })
+      .finally(() => {
+        pdfPhotoPass = null;
+        if (progressBar) progressBar.hidden = true;
+        applyDocView();
+      });
+  }
+
   /* Re-applies the two per-pane view controls (zoom + document dark mode)
      to whatever's currently rendered. Called after every render path, since
      each one rebuilds contentEl's class/markup and would otherwise drop the
@@ -187,10 +253,11 @@ export function createViewerPane(paneEl) {
 
      Zoom is universal. Dark mode applies to a rendered .html/.htm file
      (handled inside its own iframe, with embedded photos re-inverted back
-     to true colour) and to a PDF/PPTX page deck (CSS inverts just the
-     slide images — the whole page for a PDF, the embedded pictures for a
-     PPTX). It stays hidden for themed prose (.md/.docx/.txt/spreadsheets —
-     already theme-aware), a bare opened image, and the new-note editor. */
+     to true colour) and to a PDF/PPTX page deck. For a PDF the page raster
+     inverts and each detected photo region is punched back to true colour
+     by ensurePdfPhotoOverlays (run lazily on first toggle); for a PPTX the
+     embedded pictures are left alone and the themed text follows the site
+     theme. Hidden for themed prose, a bare opened image, and the editor. */
   function applyDocView() {
     const kind = ['iframe', 'deck', 'image', 'prose', 'editor']
       .find((k) => contentEl.classList.contains('vault-pane-content--' + k)) || null;
@@ -204,6 +271,7 @@ export function createViewerPane(paneEl) {
       applyHtmlFrameScale();
       postDarkState();
     }
+    if (isDeck && docDark && currentPdfBuffer) ensurePdfPhotoOverlays();
 
     if (darkBtn) {
       darkBtn.hidden = !darkApplies;
@@ -401,6 +469,10 @@ export function createViewerPane(paneEl) {
      flashing a fresh block between the two phases. */
   async function openSource(name, arrayBuffer, path, keepLoadingBlock) {
     if (!keepLoadingBlock) renderLoading(name);
+    // Snapshot a PDF's bytes before renderFile — pdf.js transfers the
+    // ArrayBuffer to its worker (detaching it), so this copy is what the
+    // lazy photo-region pass (ensurePdfPhotoOverlays) reads later.
+    const pdfBufferCopy = extensionOf(name) === 'pdf' ? arrayBuffer.slice(0) : null;
     try {
       setLoadProgress(null, `Opening ${name}…`);
       const result = await renderFile(name, arrayBuffer, { onProgress: setLoadProgress });
@@ -436,6 +508,9 @@ export function createViewerPane(paneEl) {
       currentPath = path;
       currentName = name;
       currentRawHtml = result.kind === 'iframe' ? result.html : null;
+      currentPdfBuffer = pdfBufferCopy; // snapshotted above, pre-transfer
+      pdfPhotoRegions = null;
+      pdfPhotoPass = null;
       currentSourceText = MARKDOWN_SOURCE_EXTENSIONS.has(extensionOf(name))
         ? TEXT_DECODER.decode(arrayBuffer)
         : null;
@@ -799,6 +874,9 @@ export function createViewerPane(paneEl) {
       currentRawHtml = null;
       currentHtmlFrame = null;
       currentHtmlFrameNaturalSize = null;
+      currentPdfBuffer = null;
+      pdfPhotoRegions = null;
+      pdfPhotoPass = null;
       contentEl.hidden = true;
       contentEl.innerHTML = '';
       contentEl.className = 'vault-pane-content';

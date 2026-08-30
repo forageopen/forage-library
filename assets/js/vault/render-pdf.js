@@ -67,10 +67,78 @@ export async function renderPdf(arrayBuffer, deps = {}) {
     const canvas = createCanvas(viewport.width, viewport.height);
     await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
     slides.push(
-      `<section class="vault-slide" data-slide-index="${i - 1}"><img class="vault-slide-image" src="${canvas.toDataURL('image/png')}" alt="Page ${i}"></section>`
+      // vault-slide--page / vault-slide-page mark this as a rendered PDF
+      // page (vs a PPTX embedded picture, which keeps just vault-slide-image)
+      // so dark mode can invert the page raster and the lazy photo-overlay
+      // pass can hang un-inverted crops off it — see extractPhotoRegions
+      // below and ensurePdfPhotoOverlays in viewer-pane.js.
+      `<section class="vault-slide vault-slide--page" data-slide-index="${i - 1}"><img class="vault-slide-image vault-slide-page" src="${canvas.toDataURL('image/png')}" alt="Page ${i}"></section>`
     );
     onProgress(i / pdf.numPages, `Rendering page ${i} of ${pdf.numPages}`);
   }
 
   return `<div class="vault-content vault-deck">${slides.join('')}</div>`;
+}
+
+/* Second, opt-in pass over a PDF: find every embedded photograph and return
+   its rectangle (as % of the page) per page, so PDF dark mode can leave
+   those regions in true colour while inverting everything else. Run lazily
+   the first time dark mode is switched on for the file (viewer-pane.js
+   ensurePdfPhotoOverlays), never on the normal open path.
+
+   "Photograph" vs "rasterised text / flat graphic" is a pixel-stats
+   heuristic (pdf-photo-detect.js), not semantics — a photo-realistic
+   illustration could slip through either way — but it's reliable for the
+   real case: design decks that bake photos AND title text in as images. */
+export async function extractPhotoRegions(arrayBuffer, deps = {}) {
+  const pdfjsLib = deps.pdfjsLib || (await loadPdfjs());
+  const createCanvas = deps.createCanvas || ((w, h) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    return canvas;
+  });
+  const onProgress = deps.onProgress || (() => {});
+  const { collectImageDraws, imageStatsFromRgba, classifyImageStats, rectToPercent } =
+    deps.detect || (await import('./pdf-photo-detect.js'));
+
+  const OPS = pdfjsLib.OPS;
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const pages = [];
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const viewport = page.getViewport({ scale: 1 });
+    // A 1x render is enough to populate page.objs with the decoded images;
+    // we only sample them, never keep these pixels.
+    const probe = createCanvas(Math.ceil(viewport.width), Math.ceil(viewport.height));
+    try {
+      await page.render({ canvasContext: probe.getContext('2d'), viewport }).promise;
+      const { fnArray, argsArray } = await page.getOperatorList();
+      const draws = collectImageDraws({ fnArray, argsArray, ops: OPS, viewportTransform: viewport.transform });
+      const regions = [];
+      for (const draw of draws) {
+        const pct = rectToPercent(draw, viewport.width, viewport.height);
+        if (!pct) continue;
+        let obj = null;
+        try { obj = page.objs.has(draw.objId) ? page.objs.get(draw.objId) : null; } catch { obj = null; }
+        // pdf.js resolves an image XObject to { width, height, bitmap: ImageBitmap, ... }
+        const drawable = obj && (obj.bitmap || obj);
+        const srcW = obj && (obj.width || (obj.bitmap && obj.bitmap.width));
+        const srcH = obj && (obj.height || (obj.bitmap && obj.bitmap.height));
+        if (!drawable || !(srcW > 0) || !(srcH > 0)) continue;
+        const pw = Math.min(srcW, 240);
+        const ph = Math.max(1, Math.round((pw / srcW) * srcH));
+        const sample = createCanvas(pw, ph);
+        const sctx = sample.getContext('2d');
+        try { sctx.drawImage(drawable, 0, 0, pw, ph); } catch { continue; }
+        const stats = imageStatsFromRgba(sctx.getImageData(0, 0, pw, ph).data);
+        if (classifyImageStats(stats)) regions.push(pct);
+      }
+      pages.push(regions);
+    } catch {
+      pages.push([]); // a page we can't analyse just inverts wholesale, same as before
+    }
+    onProgress(i / pdf.numPages, `Analysing page ${i} of ${pdf.numPages}`);
+  }
+  return pages;
 }
