@@ -45,6 +45,8 @@ body { background: ${bg}; color: ${fg}; font-family: system-ui, -apple-system, "
 .vault-export-content table { border-collapse: collapse; width: 100%; }
 .vault-export-content th, .vault-export-content td { border: 1px solid ${border}; padding: 0.4rem 0.6rem; }
 .vault-export-content hr { border: none; border-top: 1px solid ${border}; }
+.vault-export-content .vault-editor-body { position: relative; }
+.vault-export-content img[data-forage-float] { position: absolute; max-width: none; }
 `.trim();
 }
 

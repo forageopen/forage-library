@@ -12,6 +12,8 @@
  * so tests can inject the real `docx` npm package instead.
  */
 
+import { parseDataUrl, imageRunArgsFromPlacement } from './paste-image.js';
+
 const FONT_FAMILY = 'Calibri';
 const CODE_FONT_FAMILY = 'Consolas';
 const BODY_SIZE = 22; // 11pt
@@ -40,7 +42,7 @@ function normalizeHex(color) {
 export function blocksToDocxDocument(blocks, docxLib = globalThis.docx) {
   if (!docxLib) throw new Error('blocksToDocxDocument: docx library is not loaded');
   const {
-    AlignmentType, BorderStyle, Document, HeadingLevel, Paragraph,
+    AlignmentType, BorderStyle, Document, HeadingLevel, ImageRun, Paragraph,
     ShadingType, Table, TableCell, TableRow, TextRun, WidthType,
   } = docxLib;
 
@@ -130,6 +132,19 @@ export function blocksToDocxDocument(blocks, docxLib = globalThis.docx) {
     return new Paragraph({ alignment: AlignmentType.LEFT, spacing: BODY_SPACING, children });
   }
 
+  /* A floating pasted image -> a paragraph holding one "In Front of Text"
+     ImageRun. All the px->EMU / floating-anchor arithmetic lives in
+     paste-image.js's pure imageRunArgsFromPlacement so it's unit-tested
+     directly; this only decodes the data URL and hands the bytes over. */
+  function imageParagraph(block) {
+    const { bytes } = parseDataUrl(block.dataUrl);
+    const args = imageRunArgsFromPlacement(
+      { mime: block.mime, xPx: block.xPx, yPx: block.yPx, wPx: block.wPx, hPx: block.hPx },
+      docxLib,
+    );
+    return new Paragraph({ children: [new ImageRun({ ...args, data: bytes })] });
+  }
+
   function thematicBreakParagraph() {
     return new Paragraph({
       spacing: BODY_SPACING,
@@ -190,6 +205,8 @@ export function blocksToDocxDocument(blocks, docxLib = globalThis.docx) {
         return listBlockParagraphs(block, 0);
       case 'thematicBreak':
         return [thematicBreakParagraph()];
+      case 'image':
+        return [imageParagraph(block)];
       case 'table':
         return [];
       default:
@@ -199,7 +216,14 @@ export function blocksToDocxDocument(blocks, docxLib = globalThis.docx) {
 
   function blocksToDocxContent(blks) {
     const content = [];
-    for (const block of blks) {
+    // Float images first: a PARAGRAPH-anchored floating image attaches to
+    // the paragraph its run sits in, so emitting it before the body text
+    // anchors it near the top of the doc — where the editor's own
+    // top-left-relative offset was measured from.
+    const ordered = [...blks].sort(
+      (a, b) => (a.kind === 'image' ? 0 : 1) - (b.kind === 'image' ? 0 : 1),
+    );
+    for (const block of ordered) {
       if (block.kind === 'table') {
         content.push(tableFromIr(block));
       } else {

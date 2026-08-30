@@ -41,6 +41,15 @@
  *               | { kind: 'list', ordered, items: ListItem[] }
  *               | { kind: 'table', header: TableCell[], rows: TableCell[][], align }
  *               | { kind: 'thematicBreak' }
+ *               | { kind: 'image', mime, dataUrl, xPx, yPx, wPx, hPx }
+ *
+ * The 'image' block only ever comes from the note editor's floating pasted
+ * images (`<img data-forage-float>`, see paste-image.js) — a Word-style
+ * "In Front of Text" overlay carrying its geometry inline. A normal
+ * rendered document's inline `<img>` (mammoth/marked output) is deliberately
+ * NOT turned into a block: those are content images the exporters have
+ * never handled, and quietly dropping them keeps existing .docx/.json
+ * export behaviour unchanged.
  */
 
 // ---------------------------------------------------------------------
@@ -210,7 +219,14 @@ export function blocksFromElement(root) {
   };
 
   for (const node of Array.from(root.childNodes)) {
-    if (node.nodeType === 1 && BLOCK_TAGS.has(node.tagName)) {
+    // A note editor's floating pasted image sits as a bare top-level <img>
+    // among the contenteditable's text nodes — treat it as its own block
+    // (appendElementBlocks' IMG case turns it into an 'image' block) rather
+    // than letting it fall into the inline buffer, where it'd be dropped.
+    const isFloatImage =
+      node.nodeType === 1 && node.tagName === 'IMG' &&
+      node.hasAttribute && node.hasAttribute('data-forage-float');
+    if (isFloatImage || (node.nodeType === 1 && BLOCK_TAGS.has(node.tagName))) {
       flushInline();
       appendElementBlocks(node, blocks);
     } else if (node.nodeType === 1 || node.nodeType === 3) {
@@ -258,6 +274,11 @@ function appendElementBlocks(el, blocks) {
     blocks.push({ kind: 'thematicBreak' });
     return;
   }
+  if (tag === 'IMG') {
+    const block = imageBlockFromElement(el);
+    if (block) blocks.push(block);
+    return;
+  }
   if (tag === 'PRE') {
     const codeEl = el.querySelector('code');
     const langMatch = codeEl?.className.match(/language-(\S+)/);
@@ -282,6 +303,37 @@ function appendElementBlocks(el, blocks) {
       blocks.push({ kind: 'paragraph', runs: [{ text }] });
     }
   }
+}
+
+/** A floating pasted image (`<img data-forage-float>`, written by the note
+ * editor) -> an 'image' IR block, reading the inline px geometry the editor
+ * set. Returns null for any other `<img>` (no float marker, or a non-data
+ * `src`) so ordinary rendered-document images stay ignored. `height` is
+ * usually `auto`, so `hPx` is derived from the width and the image's
+ * natural aspect ratio when it isn't given explicitly. */
+export function imageBlockFromElement(el) {
+  if (!el.hasAttribute || !el.hasAttribute('data-forage-float')) return null;
+  const src = el.getAttribute('src') || '';
+  if (!/^data:image\//.test(src)) return null;
+  const mime = src.slice(5, src.indexOf(';'));
+  const num = (value) => {
+    const n = parseFloat(value);
+    return Number.isFinite(n) ? n : 0;
+  };
+  const wPx = num(el.style && el.style.width) || num(el.getAttribute('width'));
+  let hPx = num(el.style && el.style.height) || num(el.getAttribute('height'));
+  if (!hPx && wPx && el.naturalWidth) {
+    hPx = Math.round((wPx * el.naturalHeight) / el.naturalWidth);
+  }
+  return {
+    kind: 'image',
+    mime,
+    dataUrl: src,
+    xPx: num(el.style && el.style.left),
+    yPx: num(el.style && el.style.top),
+    wPx,
+    hPx,
+  };
 }
 
 function listElementToBlock(el) {
