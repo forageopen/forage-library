@@ -143,10 +143,13 @@ export function imageRunArgsFromPlacement({ mime, xPx, yPx, wPx, hPx }, docxLib)
  * refresh stats / export-menu state (viewer-pane.js fires a synthetic
  * `input` event).
  *
- * Every listener is scoped to `editorBody` / `overlayHost` / (only during
- * an active drag) `document`, so a second pane's controller in split view
- * doesn't double-fire — the `document` drag listeners exist only while one
- * image is actually being dragged.
+ * Move/resize runs on Pointer Events with setPointerCapture, so a gesture's
+ * pointermove/up stream is delivered even over an adjacent iframe pane or
+ * outside the window, and the browser's native image drag-and-drop (which
+ * otherwise eats the very first move inside a contenteditable) is
+ * suppressed. Listeners are scoped to `editorBody` / `overlayHost` / the
+ * captured element, so a second pane's controller in split view never
+ * double-fires.
  */
 export function createFloatImageController(editorBody, overlayHost, { onChange } = {}) {
   let selected = null;
@@ -163,7 +166,7 @@ export function createFloatImageController(editorBody, overlayHost, { onChange }
       handle.dataset.corner = corner;
       overlay.appendChild(handle);
     }
-    overlay.addEventListener('mousedown', onHandleDown);
+    overlay.addEventListener('pointerdown', onHandleDown);
     overlayHost.appendChild(overlay);
   }
 
@@ -191,17 +194,19 @@ export function createFloatImageController(editorBody, overlayHost, { onChange }
   }
 
   function onImgDown(e) {
+    if (e.button > 0) return; // primary button / touch / pen only
     const img = e.target.closest && e.target.closest('img[data-forage-float]');
     if (!img) return;
     e.preventDefault(); // don't drop a caret into the contenteditable
     img.draggable = false; // belt-and-suspenders vs. native image drag
     select(img);
-    startDrag(e, 'move', null);
+    startDrag(e, 'move', null, img);
   }
 
   /* A native drag-and-drop of the image (or of a text selection that
      started on it) would steal the pointer before onMove ever runs — kill
-     it for anything inside the editor. */
+     it for anything inside the editor. Pointer capture (below) already
+     suppresses it, but not every browser honours that on the first frame. */
   function onDragStart(e) {
     if (e.target && e.target.closest && e.target.closest('img[data-forage-float]')) {
       e.preventDefault();
@@ -209,34 +214,57 @@ export function createFloatImageController(editorBody, overlayHost, { onChange }
   }
 
   function onHandleDown(e) {
+    if (e.button > 0) return;
     const handle = e.target.closest('.vault-float-handle');
     if (!handle || !selected) return;
     e.preventDefault();
     e.stopPropagation();
-    startDrag(e, 'resize', handle.dataset.corner);
+    startDrag(e, 'resize', handle.dataset.corner, handle);
   }
 
-  function startDrag(e, mode, corner) {
+  /* Pointer Events + setPointerCapture: every pointermove/up for this
+     gesture is delivered to `captureEl` no matter what's under the cursor
+     (an adjacent iframe pane, the sidebar, off the window), AND capturing
+     the pointer suppresses the browser's own image drag-and-drop. Falls
+     back to document-level listeners if capture isn't available. */
+  function startDrag(e, mode, corner, captureEl) {
     const rect = selected.getBoundingClientRect();
-    // A transparent full-window shield so mousemove keeps landing on this
-    // document even when the pointer crosses an adjacent iframe pane in
-    // split view — the same trick resize.js uses for pane drags.
-    const shield = document.createElement('div');
-    shield.className = 'vault-resize-overlay';
-    document.body.appendChild(shield);
     drag = {
       mode,
       corner,
+      captureEl,
+      pointerId: e.pointerId,
+      captured: false,
       startX: e.clientX,
       startY: e.clientY,
       startLeft: parseFloat(selected.style.left) || 0,
       startTop: parseFloat(selected.style.top) || 0,
       startW: rect.width,
       startH: rect.height,
-      shield,
     };
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
+    try {
+      captureEl.setPointerCapture(e.pointerId);
+      captureEl.addEventListener('pointermove', onMove);
+      captureEl.addEventListener('pointerup', onUp);
+      captureEl.addEventListener('pointercancel', onUp);
+      drag.captured = true;
+    } catch (err) {
+      document.addEventListener('pointermove', onMove);
+      document.addEventListener('pointerup', onUp);
+    }
+  }
+
+  function endTracking() {
+    if (!drag) return;
+    if (drag.captured) {
+      try { drag.captureEl.releasePointerCapture(drag.pointerId); } catch (err) { /* gone */ }
+      drag.captureEl.removeEventListener('pointermove', onMove);
+      drag.captureEl.removeEventListener('pointerup', onUp);
+      drag.captureEl.removeEventListener('pointercancel', onUp);
+    } else {
+      document.removeEventListener('pointermove', onMove);
+      document.removeEventListener('pointerup', onUp);
+    }
   }
 
   function onMove(e) {
@@ -271,15 +299,13 @@ export function createFloatImageController(editorBody, overlayHost, { onChange }
 
   function onUp() {
     if (!drag) return;
-    drag.shield.remove();
-    document.removeEventListener('mousemove', onMove);
-    document.removeEventListener('mouseup', onUp);
+    endTracking();
     drag = null;
     if (onChange) onChange();
   }
 
   function onDocDown(e) {
-    if (!selected) return;
+    if (!selected || drag) return;
     if (e.target.closest && e.target.closest('img[data-forage-float]')) return;
     if (overlay && overlay.contains(e.target)) return;
     deselect();
@@ -294,9 +320,9 @@ export function createFloatImageController(editorBody, overlayHost, { onChange }
     else refresh();
   });
 
-  editorBody.addEventListener('mousedown', onImgDown);
+  editorBody.addEventListener('pointerdown', onImgDown);
   editorBody.addEventListener('dragstart', onDragStart);
-  document.addEventListener('mousedown', onDocDown, true);
+  document.addEventListener('pointerdown', onDocDown, true);
   document.addEventListener('keydown', onKey);
   window.addEventListener('resize', refresh);
   mo.observe(editorBody, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
@@ -307,16 +333,12 @@ export function createFloatImageController(editorBody, overlayHost, { onChange }
     refresh,
     destroy() {
       deselect();
-      if (drag) {
-        drag.shield.remove();
-        document.removeEventListener('mousemove', onMove);
-        document.removeEventListener('mouseup', onUp);
-        drag = null;
-      }
+      endTracking();
+      drag = null;
       if (overlay) { overlay.remove(); overlay = null; }
-      editorBody.removeEventListener('mousedown', onImgDown);
+      editorBody.removeEventListener('pointerdown', onImgDown);
       editorBody.removeEventListener('dragstart', onDragStart);
-      document.removeEventListener('mousedown', onDocDown, true);
+      document.removeEventListener('pointerdown', onDocDown, true);
       document.removeEventListener('keydown', onKey);
       window.removeEventListener('resize', refresh);
       mo.disconnect();

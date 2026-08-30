@@ -929,6 +929,7 @@ button.vault-tree-folder-label:focus-visible {
   cursor: move;
   user-select: none;
   -webkit-user-drag: none;
+  touch-action: none; /* a touch drag moves the image, never scrolls */
 }
 
 /* Selection outline + aspect-locked corner handles. Rendered into
@@ -943,13 +944,14 @@ button.vault-tree-folder-label:focus-visible {
 }
 .vault-float-handle {
   position: absolute;
-  width: 12px;
-  height: 12px;
-  margin: -6px;
+  width: 14px;
+  height: 14px;
+  margin: -7px;
   background: var(--page-bg);
   border: 1px solid var(--teal);
   border-radius: 2px;
   pointer-events: auto;
+  touch-action: none;
 }
 .vault-float-handle[data-corner="nw"] { left: 0; top: 0; cursor: nwse-resize; }
 .vault-float-handle[data-corner="ne"] { right: 0; top: 0; cursor: nesw-resize; }
