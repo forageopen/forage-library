@@ -11,7 +11,12 @@
   <script src="https://cdn.jsdelivr.net/npm/mammoth@1.12.1/mammoth.browser.min.js" integrity="sha384-HDD+X9TzmVU2HzA3VYqphTtip2QgcmmSAuKTMkFv709AUMZ6LPn0ysDRZeQIL31w" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js" integrity="sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3.4.13/dist/purify.min.js" integrity="sha384-ZuC+DIACqSIZTsp+7YF57cR5Y+6qXa7YFbEKdA/EHA/R0T+41dtorqucYl71Zp+t" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/docx@9.7.1/dist/index.umd.cjs" integrity="sha384-/NJTaOABVz2ALzgs0bTeadgMc5g3wrv9R9mr32g4W57hdKzHYt7MWDySJ1zhhPoi" crossorigin="anonymous"></script>
+  <!-- docx: the .iife.js build, not dist/index.umd.cjs — jsdelivr serves the
+       .cjs file as Content-Type: application/node, which strict MIME checking
+       refuses to execute as a <script>, leaving window.docx undefined and
+       silently breaking .docx export. index.iife.js is the same UMD bundle
+       served as application/javascript. -->
+  <script src="https://cdn.jsdelivr.net/npm/docx@9.7.1/dist/index.iife.js" integrity="sha384-9OH56uLhIvkZkwF0jWNlfpcK3gPuSy5DfEMNqKe156wCpkND+MDdtaRyd05kwpG0" crossorigin="anonymous"></script>
   <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" integrity="sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" integrity="sha384-ZZ1pncU3bQe8y31yfZdMFdSpttDoPmOZg2wguVK9almUodir1PghgT0eY7Mrty8H" crossorigin="anonymous"></script>
   <!-- pdf.js (pdfjs-dist@6.2.108) is loaded lazily via dynamic import in

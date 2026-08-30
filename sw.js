@@ -105,7 +105,7 @@ const PRECACHE_ENTRIES = [
   "https://cdn.jsdelivr.net/npm/mammoth@1.12.1/mammoth.browser.min.js",
   "https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js",
   "https://cdn.jsdelivr.net/npm/dompurify@3.4.13/dist/purify.min.js",
-  "https://cdn.jsdelivr.net/npm/docx@9.7.1/dist/index.umd.cjs",
+  "https://cdn.jsdelivr.net/npm/docx@9.7.1/dist/index.iife.js",
   "https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js",
   "https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js",
   "https://cdn.jsdelivr.net/npm/pdfjs-dist@6.2.108/build/pdf.min.mjs",
