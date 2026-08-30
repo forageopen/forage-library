@@ -44,16 +44,19 @@ jobs:
       - name: Generate vault manifest
         run: npm run generate-manifest
 
-      - name: Commit generated manifest
+      - name: Generate service worker precache list
+        run: npm run generate-precache
+
+      - name: Commit generated files
         run: |
           git config user.name "forage-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add vault/manifest.json
+          git add vault/manifest.json sw.js
           if ! git diff --cached --quiet; then
-            git commit -m "chore: regenerate vault manifest [skip ci]"
+            git commit -m "chore: regenerate vault manifest + sw precache list [skip ci]"
             git push
           else
-            echo "No manifest changes to commit."
+            echo "No generated-file changes to commit."
           fi
 
       - name: Prepare site directory

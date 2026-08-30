@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "generate-manifest": "node scripts/generate-manifest.mjs",
+    "generate-precache": "node scripts/generate-precache.mjs",
     "test": "node --test"
   },
   "license": "CC-BY-NC-SA-4.0",
