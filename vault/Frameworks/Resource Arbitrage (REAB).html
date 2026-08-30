@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resource Arbitrage (REAB)</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,Segoe UI,Arial,sans-serif;}
+body{background:#e5e7eb;padding:40px;color:#111827;}
+.page{width:210mm;min-height:297mm;margin:auto;background:white;padding:18mm;box-shadow:0 10px 30px rgba(0,0,0,.12);}
+h1{font-size:25px;margin-bottom:5px;}
+.subtitle{font-size:12.5px;color:#6b7280;margin-bottom:24px;}
+p{font-size:12px;line-height:1.6;color:#374151;margin-bottom:14px;}
+strong{font-weight:700;color:#111827;}
+blockquote{border-left:2px solid #d1d5db;padding-left:12px;margin:10px 0 14px 2px;font-size:11.5px;color:#4b5563;font-style:italic;line-height:1.5;}
+.steps{display:flex;flex-wrap:wrap;align-items:center;gap:3px 7px;font-size:9.5px;color:#6b7280;background:#f3f4f6;border-radius:6px;padding:8px 12px;margin:14px 0 16px;line-height:1.4;letter-spacing:.01em;}
+.steps .arrow{color:#9ca3af;}
+.diagram-card{border:1px solid #d1d5db;border-radius:8px;padding:14px 16px 12px;margin:16px 0 18px;}
+.diagram-card svg{width:76%;height:auto;display:block;margin:0 auto;}
+.node-label{font-size:11.5px;font-weight:600;fill:#111827;}
+.node-sub{font-size:9.5px;fill:#6b7280;}
+@media print{body{background:white;padding:0;}.page{margin:0;box-shadow:none;}}
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <h1>Resource Arbitrage (REAB)</h1>
+  <div class="subtitle">Use what already exists instead of spending time building the same thing again.</div>
+
+  <p>Having ready-to-use templates, tools, references, and visual assets can make the work much faster. <strong>Resource arbitrage means using what already exists instead of spending time making the same thing again.</strong></p>
+
+  <p>For example, if we already have a template, we do not need to design the same structure from zero. If there is an existing library, dataset, component, or open-source tool that can do the job, we use it first.</p>
+
+  <p>The idea is simple:</p>
+
+  <div class="steps"><span>WHAT DO WE NEED?</span><span class="arrow">→</span><span>DOES IT ALREADY EXIST?</span><span class="arrow">→</span><span>YES: USE / ADAPT / COMBINE</span><span class="arrow">·</span><span>NO: BUILD</span></div>
+
+  <div class="diagram-card">
+    <svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg">
+      <path id="pathUpLine" d="M96,150 L260,150 L486,72 L640,150" fill="none" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="3 4" stroke-linecap="round" stroke-linejoin="round"/>
+      <path id="pathDownLine" d="M96,150 L260,150 L486,228 L640,150" fill="none" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="3 4" stroke-linecap="round" stroke-linejoin="round"/>
+
+      <circle cx="70" cy="150" r="22" fill="#fff" stroke="#2596be" stroke-width="2"/>
+      <text x="70" y="154" text-anchor="middle" class="node-label" font-size="10">NEED</text>
+      <text x="70" y="192" text-anchor="middle" class="node-label">What do we</text>
+      <text x="70" y="205" text-anchor="middle" class="node-label">need?</text>
+
+      <rect x="238" y="128" width="44" height="44" fill="#fff" stroke="#2596be" stroke-width="2" transform="rotate(45 260 150)"/>
+      <text x="260" y="157" text-anchor="middle" class="node-label" font-size="13">?</text>
+      <text x="260" y="192" text-anchor="middle" class="node-label">Does it already</text>
+      <text x="260" y="205" text-anchor="middle" class="node-label">exist?</text>
+
+      <circle cx="486" cy="72" r="20" fill="#fff" stroke="#2596be" stroke-width="2"/>
+      <text x="486" y="76" text-anchor="middle" class="node-label" font-size="9.5">YES</text>
+      <text x="486" y="34" text-anchor="middle" class="node-label">Use / Adapt /</text>
+      <text x="486" y="47" text-anchor="middle" class="node-label">Combine</text>
+
+      <circle cx="486" cy="228" r="20" fill="#fff" stroke="#2596be" stroke-width="2"/>
+      <text x="486" y="232" text-anchor="middle" class="node-label" font-size="9.5">NO</text>
+      <text x="486" y="266" text-anchor="middle" class="node-label">Build it -</text>
+      <text x="486" y="279" text-anchor="middle" class="node-label">only now</text>
+
+      <circle cx="650" cy="150" r="24" fill="#167D6B" stroke="#167D6B" stroke-width="2"/>
+      <text x="650" y="147" text-anchor="middle" fill="#fff" font-weight="700" font-size="9">SAVE</text>
+      <text x="650" y="158" text-anchor="middle" fill="#fff" font-weight="700" font-size="9">TIME</text>
+      <text x="650" y="192" text-anchor="middle" class="node-label">Focus on what's</text>
+      <text x="650" y="205" text-anchor="middle" class="node-label">actually real</text>
+
+      <circle id="dotUp" r="6.5" fill="#2596be" stroke="#fff" stroke-width="2" opacity="0" style="filter:drop-shadow(0 0 5px rgba(37,150,190,.6))"/>
+      <circle id="dotDown" r="6.5" fill="#2596be" stroke="#fff" stroke-width="2" opacity="0" style="filter:drop-shadow(0 0 5px rgba(37,150,190,.6))"/>
+    </svg>
+  </div>
+
+  <p>This is especially useful for small repetitive tasks. A button style, document structure, presentation layout, code component, research dataset, or visual asset may only take a few minutes to make, but doing it hundreds of times becomes a waste.</p>
+
+  <p>Resource arbitrage reduces this waste by keeping useful things ready and applying them consistently.</p>
+
+  <div class="steps"><span>MAKE ONCE</span><span class="arrow">→</span><span>USE MANY TIMES</span><span class="arrow">→</span><span>SAVE TIME</span><span class="arrow">→</span><span>FOCUS ON THE REAL PROBLEM</span></div>
+
+  <p>The purpose is not to avoid making new things.</p>
+
+  <p><strong>It is to save our effort for the things that actually need to be new.</strong></p>
+
+</div>
+
+<script>
+function animateAlongPath(pathId, dotId, opts){
+  var o = Object.assign({duration:2600,pause:900,delay:0}, opts||{});
+  var path = document.getElementById(pathId);
+  var dot = document.getElementById(dotId);
+  var len = path.getTotalLength();
+  var cycle = o.duration + o.pause;
+  var start = null;
+  function frame(ts){
+    if(start===null) start = ts;
+    var elapsed = (ts - start) % cycle;
+    if(elapsed <= o.duration){
+      var t = elapsed / o.duration;
+      var pt = path.getPointAtLength(t*len);
+      dot.setAttribute('cx', pt.x);
+      dot.setAttribute('cy', pt.y);
+      dot.setAttribute('opacity', 1);
+    } else {
+      dot.setAttribute('opacity', 0);
+    }
+    requestAnimationFrame(frame);
+  }
+  setTimeout(function(){ requestAnimationFrame(frame); }, o.delay);
+}
+animateAlongPath('pathUpLine','dotUp',{duration:10000,pause:3850,delay:0});
+animateAlongPath('pathDownLine','dotDown',{duration:10000,pause:3850,delay:6920});
+</script>
+
+</body>
+</html>

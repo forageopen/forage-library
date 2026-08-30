@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bayesian Updating (BAE)</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,Segoe UI,Arial,sans-serif;}
+body{background:#e5e7eb;padding:40px;color:#111827;}
+.page{width:210mm;min-height:297mm;margin:auto;background:white;padding:14mm;box-shadow:0 10px 30px rgba(0,0,0,.12);}
+h1{font-size:22px;margin-bottom:4px;}
+.subtitle{font-size:11.5px;color:#6b7280;margin-bottom:14px;}
+p{font-size:10.5px;line-height:1.46;color:#374151;margin-bottom:8px;}
+strong{font-weight:700;color:#111827;}
+blockquote{border-left:2px solid #d1d5db;padding-left:11px;margin:8px 0 10px 2px;font-size:10.3px;color:#4b5563;font-style:italic;line-height:1.42;}
+.steps{display:flex;flex-wrap:wrap;align-items:center;gap:2px 6px;font-size:8.5px;color:#6b7280;background:#f3f4f6;border-radius:6px;padding:6px 11px;margin:9px 0 10px;line-height:1.32;letter-spacing:.01em;}
+.steps .arrow{color:#9ca3af;}
+.compare{display:flex;flex-direction:column;gap:3px;font-size:8.5px;color:#6b7280;background:#f3f4f6;border-radius:6px;padding:6px 11px;margin:9px 0 10px;line-height:1.32;}
+.compare b{color:#2596be;font-weight:700;}
+.diagram-row{display:flex;gap:10px;margin:10px 0 12px;}
+.diagram-card{border:1px solid #d1d5db;border-radius:8px;padding:8px 11px 6px;flex:1;}
+.diagram-card svg{width:100%;height:auto;display:block;margin:0 auto;}
+.diagram-card .cap{text-align:center;font-size:8.3px;color:#9ca3af;margin-top:1px;}
+.node-label{font-size:10px;font-weight:600;fill:#111827;}
+.node-sub{font-size:8.3px;fill:#6b7280;}
+@media print{body{background:white;padding:0;}.page{margin:0;box-shadow:none;}}
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <h1>Bayesian Updating (BAE)</h1>
+  <div class="subtitle">Don't defend your first guess. Update it when new facts come in.</div>
+
+  <p><strong>Bayesian updating is a way of changing our belief when new evidence comes in.</strong></p>
+
+  <p>We start with a guess. We do not assume it is true. As we collect evidence, we update how strongly we believe the guess. Strong evidence increases confidence. Weak or contradictory evidence decreases it.</p>
+
+  <div class="diagram-row">
+    <div class="diagram-card">
+      <svg viewBox="-70 -10 480 250" xmlns="http://www.w3.org/2000/svg">
+        <path id="loopMain" d="M170,40 L280,105 L280,170 L170,215 L60,170 L60,105 Z" fill="none" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="3 4" stroke-linejoin="round"/>
+        <circle cx="170" cy="40" r="17" fill="#167D6B"/>
+        <text x="170" y="15" text-anchor="middle" class="node-label">Guess</text>
+        <circle cx="280" cy="105" r="15" fill="#fff" stroke="#2596be" stroke-width="2"/>
+        <text x="315" y="100" text-anchor="start" class="node-label">Current</text>
+        <text x="315" y="112" text-anchor="start" class="node-label">belief</text>
+        <circle cx="280" cy="170" r="15" fill="#fff" stroke="#2596be" stroke-width="2"/>
+        <text x="315" y="175" text-anchor="start" class="node-label">New</text>
+        <text x="315" y="187" text-anchor="start" class="node-label">evidence</text>
+        <circle cx="170" cy="215" r="15" fill="#fff" stroke="#2596be" stroke-width="2"/>
+        <text x="170" y="235" text-anchor="middle" class="node-label">Update belief</text>
+        <circle cx="60" cy="170" r="15" fill="#fff" stroke="#2596be" stroke-width="2"/>
+        <text x="10" y="175" text-anchor="end" class="node-label">New</text>
+        <text x="10" y="187" text-anchor="end" class="node-label">belief</text>
+        <circle cx="60" cy="105" r="15" fill="#fff" stroke="#2596be" stroke-width="2"/>
+        <text x="10" y="100" text-anchor="end" class="node-label">More</text>
+        <text x="10" y="112" text-anchor="end" class="node-label">evidence</text>
+        <circle id="dotLoopMain" r="5.5" fill="#2596be" stroke="#fff" stroke-width="2" opacity="0" style="filter:drop-shadow(0 0 5px rgba(37,150,190,.6))"/>
+      </svg>
+      <div class="cap">the belief cycle</div>
+    </div>
+    <div class="diagram-card">
+      <svg viewBox="-15 -5 410 240" xmlns="http://www.w3.org/2000/svg">
+        <path id="supportLine" d="M40,150 L150,150 L280,70 L360,150" fill="none" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="3 4"/>
+        <path id="contraLine" d="M40,150 L150,150 L280,220 L360,150" fill="none" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="3 4"/>
+        <circle cx="40" cy="150" r="17" fill="#fff" stroke="#2596be" stroke-width="2"/>
+        <text x="40" y="190" text-anchor="middle" class="node-label">Assumption</text>
+        <circle cx="150" cy="150" r="15" fill="#fff" stroke="#2596be" stroke-width="2"/>
+        <text x="150" y="190" text-anchor="middle" class="node-label">Evidence</text>
+        <circle cx="280" cy="70" r="14" fill="#fff" stroke="#2596be" stroke-width="2"/>
+        <text x="280" y="40" text-anchor="middle" class="node-label">Supports</text>
+        <text x="280" y="52" text-anchor="middle" class="node-sub">confidence up</text>
+        <circle cx="280" cy="220" r="14" fill="#fff" stroke="#2596be" stroke-width="2"/>
+        <text x="280" y="205" text-anchor="middle" class="node-label" transform="translate(0,0)"></text>
+        <text x="280" y="248" text-anchor="middle" class="node-label">Contradicts</text>
+        <text x="280" y="260" text-anchor="middle" class="node-sub">confidence down</text>
+        <circle cx="360" cy="150" r="18" fill="#167D6B" stroke="#167D6B" stroke-width="2"/>
+        <text x="360" y="147" text-anchor="middle" fill="#fff" font-weight="700" font-size="7.5">UPDATE</text>
+        <text x="360" y="190" text-anchor="middle" class="node-label">Update</text>
+        <circle id="dotSup" r="5.5" fill="#2596be" stroke="#fff" stroke-width="2" opacity="0" style="filter:drop-shadow(0 0 5px rgba(37,150,190,.6))"/>
+        <circle id="dotCon" r="5.5" fill="#2596be" stroke="#fff" stroke-width="2" opacity="0" style="filter:drop-shadow(0 0 5px rgba(37,150,190,.6))"/>
+      </svg>
+      <div class="cap">support / contradict</div>
+    </div>
+  </div>
+
+  <p>Think of it like adjusting a prediction.</p>
+
+  <p>If we think there is a 50% chance that something is true, and new evidence strongly supports it, maybe our confidence should become higher. If the new evidence contradicts it, our confidence should go down.</p>
+
+  <p>The important part is this:</p>
+
+  <blockquote><strong>Evidence changes the belief. The belief does not change the evidence.</strong></blockquote>
+
+  <div class="steps"><span>BELIEF</span><span class="arrow">→</span><span>EVIDENCE</span><span class="arrow">→</span><span>UPDATE</span><span class="arrow">→</span><span>BELIEF</span></div>
+
+  <p>This makes Bayesian updating useful when we are working with uncertain information.</p>
+
+  <p>For example, suppose we think a new feature will solve a user's problem. We start with a guess. After people use it, we collect what actually happened. The result tells us whether our original belief should become stronger, weaker, or remain uncertain.</p>
+
+  <div class="steps"><span>GUESS</span><span class="arrow">→</span><span>TEST</span><span class="arrow">→</span><span>EVIDENCE</span><span class="arrow">→</span><span>SUPPORTS IT? / CONTRADICTS? / NOT ENOUGH?</span><span class="arrow">→</span><span>UPDATE</span></div>
+
+  <p>This does not mean every piece of evidence should completely change our mind.</p>
+
+  <p>One small observation may only move our confidence a little. Several strong and independent pieces of evidence may move it much more.</p>
+
+  <p>So Bayesian thinking is not:</p>
+
+  <blockquote>"One mistake means everything is wrong."</blockquote>
+
+  <p>It is:</p>
+
+  <blockquote><strong>"Given what we know now, what should we believe now?"</strong></blockquote>
+
+  <p>This also stops us from only looking for proof that we are right.</p>
+
+  <p>If we only collect evidence that agrees with us, our belief can become stronger without actually becoming more accurate. Bayesian updating asks us to consider evidence that could also prove our guess wrong.</p>
+
+  <p>There is also an important state called <strong>unknown</strong>.</p>
+
+  <p>Sometimes the evidence is simply not enough to make a reasonable update. We should not invent certainty just because the system needs a number.</p>
+
+  <div class="compare"><span><b>NO EVIDENCE</b> → unknown</span><span><b>WEAK EVIDENCE</b> → small update</span><span><b>STRONG EVIDENCE</b> → large update</span></div>
+
+  <p>In Forage, Bayesian updating gives us a disciplined way to handle uncertainty. We record what we currently believe, collect evidence, and update the belief when the evidence changes. <strong>The goal is not to be certain. The goal is to become less wrong over time.</strong></p>
+
+  <div class="steps"><span>BELIEVE</span><span class="arrow">→</span><span>TEST</span><span class="arrow">→</span><span>OBSERVE</span><span class="arrow">→</span><span>UPDATE</span><span class="arrow">→</span><span>BELIEVE BETTER</span></div>
+
+  <p><strong>Bayesian updating: don't defend your first guess. Update it when new facts come in.</strong></p>
+
+</div>
+
+<script>
+function animateAlongPath(pathId, dotId, opts){
+  var o = Object.assign({duration:2600,pause:900,delay:0}, opts||{});
+  var path = document.getElementById(pathId);
+  var dot = document.getElementById(dotId);
+  var len = path.getTotalLength();
+  var cycle = o.duration + o.pause;
+  var start = null;
+  function frame(ts){
+    if(start===null) start = ts;
+    var elapsed = (ts - start) % cycle;
+    if(elapsed <= o.duration){
+      var t = elapsed / o.duration;
+      var pt = path.getPointAtLength(t*len);
+      dot.setAttribute('cx', pt.x);
+      dot.setAttribute('cy', pt.y);
+      dot.setAttribute('opacity', 1);
+    } else {
+      dot.setAttribute('opacity', 0);
+    }
+    requestAnimationFrame(frame);
+  }
+  setTimeout(function(){ requestAnimationFrame(frame); }, o.delay);
+}
+animateAlongPath('loopMain','dotLoopMain',{duration:15380,pause:1540,delay:0});
+animateAlongPath('supportLine','dotSup',{duration:10000,pause:3850,delay:0});
+animateAlongPath('contraLine','dotCon',{duration:10000,pause:3850,delay:6920});
+</script>
+
+</body>
+</html>

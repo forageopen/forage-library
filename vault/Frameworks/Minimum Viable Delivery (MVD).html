@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minimum Viable Delivery (MVD)</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,Segoe UI,Arial,sans-serif;}
+body{background:#e5e7eb;padding:40px;color:#111827;}
+.page{width:210mm;min-height:297mm;margin:auto;background:white;padding:16mm;box-shadow:0 10px 30px rgba(0,0,0,.12);}
+h1{font-size:22px;margin-bottom:4px;}
+.subtitle{font-size:11.5px;color:#6b7280;margin-bottom:18px;}
+p{font-size:10.8px;line-height:1.5;color:#374151;margin-bottom:10px;}
+strong{font-weight:700;color:#111827;}
+blockquote{border-left:2px solid #d1d5db;padding-left:11px;margin:9px 0 11px 2px;font-size:10.5px;color:#4b5563;font-style:italic;line-height:1.45;}
+.steps{display:flex;flex-wrap:wrap;align-items:center;gap:2px 6px;font-size:8.7px;color:#6b7280;background:#f3f4f6;border-radius:6px;padding:7px 11px;margin:10px 0 12px;line-height:1.35;letter-spacing:.01em;}
+.steps .arrow{color:#9ca3af;}
+.compare{display:flex;flex-direction:column;gap:3px;font-size:8.7px;color:#6b7280;background:#f3f4f6;border-radius:6px;padding:7px 11px;margin:10px 0 12px;line-height:1.35;}
+.compare b{color:#2596be;font-weight:700;}
+.diagram-card{border:1px solid #d1d5db;border-radius:8px;padding:10px 14px 8px;margin:10px 0 13px;}
+.diagram-card svg{width:64%;height:auto;display:block;margin:0 auto;}
+.diagram-card.small svg{width:52%;}
+.node-label{font-size:11px;font-weight:600;fill:#111827;}
+.node-sub{font-size:9px;fill:#6b7280;}
+.test-line{font-size:10px;fill:#2596be;}
+@media print{body{background:white;padding:0;}.page{margin:0;box-shadow:none;}}
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <h1>Minimum Viable Delivery (MVD)</h1>
+  <div class="subtitle">The smallest complete delivery that lets you see the result.</div>
+
+  <p><strong>Minimum Viable Delivery means building the smallest complete thing that can produce the result we want.</strong></p>
+
+  <p>The important word is <strong>delivery</strong>. We are not trying to make the smallest possible product. We are trying to make the smallest thing that is useful enough for someone to actually use and get the result.</p>
+
+  <div class="diagram-card">
+    <svg viewBox="0 0 720 250" xmlns="http://www.w3.org/2000/svg">
+      <path id="mvdLine" d="M90,120 L642,120" fill="none" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="3 4"/>
+
+      <circle cx="90" cy="120" r="30" fill="#fff" stroke="#9ca3af" stroke-width="2"/>
+      <text x="90" y="188" text-anchor="middle" class="node-label">Big idea</text>
+
+      <circle cx="290" cy="120" r="25" fill="#fff" stroke="#2596be" stroke-width="2"/>
+      <text x="290" y="188" text-anchor="middle" class="node-label">What must the</text>
+      <text x="290" y="201" text-anchor="middle" class="node-label">user get?</text>
+
+      <circle cx="470" cy="120" r="19" fill="#fff" stroke="#2596be" stroke-width="2"/>
+      <text x="470" y="188" text-anchor="middle" class="node-label">Remove the</text>
+      <text x="470" y="201" text-anchor="middle" class="node-label">rest</text>
+
+      <circle cx="642" cy="120" r="16" fill="#167D6B" stroke="#167D6B" stroke-width="2"/>
+      <text x="642" y="188" text-anchor="middle" class="node-label">Smallest complete</text>
+      <text x="642" y="201" text-anchor="middle" class="node-label">delivery</text>
+
+      <circle id="dotMvd" r="6" fill="#2596be" stroke="#fff" stroke-width="2" opacity="0" style="filter:drop-shadow(0 0 5px rgba(37,150,190,.6))"/>
+    </svg>
+  </div>
+
+  <p>A simple way to test an MVD is to finish this sentence:</p>
+
+  <blockquote><strong>"After using this, the user can now see ______."</strong></blockquote>
+
+  <p>The answer should be something real. Maybe they can see a hidden relationship, find duplicated work, understand a bottleneck, discover a missing document, or make a better decision. If we cannot explain what the user can now see, understand, or do, the feature probably does not belong in the MVD.</p>
+
+  <div class="steps"><span>FEATURE</span><span class="arrow">→</span><span>WHAT DOES IT GIVE THE USER?</span><span class="arrow">→</span><span>A CLEAR RESULT?</span><span class="arrow">→</span><span>YES: KEEP</span><span class="arrow">·</span><span>NO: DEFER / REMOVE</span></div>
+
+  <p>This is where MVD is different from simply making a small prototype.</p>
+
+  <p>A prototype can be small because it is unfinished. <strong>An MVD is small because we deliberately removed everything that is not necessary for the outcome.</strong></p>
+
+  <div class="compare"><span><b>PROTOTYPE</b> = small because it is not finished</span><span><b>MVD</b> = small because only the necessary parts remain</span></div>
+
+  <p>An MVD should also feel complete enough to use. The essential functions should work, the design should feel consistent, and the system should not make the user wait unnecessarily.</p>
+
+  <div class="steps"><span>ESSENTIAL</span><span class="arrow">+</span><span>COHESIVE</span><span class="arrow">+</span><span>SIMPLE</span><span class="arrow">+</span><span>FAST</span><span class="arrow">=</span><span>VIABLE DELIVERY</span></div>
+
+  <p>For knowledge systems, this becomes even more important.</p>
+
+  <p>The goal is not to store more information or create better folders. <strong>The goal is to help people see something inside the information that was difficult to see before.</strong></p>
+
+  <div class="steps"><span>LOTS OF INFORMATION</span><span class="arrow">→</span><span>STRUCTURE</span><span class="arrow">→</span><span>VISIBLE RELATIONSHIPS</span><span class="arrow">→</span><span>UNDERSTANDING</span><span class="arrow">→</span><span>BETTER DECISION</span></div>
+
+  <p>So do not build a feature just because it is technically possible, looks nice, or is expected in a conventional product.</p>
+
+  <p>Build it because it helps produce the intended result.</p>
+
+  <p><strong>MVD is not about doing less work. It is about making sure the work we do actually delivers something.</strong></p>
+
+  <div class="diagram-card small">
+    <svg viewBox="0 0 700 130" xmlns="http://www.w3.org/2000/svg">
+      <path id="mvdLine2" d="M70,60 L630,60" fill="none" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="3 4"/>
+      <circle cx="70" cy="60" r="15" fill="#fff" stroke="#2596be" stroke-width="2"/>
+      <text x="70" y="102" text-anchor="middle" class="node-label" font-size="9.5">Build less</text>
+      <circle cx="290" cy="60" r="15" fill="#fff" stroke="#2596be" stroke-width="2"/>
+      <text x="290" y="102" text-anchor="middle" class="node-label" font-size="9.5">Deliver something</text>
+      <text x="290" y="114" text-anchor="middle" class="node-label" font-size="9.5">complete</text>
+      <circle cx="470" cy="60" r="15" fill="#fff" stroke="#2596be" stroke-width="2"/>
+      <text x="470" y="102" text-anchor="middle" class="node-label" font-size="9.5">Make outcome</text>
+      <text x="470" y="114" text-anchor="middle" class="node-label" font-size="9.5">visible</text>
+      <circle cx="630" cy="60" r="17" fill="#167D6B" stroke="#167D6B" stroke-width="2"/>
+      <text x="630" y="102" text-anchor="middle" class="node-label" font-size="9.5">Learn from</text>
+      <text x="630" y="114" text-anchor="middle" class="node-label" font-size="9.5">real use</text>
+      <circle id="dotMvd2" r="5" fill="#2596be" stroke="#fff" stroke-width="2" opacity="0" style="filter:drop-shadow(0 0 5px rgba(37,150,190,.6))"/>
+    </svg>
+  </div>
+
+  <p><strong>Minimum Viable Delivery: the smallest complete delivery that lets you see the result.</strong></p>
+
+</div>
+
+<script>
+function animateAlongPath(pathId, dotId, opts){
+  var o = Object.assign({duration:2800,pause:1000,delay:0}, opts||{});
+  var path = document.getElementById(pathId);
+  var dot = document.getElementById(dotId);
+  var len = path.getTotalLength();
+  var cycle = o.duration + o.pause;
+  var start = null;
+  function frame(ts){
+    if(start===null) start = ts;
+    var elapsed = (ts - start) % cycle;
+    if(elapsed <= o.duration){
+      var t = elapsed / o.duration;
+      var pt = path.getPointAtLength(t*len);
+      dot.setAttribute('cx', pt.x);
+      dot.setAttribute('cy', pt.y);
+      dot.setAttribute('opacity', 1);
+    } else {
+      dot.setAttribute('opacity', 0);
+    }
+    requestAnimationFrame(frame);
+  }
+  setTimeout(function(){ requestAnimationFrame(frame); }, o.delay);
+}
+animateAlongPath('mvdLine','dotMvd',{duration:10000,pause:3850,delay:0});
+animateAlongPath('mvdLine2','dotMvd2',{duration:8460,pause:3850,delay:3080});
+</script>
+
+</body>
+</html>

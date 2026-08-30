@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agile Backward Model (ABIM)</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,Segoe UI,Arial,sans-serif;}
+body{background:#e5e7eb;padding:40px;color:#111827;}
+.page{width:210mm;min-height:297mm;margin:auto;background:white;padding:9mm;box-shadow:0 10px 30px rgba(0,0,0,.12);}
+h1{font-size:18px;margin-bottom:3px;}
+.subtitle{font-size:9.5px;color:#6b7280;margin-bottom:8px;}
+p{font-size:8.6px;line-height:1.28;color:#374151;margin-bottom:3.7px;}
+strong{font-weight:700;color:#111827;}
+blockquote{border-left:2px solid #d1d5db;padding-left:8px;margin:3px 0 3.8px 2px;font-size:8.4px;color:#4b5563;font-style:italic;line-height:1.24;}
+.steps{display:flex;flex-wrap:wrap;align-items:center;gap:1.5px 5px;font-size:7.2px;color:#6b7280;background:#f3f4f6;border-radius:5px;padding:3.5px 8px;margin:3.8px 0 4.2px;line-height:1.2;letter-spacing:.005em;}
+.steps .arrow{color:#9ca3af;}
+.diagram-card{border:1px solid #d1d5db;border-radius:8px;padding:5px 9px 3px;margin:4px 0 4.5px;}
+.diagram-card svg{width:44%;height:auto;display:block;margin:0 auto;}
+.diagram-row{display:flex;gap:10px;margin:4px 0 4.5px;}
+.diagram-row .diagram-card{flex:1;margin:0;}
+.diagram-row .diagram-card svg{width:100%;}
+.diagram-card .cap{text-align:center;font-size:7.3px;color:#9ca3af;margin-top:0;}
+.node-label{font-size:9.5px;font-weight:600;fill:#111827;}
+.node-sub{font-size:8px;fill:#6b7280;}
+.node-num{font-size:9px;font-weight:600;fill:#fff;}
+@media print{body{background:white;padding:0;}.page{margin:0;box-shadow:none;}}
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <h1>Agile Backward Model (ABIM)</h1>
+  <div class="subtitle">Think backward. Build quickly. Check results. Realign. Repeat.</div>
+
+  <p>ABIM is a way of working where we <strong>think about the result first, make something quickly, then check it against what actually happens before going further</strong>.</p>
+
+  <p>We do not spend too much time trying to predict everything before making anything. We make a small version, look at what already works, and adjust our direction based on what we learn.</p>
+
+  <div class="steps"><span>WHAT DO WE WANT?</span><span class="arrow">→</span><span>MAKE A QUICK VERSION</span><span class="arrow">→</span><span>LOOK AT RESULTS</span><span class="arrow">→</span><span>REALIGN</span><span class="arrow">→</span><span>MAKE IT FIT</span><span class="arrow">→</span><span>DELIVER</span><span class="arrow">→</span><span>LEARN</span><span class="arrow">↺</span></div>
+
+  <p>The first step is to think backward from the result.</p>
+
+  <p>Instead of asking:</p>
+  <blockquote>"What should we build?"</blockquote>
+  <p>We ask:</p>
+  <blockquote><strong>"What should happen after we build it?"</strong></blockquote>
+  <p>From there, we work backward to understand what needs to be true for that result to happen.</p>
+
+  <div class="steps"><span>OUTCOME</span><span class="arrow">↑</span><span>WHAT MUST HAPPEN?</span><span class="arrow">↑</span><span>WHAT DO WE NEED?</span><span class="arrow">↑</span><span>WHAT SHOULD WE BUILD?</span></div>
+
+  <p>Once we have a reasonable direction, <strong>make something real quickly</strong>.</p>
+
+  <p>The prototype is not the final answer. It is something we make quickly so that we have something real to judge. This is often called a <strong>Proof of Concept, or PoC</strong>. The idea is simple: make enough of it to find out whether it works before spending too much on it.</p>
+
+  <div class="steps"><span>IDEA</span><span class="arrow">→</span><span>MAKE SOMETHING REAL</span><span class="arrow">→</span><span>CAN IT WORK?</span><span class="arrow">→</span><span>WHAT DID WE LEARN?</span></div>
+
+  <p>A PoC does not need to be beautiful. It does not need every feature. Its job is to answer an important question early.</p>
+
+  <p>Sometimes the question is technical:</p>
+  <blockquote>"Can this actually work?"</blockquote>
+  <p>Sometimes it is about the user:</p>
+  <blockquote>"Does this solve the problem?"</blockquote>
+  <p>Sometimes it is about the idea itself:</p>
+  <blockquote>"Is this even useful?"</blockquote>
+
+  <p>After we have something real, <strong>look outside our own assumptions</strong>.</p>
+
+  <p>Compare it with existing products, established patterns, available tools, research, user behaviour, or anything else that gives us a better picture of what's really going on. We should not become attached to our first version simply because we made it.</p>
+
+  <div class="steps"><span>OUR IDEA</span><span class="arrow">→</span><span>MAKE IT REAL</span><span class="arrow">→</span><span>COMPARE WITH RESULTS</span><span class="arrow">→</span><span>SEE THE GAP</span><span class="arrow">→</span><span>REALIGN</span></div>
+
+  <p>This is where resource arbitrage also becomes useful. If someone has already solved part of the problem, use it. A template, library, dataset, design pattern, tool, or previous project may save us from doing the same work again.</p>
+
+  <div class="steps"><span>REUSE</span><span class="arrow">→</span><span>ADAPT</span><span class="arrow">→</span><span>COMBINE</span><span class="arrow">→</span><span>BUILD</span></div>
+
+  <p>After the direction is clearer, make the work fit together.</p>
+
+  <p>A new feature should not look like it came from another product. New code should not fight the existing structure. New content should not break the way the rest of the system works. <strong>The new part must become part of the whole.</strong></p>
+
+  <div class="steps"><span>NEW PART</span><span class="arrow">→</span><span>FIT WITH EXISTING SYSTEM</span><span class="arrow">→</span><span>EVERYTHING FITS</span><span class="arrow">→</span><span>DELIVERY</span></div>
+
+  <p>Then we deliver and see what actually happens.</p>
+
+  <p>Built does not mean proven. A feature can work technically and still fail to solve the actual problem.</p>
+
+  <div class="steps"><span>BUILT</span><span class="arrow">→</span><span>USED</span><span class="arrow">→</span><span>OBSERVED</span><span class="arrow">→</span><span>EVIDENCE</span></div>
+
+  <p>If it works, continue. If it partly works, change it. If it does not work, go back. If we do not have enough information, call it <strong>unknown</strong>.</p>
+
+  <p>The important thing is not to defend the first guess. <strong>The important thing is to correct it while correction is still cheap.</strong></p>
+
+  <div class="steps"><span>EVIDENCE</span><span class="arrow">→</span><span>CONTINUE</span><span class="arrow">·</span><span>MODIFY</span><span class="arrow">·</span><span>REDUCE</span><span class="arrow">·</span><span>REPLACE</span><span class="arrow">·</span><span>DEFER</span><span class="arrow">·</span><span>KILL</span></div>
+
+  <p>This is why ABIM is not simply about building fast.</p>
+  <blockquote><strong>Speed is not the goal. Fast correction is.</strong></blockquote>
+
+  <p>Making something quickly gives us something to react to. Comparing it with what actually happened tells us where we are wrong. Realigning early prevents a small mistake from becoming a large project.</p>
+
+  <p>Agile already gives us a way to work in iterations. ABIM adds another habit: <strong>before moving further, look again at where you are going.</strong></p>
+
+  <div class="diagram-row">
+    <div class="diagram-card">
+      <svg viewBox="-25 -5 350 240" xmlns="http://www.w3.org/2000/svg">
+        <path id="agileLoop" d="M150,35 L255,100 L215,205 L85,205 L45,100 Z" fill="none" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="3 4" stroke-linejoin="round"/>
+        <circle cx="150" cy="35" r="14" fill="#9ca3af"/>
+        <text x="150" y="17" text-anchor="middle" class="node-label" font-size="9">Plan</text>
+        <circle cx="255" cy="100" r="12" fill="#fff" stroke="#2596be" stroke-width="2"/>
+        <text x="278" y="96" text-anchor="start" class="node-label" font-size="9">Build</text>
+        <circle cx="215" cy="205" r="12" fill="#fff" stroke="#2596be" stroke-width="2"/>
+        <text x="215" y="226" text-anchor="middle" class="node-label" font-size="9">Test</text>
+        <circle cx="85" cy="205" r="12" fill="#fff" stroke="#2596be" stroke-width="2"/>
+        <text x="85" y="226" text-anchor="middle" class="node-label" font-size="9">Learn</text>
+        <circle cx="45" cy="100" r="12" fill="#fff" stroke="#2596be" stroke-width="2"/>
+        <text x="22" y="96" text-anchor="end" class="node-label" font-size="9">Adapt</text>
+        <circle id="dotAgile" r="5" fill="#2596be" stroke="#fff" stroke-width="2" opacity="0" style="filter:drop-shadow(0 0 5px rgba(37,150,190,.6))"/>
+      </svg>
+      <div class="cap">AGILE — plan, build, test, learn, adapt</div>
+    </div>
+    <div class="diagram-card">
+      <svg viewBox="-25 -5 350 240" xmlns="http://www.w3.org/2000/svg">
+        <path id="abimLoop2" d="M150,35 L255,100 L215,205 L85,205 L45,100 Z" fill="none" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="3 4" stroke-linejoin="round"/>
+        <circle cx="150" cy="35" r="14" fill="#167D6B"/>
+        <text x="150" y="17" text-anchor="middle" class="node-label" font-size="9">Think backward</text>
+        <circle cx="255" cy="100" r="12" fill="#fff" stroke="#2596be" stroke-width="2"/>
+        <text x="278" y="96" text-anchor="start" class="node-label" font-size="9">Build</text>
+        <circle cx="215" cy="205" r="12" fill="#fff" stroke="#2596be" stroke-width="2"/>
+        <text x="215" y="226" text-anchor="middle" class="node-label" font-size="9">Check results</text>
+        <circle cx="85" cy="205" r="12" fill="#fff" stroke="#2596be" stroke-width="2"/>
+        <text x="85" y="226" text-anchor="middle" class="node-label" font-size="9">Realign</text>
+        <circle cx="45" cy="100" r="12" fill="#fff" stroke="#2596be" stroke-width="2"/>
+        <text x="22" y="96" text-anchor="end" class="node-label" font-size="9">Build again</text>
+        <circle id="dotAbim2" r="5" fill="#2596be" stroke="#fff" stroke-width="2" opacity="0" style="filter:drop-shadow(0 0 5px rgba(37,150,190,.6))"/>
+      </svg>
+      <div class="cap">ABIM — think backward, build, check, realign</div>
+    </div>
+  </div>
+
+  <p>ABIM does not try to predict everything correctly at the beginning. It gives us a way to <strong>move forward while continuously checking whether we are still moving in the right direction</strong>.</p>
+
+  <div class="steps"><span>THINK BACKWARD</span><span class="arrow">→</span><span>BUILD FORWARD</span><span class="arrow">→</span><span>CHECK RESULTS</span><span class="arrow">→</span><span>REALIGN</span><span class="arrow">→</span><span>BUILD AGAIN</span><span class="arrow">↺</span></div>
+
+  <p>We do not need to get everything right at the beginning. We need to notice when we are wrong and correct ourselves before the wrong direction becomes expensive.</p>
+
+  <p><strong>ABIM: Think backward. Build quickly. Check results. Realign. Repeat.</strong></p>
+
+</div>
+
+<script>
+function animateAlongPath(pathId, dotId, opts){
+  var o = Object.assign({duration:5200,pause:400,delay:0}, opts||{});
+  var path = document.getElementById(pathId);
+  var dot = document.getElementById(dotId);
+  var len = path.getTotalLength();
+  var cycle = o.duration + o.pause;
+  var start = null;
+  function frame(ts){
+    if(start===null) start = ts;
+    var elapsed = (ts - start) % cycle;
+    if(elapsed <= o.duration){
+      var t = elapsed / o.duration;
+      var pt = path.getPointAtLength(t*len);
+      dot.setAttribute('cx', pt.x);
+      dot.setAttribute('cy', pt.y);
+      dot.setAttribute('opacity', 1);
+    } else {
+      dot.setAttribute('opacity', 0);
+    }
+    requestAnimationFrame(frame);
+  }
+  setTimeout(function(){ requestAnimationFrame(frame); }, o.delay);
+}
+animateAlongPath('agileLoop','dotAgile',{duration:16920,pause:1540,delay:0});
+animateAlongPath('abimLoop2','dotAbim2',{duration:16920,pause:1540,delay:0});
+</script>
+
+</body>
+</html>
