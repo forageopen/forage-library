@@ -18,6 +18,7 @@ import { highlightSwatchesHtml } from './highlight-colors.js';
 import { contrastTextColor } from './contrast.js';
 import { formatReadingStats, formatPageStats } from './reading-stats.js';
 import { computeFitScale, isHtmlFrameSizeMessage, HTML_FRAME_MEASURE_SCRIPT } from './html-frame-fit.js';
+import { createLoadingBar, MIN_VISIBLE_MS } from './loading-bar.js';
 import {
   clampZoom,
   readStoredZoom,
@@ -398,37 +399,48 @@ export function createViewerPane(paneEl) {
      onProgress during the slow render loop. fraction === null → an
      indeterminate animated bar, for phases with no measurable total. */
   let setLoadProgress = () => {};
+  /* The live loading bar (loading-bar.js) — an animated WebGL canvas with a
+     RAF loop, so it must be torn down the moment its block is replaced by
+     real content or an error. destroyLoadingBar() is called from every
+     such path; the bar also self-destructs if it finds itself detached. */
+  let activeLoadingBar = null;
+  let loadingStartedAt = 0;
+  /* Bumped by every renderLoading() so an async open that got superseded
+     while its bar was dwelling (holdLoadingBar) can bail before it
+     clobbers the newer file's content. */
+  let loadSeq = 0;
+
+  function destroyLoadingBar() {
+    if (activeLoadingBar) {
+      activeLoadingBar.destroy();
+      activeLoadingBar = null;
+    }
+    setLoadProgress = () => {};
+  }
+
+  /* A light/cached doc renders in a few frames, so the bar would just
+     flash and the fill animation never plays. Keep the finished bar up
+     until it's been visible MIN_VISIBLE_MS — only for the animated WebGL
+     bar, and only padding out time the real work didn't already take (no
+     added latency for a genuinely slow file). */
+  async function holdLoadingBar() {
+    if (!activeLoadingBar || !activeLoadingBar.animated) return;
+    const remaining = MIN_VISIBLE_MS - (performance.now() - loadingStartedAt);
+    if (remaining > 0) await new Promise((resolve) => setTimeout(resolve, remaining));
+  }
 
   function renderLoading(name) {
     resetDropzoneMessage();
     showContent();
+    destroyLoadingBar();
     contentEl.className = 'vault-pane-content';
     contentEl.innerHTML = '';
-    const div = document.createElement('div');
-    div.className = 'vault-status vault-status--loading vault-loading--indeterminate';
-    const label = document.createElement('span');
-    label.className = 'vault-loading-label';
-    label.textContent = `Loading ${name}…`;
-    const track = document.createElement('div');
-    track.className = 'vault-loading-track';
-    const fill = document.createElement('div');
-    fill.className = 'vault-loading-fill';
-    track.appendChild(fill);
-    div.append(label, track);
-    contentEl.appendChild(div);
+    loadingStartedAt = performance.now();
+    loadSeq += 1;
+    activeLoadingBar = createLoadingBar(name);
+    contentEl.appendChild(activeLoadingBar.el);
     applyDocView();
-
-    setLoadProgress = (fraction, text) => {
-      if (!div.isConnected) return;
-      if (typeof text === 'string') label.textContent = text;
-      if (fraction == null || !Number.isFinite(fraction)) {
-        div.classList.add('vault-loading--indeterminate');
-        fill.style.width = '';
-      } else {
-        div.classList.remove('vault-loading--indeterminate');
-        fill.style.width = `${Math.round(Math.min(1, Math.max(0, fraction)) * 100)}%`;
-      }
-    };
+    setLoadProgress = (fraction, text) => activeLoadingBar && activeLoadingBar.setProgress(fraction, text);
   }
 
   /* An unopenable file (wrong type, fetch failure, parse error) keeps the
@@ -448,6 +460,7 @@ export function createViewerPane(paneEl) {
   }
 
   function renderError(name, message) {
+    destroyLoadingBar();
     contentEl.hidden = true;
     dropzone.hidden = false;
     if (dropzoneMessage) {
@@ -469,6 +482,7 @@ export function createViewerPane(paneEl) {
      flashing a fresh block between the two phases. */
   async function openSource(name, arrayBuffer, path, keepLoadingBlock) {
     if (!keepLoadingBlock) renderLoading(name);
+    const seq = loadSeq;
     // Snapshot a PDF's bytes before renderFile — pdf.js transfers the
     // ArrayBuffer to its worker (detaching it), so this copy is what the
     // lazy photo-region pass (ensurePdfPhotoOverlays) reads later.
@@ -476,6 +490,10 @@ export function createViewerPane(paneEl) {
     try {
       setLoadProgress(null, `Opening ${name}…`);
       const result = await renderFile(name, arrayBuffer, { onProgress: setLoadProgress });
+      setLoadProgress(1); // snap the fill to 100% for a clean finish
+      await holdLoadingBar();
+      if (seq !== loadSeq) return; // a newer open superseded this one during the dwell
+      destroyLoadingBar();
       contentEl.className = 'vault-pane-content vault-pane-content--' + result.kind;
       if (result.kind === 'iframe') {
         /* A hand-authored .html file's raw markup can carry its own
@@ -850,6 +868,7 @@ export function createViewerPane(paneEl) {
        identity doesn't shift just because the main content did. */
     startNewNote() {
       showContent();
+      destroyLoadingBar();
       currentName = NEW_DOCUMENT_NAME;
       currentSourceText = null;
       contentEl.className = 'vault-pane-content vault-pane-content--editor';
@@ -868,6 +887,7 @@ export function createViewerPane(paneEl) {
        left exactly as-is (same rationale as startNewNote: closing the
        main content shouldn't disturb an independent panel). */
     closeFile() {
+      destroyLoadingBar();
       currentPath = null;
       currentName = null;
       currentSourceText = null;
