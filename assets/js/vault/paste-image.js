@@ -194,8 +194,18 @@ export function createFloatImageController(editorBody, overlayHost, { onChange }
     const img = e.target.closest && e.target.closest('img[data-forage-float]');
     if (!img) return;
     e.preventDefault(); // don't drop a caret into the contenteditable
+    img.draggable = false; // belt-and-suspenders vs. native image drag
     select(img);
     startDrag(e, 'move', null);
+  }
+
+  /* A native drag-and-drop of the image (or of a text selection that
+     started on it) would steal the pointer before onMove ever runs — kill
+     it for anything inside the editor. */
+  function onDragStart(e) {
+    if (e.target && e.target.closest && e.target.closest('img[data-forage-float]')) {
+      e.preventDefault();
+    }
   }
 
   function onHandleDown(e) {
@@ -285,6 +295,7 @@ export function createFloatImageController(editorBody, overlayHost, { onChange }
   });
 
   editorBody.addEventListener('mousedown', onImgDown);
+  editorBody.addEventListener('dragstart', onDragStart);
   document.addEventListener('mousedown', onDocDown, true);
   document.addEventListener('keydown', onKey);
   window.addEventListener('resize', refresh);
@@ -304,6 +315,7 @@ export function createFloatImageController(editorBody, overlayHost, { onChange }
       }
       if (overlay) { overlay.remove(); overlay = null; }
       editorBody.removeEventListener('mousedown', onImgDown);
+      editorBody.removeEventListener('dragstart', onDragStart);
       document.removeEventListener('mousedown', onDocDown, true);
       document.removeEventListener('keydown', onKey);
       window.removeEventListener('resize', refresh);

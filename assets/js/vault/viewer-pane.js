@@ -813,6 +813,10 @@ export function createViewerPane(paneEl) {
     const img = document.createElement('img');
     img.setAttribute('data-forage-float', '');
     img.alt = '';
+    // An <img> inside a contenteditable is natively drag-and-droppable —
+    // that hijacks the pointer before our own drag handler ever sees a
+    // mousemove. Turn it off so the float controller can move/resize it.
+    img.draggable = false;
     img.style.position = 'absolute';
     img.src = dataUrl;
     await img.decode().catch(() => {});
