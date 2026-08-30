@@ -185,18 +185,17 @@ export function createViewerPane(paneEl) {
      each one rebuilds contentEl's class/markup and would otherwise drop the
      state.
 
-     Zoom is universal. Dark mode only makes sense for content that doesn't
-     already follow the site theme: a rendered .html/.htm file (handled
-     inside its iframe) and a PDF/PPTX page deck (a CSS filter on contentEl,
-     safe since those are static). Themed prose (.md/.docx/.txt/spreadsheets)
-     and bare images opt out — the button hides for them. */
+     Zoom is universal. Dark mode only applies to a rendered .html/.htm file
+     (handled inside its own iframe): themed prose (.md/.docx/.txt/
+     spreadsheets) already follows the site theme, and a PDF/PPTX page or a
+     bare image is a raster that shouldn't be colour-inverted — the button
+     hides for all of those. */
   function applyDocView() {
     const kind = ['iframe', 'deck', 'image', 'prose', 'editor']
       .find((k) => contentEl.classList.contains('vault-pane-content--' + k)) || null;
     const isIframe = kind === 'iframe';
-    const darkApplies = kind === 'iframe' || kind === 'deck';
+    const darkApplies = isIframe;
 
-    contentEl.classList.toggle('vault-pane-content--dark', docDark && kind === 'deck');
     contentEl.style.zoom = (isIframe || userZoom === 1) ? '' : String(userZoom);
     if (isIframe) {
       applyHtmlFrameScale();

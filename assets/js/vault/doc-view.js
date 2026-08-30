@@ -19,23 +19,24 @@ export const ZOOM_DEFAULT = 1;
 const ZOOM_KEY = 'forage-vault-zoom';
 const DARK_KEY = 'forage-vault-dark';
 
-/* A near-total invert (white -> charcoal, not pure black) plus a 180deg
-   hue-rotate that lands every hue back where it started — so coloured text
-   and diagrams keep their colour while the page ground flips dark.
+/* A full invert plus a 180deg hue-rotate that lands every hue back where
+   it started — so coloured text and diagrams keep their colour while the
+   page ground flips from white to black. A full `invert(1)` (rather than a
+   softer charcoal) is deliberate: it's the only invert strength that's its
+   own exact inverse, so raster images can be flipped straight back to
+   their true colours by applying the same filter a second time (see the
+   img/picture/video rule in DOC_DARK_IFRAME_ADDON) — a partial invert
+   double-applied washes contrast out instead of cancelling.
 
-   For a rendered .html/.htm file this filter is injected *inside* the
-   sandboxed iframe (DOC_DARK_IFRAME_ADDON below) rather than set on the
-   host element from the parent: a `hue-rotate` on the parent side forces
-   the whole composited layer — including any continuously-animating
-   content in the framed doc — to re-rasterise on the CPU every frame,
-   which pegs the renderer. Applied to `html` from *within* the frame it
-   stays GPU-composited and the framed doc's own animations keep running
-   at full frame rate.
-
-   For a PDF/PPTX deck (static page images, no animation) the same filter
-   is set on the pane content element from CSS — see
-   .vault-pane-content--dark in forage.css. */
-export const DOC_DARK_FILTER = 'invert(0.92) hue-rotate(180deg)';
+   Dark mode only applies to rendered .html/.htm files. The filter is
+   injected *inside* the sandboxed iframe (DOC_DARK_IFRAME_ADDON) rather
+   than set on the host element from the parent: a `hue-rotate` on the
+   parent side forces the whole composited layer — including any
+   continuously-animating content in the framed doc — to re-rasterise on
+   the CPU every frame, which pegs the renderer. Applied to `html` from
+   *within* the frame it stays GPU-composited and the framed doc's own
+   animations keep running at full frame rate. */
+export const DOC_DARK_FILTER = 'invert(1) hue-rotate(180deg)';
 
 /* postMessage envelope the parent sends the framed doc to flip dark mode,
    and the "I'm listening now" ping the framed doc sends back on load so
@@ -49,9 +50,18 @@ export const DOC_DARK_READY_MESSAGE = 'forage-doc-dark-ready';
  * offered for re-download" contract as the measure script. A <style> that
  * only bites when <html> carries the `forage-dark` class, plus a tiny
  * listener that toggles that class on the parent's message and announces
- * itself once on load. Runs inside `sandbox="allow-scripts"`. */
+ * itself once on load. Runs inside `sandbox="allow-scripts"`.
+ *
+ * The second rule re-applies the same filter to raster media (img,
+ * picture, video, canvas, SVG <image>) — invert(1) is its own inverse, so
+ * this cancels the page-level flip and leaves photos/screenshots in their
+ * true colours. Authors can opt any other element out with
+ * `data-forage-keep-color`. */
 export const DOC_DARK_IFRAME_ADDON = `
-<style>html.forage-dark{background:#1c1c1c!important;filter:${DOC_DARK_FILTER};}</style>
+<style>
+html.forage-dark { background: #000 !important; filter: ${DOC_DARK_FILTER}; }
+html.forage-dark :is(img, picture, video, canvas, image, [data-forage-keep-color]) { filter: ${DOC_DARK_FILTER}; }
+</style>
 <script>(function () {
   function apply(on) { document.documentElement.classList.toggle('forage-dark', !!on); }
   window.addEventListener('message', function (e) {

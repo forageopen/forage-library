@@ -663,20 +663,11 @@ body.vault-resizing { cursor: col-resize; user-select: none; }
 }
 .vault-pane-zoom-row button:hover, .vault-pane-zoom-row button:focus-visible { background: var(--ribbon-hover); }
 .vault-pane-header-btn[aria-pressed="true"] { background: var(--ribbon-hover); color: var(--text); }
-
-/* Document dark mode for a PDF/PPTX page deck — a near-total invert
-   (white -> charcoal, not pure black) plus a 180deg hue-rotate that lands
-   every hue back where it started, so coloured content keeps its colour
-   while white pages go dark. Kept in sync with DOC_DARK_FILTER in
-   doc-view.js. Safe as a plain element filter here because deck pages are
-   static; a rendered .html/.htm file gets the same filter injected inside
-   its iframe instead (see DOC_DARK_IFRAME_ADDON) so any animation it runs
-   stays GPU-composited. Themed prose and bare images don't get a dark
-   toggle at all — the button hides for them (see applyDocView). */
-.vault-pane-content--dark.vault-pane-content--deck { filter: invert(0.92) hue-rotate(180deg); }
-@media print {
-  .vault-pane-content--dark { filter: none !important; }
-}
+/* Document dark mode itself has no rule here — it only applies to a
+   rendered .html/.htm file and lives inside that file's own sandboxed
+   iframe (see DOC_DARK_IFRAME_ADDON in doc-view.js), where a hue-rotate
+   stays GPU-composited instead of pegging the renderer over animated
+   frame content. The button hides for every other kind (see applyDocView). */
 
 /* Word count / reading time — a full-width bar under the pane header,
    text right-aligned, colors pulled from the active theme like every
