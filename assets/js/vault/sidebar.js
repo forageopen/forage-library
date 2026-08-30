@@ -49,6 +49,41 @@ export function isEmptyFolder(node) {
   return node.type === 'folder' && (!node.children || node.children.length === 0);
 }
 
+export const WELCOME_NOTE_PATH = 'vault/00-welcome-note.md';
+
+/* Pure: the sidebar's top-level order. The manifest lists entries
+   alphabetically, which drops the welcome note below the (emoji-prefixed)
+   folders — but it's the intended starting point, so pin it first and
+   leave everything else in manifest order. */
+export function orderRootChildren(children) {
+  const pinned = children.filter((c) => c.path === WELCOME_NOTE_PATH);
+  const rest = children.filter((c) => c.path !== WELCOME_NOTE_PATH);
+  return [...pinned, ...rest];
+}
+
+/* Optional per-folder glyph, keyed by the folder's manifest name (its
+   on-disk directory name). When set it replaces the generic Lucide folder
+   icon. Folders whose directory name already carries an emoji prefix
+   ("📊 Slides", "📝 Articles") get their glyph that way instead. */
+const FOLDER_ICONS = {
+  'About Us': '🏛️',
+  Frameworks: '🧩',
+};
+
+function fillFolderIcon(container, node, withOpenState) {
+  const emoji = FOLDER_ICONS[node.name];
+  if (emoji) {
+    const span = document.createElement('span');
+    span.className = 'vault-tree-folder-emoji';
+    span.textContent = emoji;
+    span.setAttribute('aria-hidden', 'true');
+    container.appendChild(span);
+    return;
+  }
+  container.appendChild(makeIcon('folder', withOpenState ? 'vault-tree-folder-icon-closed' : undefined));
+  if (withOpenState) container.appendChild(makeIcon('folderOpen', 'vault-tree-folder-icon-open'));
+}
+
 function renderFolder(node) {
   const li = document.createElement('li');
   li.className = 'vault-tree-folder';
@@ -64,7 +99,7 @@ function renderFolder(node) {
     li.classList.add('vault-tree-folder--empty');
     const label = document.createElement('div');
     label.className = 'vault-tree-folder-label';
-    folderIcon.appendChild(makeIcon('folder'));
+    fillFolderIcon(folderIcon, node, false);
     label.append(folderIcon, name);
     li.appendChild(label);
     return li;
@@ -76,8 +111,7 @@ function renderFolder(node) {
   label.className = 'vault-tree-folder-label';
   label.setAttribute('aria-expanded', 'false');
 
-  folderIcon.appendChild(makeIcon('folder', 'vault-tree-folder-icon-closed'));
-  folderIcon.appendChild(makeIcon('folderOpen', 'vault-tree-folder-icon-open'));
+  fillFolderIcon(folderIcon, node, true);
   label.append(makeIcon('chevron', 'vault-tree-chevron'), folderIcon, name);
   li.appendChild(label);
 
@@ -123,7 +157,7 @@ export async function initSidebar(root, onOpen, fetchImpl = fetch) {
 
   const ul = document.createElement('ul');
   ul.className = 'vault-tree';
-  (manifest.children || []).forEach((child) => ul.appendChild(renderNode(child)));
+  orderRootChildren(manifest.children || []).forEach((child) => ul.appendChild(renderNode(child)));
   root.innerHTML = '';
   root.appendChild(ul);
 

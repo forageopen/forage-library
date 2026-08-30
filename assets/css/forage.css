@@ -562,6 +562,7 @@ button.vault-tree-folder-label:focus-visible { background: var(--ribbon-hover); 
 
 .vault-tree-folder-icon { display: inline-flex; flex-shrink: 0; }
 .vault-tree-folder-icon svg { width: 15px; height: 15px; }
+.vault-tree-folder-emoji { width: 16px; font-size: 13px; line-height: 1; text-align: center; }
 .vault-tree-folder-icon-open { display: none; }
 .vault-tree-folder:not(.vault-tree-folder--collapsed) > .vault-tree-folder-label .vault-tree-folder-icon-closed { display: none; }
 .vault-tree-folder:not(.vault-tree-folder--collapsed) > .vault-tree-folder-label .vault-tree-folder-icon-open { display: block; }
