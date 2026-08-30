@@ -809,15 +809,20 @@ button.vault-tree-folder-label:focus-visible {
 .vault-content p { font-size: 14px; line-height: 1.7; color: var(--text-soft); margin-bottom: 14px; }
 .vault-table-wrap { overflow-x: auto; margin: 1em 0; }
 
-/* Word-by-word "read along" (read-aloud.js) — style "reveal": while a
-   session is live (`vault-read-active` on the container) every word not
-   yet reached sits faint, each pops to full as it's read, and the word
-   under the cursor flashes the accent colour. Idle, the wrapper spans are
-   inert. */
-.vault-content .vault-read-word { transition: opacity 0.28s ease, color 0.18s ease; }
-.vault-read-active .vault-read-word { opacity: 0.28; }
-.vault-read-active .vault-read-word.vault-read-word--read { opacity: 1; }
-.vault-read-active .vault-read-word.vault-read-word--current { opacity: 1; color: var(--teal); }
+/* Word-by-word "read along" (read-aloud.js) — style "bold pop": while a
+   session is live (`vault-read-active` on the container) words ahead of
+   the cursor dim, already-read words sit at normal colour, and the
+   current word turns the accent colour with a faux-bold stroke. Every
+   effect here is paint-only (colour + text-stroke) — the glyph metrics
+   never change, so the line does not reflow as the cursor advances.
+   Idle, the wrapper spans are inert. */
+.vault-content .vault-read-word { transition: color 0.18s ease; }
+.vault-read-active .vault-read-word { color: var(--subtitle); }
+.vault-read-active .vault-read-word.vault-read-word--read { color: inherit; }
+.vault-read-active .vault-read-word.vault-read-word--current {
+  color: var(--teal);
+  -webkit-text-stroke: 0.4px var(--teal);
+}
 @media (prefers-reduced-motion: reduce) {
   .vault-content .vault-read-word { transition: none; }
 }

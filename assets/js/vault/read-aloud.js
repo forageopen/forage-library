@@ -85,19 +85,21 @@ export function createReadAloud(container, { wpm = READ_WPM, onState, scrollTarg
   let i = 0;
   let timer = 0;
   let state = 'idle';
-  let sinceScroll = 0;
 
   const emit = () => { if (onState) onState(state); };
 
+  /* Follow the cursor only when it has actually left the visible area —
+     never re-centre. `block: 'nearest'` is a no-op while the word is on
+     screen, so pressing play at the top of a document doesn't jump it. */
   const keepInView = () => {
     const cur = words[i];
-    if (!cur || (sinceScroll++ % 3 !== 0 && sinceScroll > 1)) return;
+    if (!cur) return;
     const box = cur.getBoundingClientRect();
-    const host = (scrollTarget || container).getBoundingClientRect
-      ? (scrollTarget || container).getBoundingClientRect()
-      : { top: 0, bottom: (container.ownerDocument.defaultView || window).innerHeight };
-    if (box.top < host.top + 80 || box.bottom > host.bottom - 60) {
-      cur.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    const view = scrollTarget && scrollTarget.getBoundingClientRect
+      ? scrollTarget.getBoundingClientRect()
+      : { top: 0, bottom: (container.ownerDocument.defaultView || globalThis).innerHeight };
+    if (box.top < view.top || box.bottom > view.bottom) {
+      cur.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
   };
 
@@ -149,7 +151,6 @@ export function createReadAloud(container, { wpm = READ_WPM, onState, scrollTarg
   const reset = () => {
     clearTimeout(timer);
     i = 0;
-    sinceScroll = 0;
     state = 'idle';
     clearMarks();
     container.classList.remove('vault-read-active');
