@@ -44,31 +44,40 @@ export function isHtmlFrameSizeMessage(data) {
  * with no allow-same-origin has an opaque origin and can't target the
  * parent's real one by name.
  *
- * Deliberately does NOT also listen for the frame's own 'resize' event —
- * the parent pins this frame to its measured natural pixel size right
- * after receiving this message (see handleHtmlFrameMessage in
- * viewer-pane.js), which itself fires 'resize' inside the frame again;
- * re-measuring and re-posting from that would ping-pong indefinitely if
- * the reported height so much as sub-pixel-jitters between the two
- * measurements, which has been observed to hang the tab. One clean
- * measurement per load is enough since nothing else changes this
- * frame's size afterwards (only its CSS transform, which doesn't affect
- * layout or fire 'resize'). */
+ * Deliberately does NOT listen for the frame's own 'resize' event — the
+ * parent pins this frame to the reported natural size (see
+ * handleHtmlFrameMessage in viewer-pane.js), which fires 'resize' inside
+ * the frame again; re-posting off that would ping-pong indefinitely on
+ * sub-pixel jitter, which has been observed to hang the tab.
+ *
+ * A single post on 'load' turned out not to be enough: the first
+ * measurement can land before layout settles (a too-narrow width) or
+ * before the parent pane has finished building and is listening — the
+ * latter shows up when a doc is opened right after a sidebar folder
+ * expands. So it re-measures a handful of times across the first second
+ * instead, posting *only when the measured size actually changed* — the
+ * parent dedupes identical sizes too, so this can't ping-pong with the
+ * frame-pinning, and the retry count is hard-capped. */
 export const HTML_FRAME_MEASURE_SCRIPT = `
 <script>(function () {
-  var posted = false;
-  function post() {
-    if (posted) return; // hard guard: at most one measurement per load, ever
+  var lastKey = '';
+  var tries = 0;
+  function measure() {
     var docEl = document.documentElement;
     var body = document.body;
     var width = Math.max(docEl.scrollWidth, body ? body.scrollWidth : 0);
     var height = Math.max(docEl.scrollHeight, body ? body.scrollHeight : 0);
     if (width > 0 && height > 0) {
-      posted = true;
-      parent.postMessage({ source: 'forage-html-frame', width: width, height: height }, '*');
+      var key = width + 'x' + height;
+      if (key !== lastKey) {
+        lastKey = key;
+        parent.postMessage({ source: 'forage-html-frame', width: width, height: height }, '*');
+      }
     }
+    tries += 1;
+    if (tries < 8) setTimeout(measure, tries < 4 ? 50 : 200);
   }
-  if (document.readyState === 'complete') post();
-  else window.addEventListener('load', post);
+  if (document.readyState === 'complete') measure();
+  else window.addEventListener('load', measure);
 })();</script>
 `;

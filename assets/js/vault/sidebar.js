@@ -49,16 +49,22 @@ export function isEmptyFolder(node) {
   return node.type === 'folder' && (!node.children || node.children.length === 0);
 }
 
-export const WELCOME_NOTE_PATH = 'vault/00-welcome-note.md';
+/* Paths that should sit at the top of their sibling list, in this order,
+   ahead of the manifest's alphabetical ordering. Applied at every level. */
+export const PINNED_PATHS = [
+  'vault/00-welcome-note.md',
+  'vault/About Us/What is Forage Library.html',
+];
 
-/* Pure: the sidebar's top-level order. The manifest lists entries
-   alphabetically, which drops the welcome note below the (emoji-prefixed)
-   folders — but it's the intended starting point, so pin it first and
-   leave everything else in manifest order. */
-export function orderRootChildren(children) {
-  const pinned = children.filter((c) => c.path === WELCOME_NOTE_PATH);
-  const rest = children.filter((c) => c.path !== WELCOME_NOTE_PATH);
-  return [...pinned, ...rest];
+/* Pure: reorder a folder's (or the root's) children so pinned entries come
+   first in PINNED_PATHS order; everything else keeps its manifest order
+   (Array.sort is stable). */
+export function orderSiblings(children) {
+  const rank = (c) => {
+    const i = PINNED_PATHS.indexOf(c.path);
+    return i === -1 ? PINNED_PATHS.length : i;
+  };
+  return [...children].sort((a, b) => rank(a) - rank(b));
 }
 
 /* Optional per-folder glyph, keyed by the folder's manifest name (its
@@ -117,7 +123,7 @@ function renderFolder(node) {
 
   const ul = document.createElement('ul');
   ul.className = 'vault-tree-children';
-  node.children.forEach((child) => ul.appendChild(renderNode(child)));
+  orderSiblings(node.children).forEach((child) => ul.appendChild(renderNode(child)));
   li.appendChild(ul);
 
   label.addEventListener('click', () => {
@@ -157,7 +163,7 @@ export async function initSidebar(root, onOpen, fetchImpl = fetch) {
 
   const ul = document.createElement('ul');
   ul.className = 'vault-tree';
-  orderRootChildren(manifest.children || []).forEach((child) => ul.appendChild(renderNode(child)));
+  orderSiblings(manifest.children || []).forEach((child) => ul.appendChild(renderNode(child)));
   root.innerHTML = '';
   root.appendChild(ul);
 

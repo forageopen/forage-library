@@ -35,3 +35,11 @@ test('HTML_FRAME_MEASURE_SCRIPT is a self-contained inline <script> tag', () => 
   assert.match(HTML_FRAME_MEASURE_SCRIPT, /^\s*<script>[\s\S]*<\/script>\s*$/);
   assert.match(HTML_FRAME_MEASURE_SCRIPT, /forage-html-frame/);
 });
+
+test('HTML_FRAME_MEASURE_SCRIPT re-measures on load and via a bounded retry', () => {
+  assert.match(HTML_FRAME_MEASURE_SCRIPT, /addEventListener\('load'/);
+  assert.match(HTML_FRAME_MEASURE_SCRIPT, /setTimeout\(measure/);
+  assert.match(HTML_FRAME_MEASURE_SCRIPT, /tries < 8/);
+  // only re-posts when the measured size changed, so it can't ping-pong
+  assert.match(HTML_FRAME_MEASURE_SCRIPT, /key !== lastKey/);
+});
