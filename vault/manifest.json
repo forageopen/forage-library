@@ -4,19 +4,25 @@
   "path": "vault",
   "children": [
     {
+      "name": "📊 Slides",
+      "type": "folder",
+      "path": "vault/📊 Slides",
+      "children": [
+        {
+          "name": "Creative Management.pdf",
+          "type": "file",
+          "path": "vault/📊 Slides/Creative Management.pdf",
+          "fileType": "pdf",
+          "title": "Creative Management",
+          "date": "2026-08-30"
+        }
+      ]
+    },
+    {
       "name": "📊 Slides ",
       "type": "folder",
       "path": "vault/📊 Slides ",
-      "children": [
-        {
-          "name": " Creative Management - Forage School of Applied Intelligence.pdf",
-          "type": "file",
-          "path": "vault/📊 Slides / Creative Management - Forage School of Applied Intelligence.pdf",
-          "fileType": "pdf",
-          "title": "Creative Management Forage School Of Applied Intelligence",
-          "date": "2026-08-28"
-        }
-      ]
+      "children": []
     },
     {
       "name": "📝 Articles ",
@@ -57,7 +63,48 @@
       "name": "Frameworks",
       "type": "folder",
       "path": "vault/Frameworks",
-      "children": []
+      "children": [
+        {
+          "name": "Agile Backward Model (ABIM).html",
+          "type": "file",
+          "path": "vault/Frameworks/Agile Backward Model (ABIM).html",
+          "fileType": "html",
+          "title": "Agile Backward Model (ABIM)",
+          "date": "2026-08-30"
+        },
+        {
+          "name": "Bayesian Updating (BAE).html",
+          "type": "file",
+          "path": "vault/Frameworks/Bayesian Updating (BAE).html",
+          "fileType": "html",
+          "title": "Bayesian Updating (BAE)",
+          "date": "2026-08-30"
+        },
+        {
+          "name": "Friction Route Model (FRM).html",
+          "type": "file",
+          "path": "vault/Frameworks/Friction Route Model (FRM).html",
+          "fileType": "html",
+          "title": "Friction-Route Model (FRM)",
+          "date": "2026-08-30"
+        },
+        {
+          "name": "Minimum Viable Delivery (MVD).html",
+          "type": "file",
+          "path": "vault/Frameworks/Minimum Viable Delivery (MVD).html",
+          "fileType": "html",
+          "title": "Minimum Viable Delivery (MVD)",
+          "date": "2026-08-30"
+        },
+        {
+          "name": "Resource Arbitrage (REAB).html",
+          "type": "file",
+          "path": "vault/Frameworks/Resource Arbitrage (REAB).html",
+          "fileType": "html",
+          "title": "Resource Arbitrage (REAB)",
+          "date": "2026-08-30"
+        }
+      ]
     },
     {
       "name": "Guides",
