@@ -36,18 +36,21 @@ async function resolveMediaMap(zip, slidePath) {
   return map;
 }
 
-export async function renderPptx(arrayBuffer, JSZipLib = globalThis.JSZip) {
+export async function renderPptx(arrayBuffer, JSZipLib = globalThis.JSZip, onProgress = null) {
   if (!JSZipLib) throw new Error('renderPptx: JSZip library is not loaded');
+  const report = onProgress || (() => {}); // (fraction 0..1 or null, label)
   const zip = await JSZipLib.loadAsync(arrayBuffer);
   const slidePaths = Object.keys(zip.files)
     .filter((name) => /^ppt\/slides\/slide\d+\.xml$/.test(name))
     .sort((a, b) => slideNumber(a) - slideNumber(b));
 
   const slides = [];
+  report(0, `Rendering slide 1 of ${slidePaths.length}`);
   for (const slidePath of slidePaths) {
     const xml = await zip.file(slidePath).async('string');
     const mediaMap = await resolveMediaMap(zip, slidePath);
     slides.push(extractSlide(xml, mediaMap));
+    report(slides.length / slidePaths.length, `Rendering slide ${slides.length} of ${slidePaths.length}`);
   }
   return slidesToHtml(slides);
 }

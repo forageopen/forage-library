@@ -323,16 +323,44 @@ export function createViewerPane(paneEl) {
     contentEl.hidden = false;
   }
 
+  /* Set by renderLoading() to a (fraction, label) updater for the loading
+     block's progress bar, cleared once that block is replaced by real
+     content or an error. openVaultFile drives it during the download; the
+     deck renderers (PDF pages / PPTX slides) drive it via renderFile's
+     onProgress during the slow render loop. fraction === null → an
+     indeterminate animated bar, for phases with no measurable total. */
+  let setLoadProgress = () => {};
+
   function renderLoading(name) {
     resetDropzoneMessage();
     showContent();
     contentEl.className = 'vault-pane-content';
     contentEl.innerHTML = '';
     const div = document.createElement('div');
-    div.className = 'vault-status vault-status--loading';
-    div.textContent = `Loading ${name}…`;
+    div.className = 'vault-status vault-status--loading vault-loading--indeterminate';
+    const label = document.createElement('span');
+    label.className = 'vault-loading-label';
+    label.textContent = `Loading ${name}…`;
+    const track = document.createElement('div');
+    track.className = 'vault-loading-track';
+    const fill = document.createElement('div');
+    fill.className = 'vault-loading-fill';
+    track.appendChild(fill);
+    div.append(label, track);
     contentEl.appendChild(div);
     applyDocView();
+
+    setLoadProgress = (fraction, text) => {
+      if (!div.isConnected) return;
+      if (typeof text === 'string') label.textContent = text;
+      if (fraction == null || !Number.isFinite(fraction)) {
+        div.classList.add('vault-loading--indeterminate');
+        fill.style.width = '';
+      } else {
+        div.classList.remove('vault-loading--indeterminate');
+        fill.style.width = `${Math.round(Math.min(1, Math.max(0, fraction)) * 100)}%`;
+      }
+    };
   }
 
   /* An unopenable file (wrong type, fetch failure, parse error) keeps the
@@ -366,10 +394,16 @@ export function createViewerPane(paneEl) {
     dropzone.addEventListener('click', () => resetDropzoneMessage());
   }
 
-  async function openSource(name, arrayBuffer, path) {
-    renderLoading(name);
+  /* `keepLoadingBlock` is set by the callers below, which have already put
+     up the loading block (and, for a vault fetch, driven its bar through
+     the download) — reusing it keeps the bar one continuous element from
+     "Downloading" straight into "Rendering page N of M" instead of
+     flashing a fresh block between the two phases. */
+  async function openSource(name, arrayBuffer, path, keepLoadingBlock) {
+    if (!keepLoadingBlock) renderLoading(name);
     try {
-      const result = await renderFile(name, arrayBuffer);
+      setLoadProgress(null, `Opening ${name}…`);
+      const result = await renderFile(name, arrayBuffer, { onProgress: setLoadProgress });
       contentEl.className = 'vault-pane-content vault-pane-content--' + result.kind;
       if (result.kind === 'iframe') {
         /* A hand-authored .html file's raw markup can carry its own
@@ -445,11 +479,41 @@ export function createViewerPane(paneEl) {
         renderError(name, `${res.status} ${res.statusText}`);
         return;
       }
-      const arrayBuffer = await res.arrayBuffer();
-      await openSource(name, arrayBuffer, path);
+      const arrayBuffer = await readBodyWithProgress(res, name);
+      await openSource(name, arrayBuffer, path, true);
     } catch (err) {
       renderError(name, err.message);
     }
+  }
+
+  /* Streams the response body so the loading bar can track the download —
+     GitHub Pages serves a Content-Length for static files, so a real
+     percentage is available. Falls back to a plain buffered read (with an
+     indeterminate bar) when the body isn't streamable or the length is
+     unknown. */
+  async function readBodyWithProgress(res, name) {
+    const total = Number(res.headers.get('content-length')) || 0;
+    if (!total || !res.body || typeof res.body.getReader !== 'function') {
+      setLoadProgress(null, `Downloading ${name}…`);
+      return res.arrayBuffer();
+    }
+    const reader = res.body.getReader();
+    const chunks = [];
+    let received = 0;
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+      received += value.length;
+      setLoadProgress(received / total, `Downloading ${Math.round((received / total) * 100)}%`);
+    }
+    const out = new Uint8Array(received);
+    let offset = 0;
+    for (const chunk of chunks) {
+      out.set(chunk, offset);
+      offset += chunk.length;
+    }
+    return out.buffer;
   }
 
   async function openLocalFile(file) {
@@ -461,7 +525,7 @@ export function createViewerPane(paneEl) {
     renderLoading(file.name);
     try {
       const arrayBuffer = await file.arrayBuffer();
-      await openSource(file.name, arrayBuffer, 'local:' + file.name);
+      await openSource(file.name, arrayBuffer, 'local:' + file.name, true);
     } catch (err) {
       renderError(file.name, err.message);
     }

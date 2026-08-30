@@ -40,6 +40,26 @@ test('dispatches .pdf to the pdf renderer as a deck', async () => {
   assert.deepEqual(result, { kind: 'deck', html: '<section></section>' });
 });
 
+test('forwards onProgress to the pdf renderer', async () => {
+  let seen;
+  const onProgress = () => {};
+  await renderFile('scan.pdf', new ArrayBuffer(0), {
+    onProgress,
+    renderPdf: async (_buf, deps) => { seen = deps && deps.onProgress; return ''; },
+  });
+  assert.equal(seen, onProgress);
+});
+
+test('forwards onProgress to the pptx renderer (third positional arg)', async () => {
+  let seen;
+  const onProgress = () => {};
+  await renderFile('deck.pptx', new ArrayBuffer(0), {
+    onProgress,
+    renderPptx: async (_buf, _zip, cb) => { seen = cb; return ''; },
+  });
+  assert.equal(seen, onProgress);
+});
+
 test('dispatches .xlsx to the spreadsheet renderer as prose', async () => {
   const result = await renderFile('data.xlsx', new ArrayBuffer(0), { renderSpreadsheet: (buf, name) => `<table data-name="${name}"></table>` });
   assert.deepEqual(result, { kind: 'prose', html: '<table data-name="data.xlsx"></table>' });

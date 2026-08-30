@@ -15,6 +15,10 @@ export function extensionOf(filename) {
   return match ? match[1].toLowerCase() : '';
 }
 
+/* `deps.onProgress(fraction, label)` — optional; fraction is 0..1 or null
+   (indeterminate). Only the deck renderers (PDF pages, PPTX slides) drive
+   it, since they're the ones with a slow per-item loop worth showing a bar
+   for; every other type renders in one shot. */
 export async function renderFile(filename, arrayBuffer, deps = {}) {
   const ext = extensionOf(filename);
   const {
@@ -35,9 +39,9 @@ export async function renderFile(filename, arrayBuffer, deps = {}) {
     case 'docx':
       return { kind: 'prose', html: await docx(arrayBuffer) };
     case 'pptx':
-      return { kind: 'deck', html: await pptx(arrayBuffer) };
+      return { kind: 'deck', html: await pptx(arrayBuffer, undefined, deps.onProgress) };
     case 'pdf':
-      return { kind: 'deck', html: await pdf(arrayBuffer) };
+      return { kind: 'deck', html: await pdf(arrayBuffer, { onProgress: deps.onProgress }) };
     case 'xlsx':
     case 'csv':
       return { kind: 'prose', html: sheet(arrayBuffer, filename) };

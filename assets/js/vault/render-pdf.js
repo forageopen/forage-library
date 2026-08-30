@@ -48,8 +48,18 @@ export async function renderPdf(arrayBuffer, deps = {}) {
     canvas.height = h;
     return canvas;
   });
+  // (fraction 0..1 or null, label) — see renderFile in renderers.js. The
+  // per-page render loop below is the slow part (one 2x canvas raster per
+  // page), so that's what the bar tracks.
+  const onProgress = deps.onProgress || (() => {});
 
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+  loadingTask.onProgress = ({ loaded, total }) => {
+    onProgress(total ? loaded / total : null, 'Reading PDF…');
+  };
+  const pdf = await loadingTask.promise;
+  onProgress(0, `Rendering page 1 of ${pdf.numPages}`);
+
   const slides = [];
   for (let i = 1; i <= pdf.numPages; i++) {
     const page = await pdf.getPage(i);
@@ -59,6 +69,7 @@ export async function renderPdf(arrayBuffer, deps = {}) {
     slides.push(
       `<section class="vault-slide" data-slide-index="${i - 1}"><img class="vault-slide-image" src="${canvas.toDataURL('image/png')}" alt="Page ${i}"></section>`
     );
+    onProgress(i / pdf.numPages, `Rendering page ${i} of ${pdf.numPages}`);
   }
 
   return `<div class="vault-content vault-deck">${slides.join('')}</div>`;
