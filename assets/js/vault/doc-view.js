@@ -28,14 +28,20 @@ const DARK_KEY = 'forage-vault-dark';
    img/picture/video rule in DOC_DARK_IFRAME_ADDON) — a partial invert
    double-applied washes contrast out instead of cancelling.
 
-   Dark mode only applies to rendered .html/.htm files. The filter is
-   injected *inside* the sandboxed iframe (DOC_DARK_IFRAME_ADDON) rather
-   than set on the host element from the parent: a `hue-rotate` on the
-   parent side forces the whole composited layer — including any
-   continuously-animating content in the framed doc — to re-rasterise on
-   the CPU every frame, which pegs the renderer. Applied to `html` from
-   *within* the frame it stays GPU-composited and the framed doc's own
-   animations keep running at full frame rate. */
+   For a rendered .html/.htm file the filter is injected *inside* the
+   sandboxed iframe (DOC_DARK_IFRAME_ADDON) rather than set on the host
+   element from the parent: a `hue-rotate` on the parent side forces the
+   whole composited layer — including any continuously-animating content in
+   the framed doc — to re-rasterise on the CPU every frame, which pegs the
+   renderer. Applied to `html` from *within* the frame it stays
+   GPU-composited and the framed doc's own animations keep running at full
+   frame rate.
+
+   A PDF/PPTX page deck instead gets a CSS filter on its slide images only
+   (see .vault-pane-content--dark in forage.css) — the whole page for a
+   PDF, embedded pictures for a PPTX; the deck's own chrome follows the
+   site theme. Themed prose and bare images get no dark toggle at all (see
+   applyDocView in viewer-pane.js). */
 export const DOC_DARK_FILTER = 'invert(1) hue-rotate(180deg)';
 
 /* postMessage envelope the parent sends the framed doc to flip dark mode,
