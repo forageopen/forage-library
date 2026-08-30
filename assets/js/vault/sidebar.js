@@ -53,7 +53,7 @@ export function isEmptyFolder(node) {
    ahead of the manifest's alphabetical ordering. Applied at every level. */
 export const PINNED_PATHS = [
   'vault/00-welcome-note.md',
-  'vault/About Us/What is Forage Library.html',
+  'vault/About Us/What is Forage Library.md',
 ];
 
 /* Pure: reorder a folder's (or the root's) children so pinned entries come
