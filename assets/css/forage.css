@@ -528,15 +528,52 @@ body.vault-resizing { cursor: col-resize; user-select: none; }
 .vault-tree-folder--collapsed > .vault-tree-children { display: none; }
 
 .vault-tree-folder-label {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  text-align: left;
   padding: 6px 8px;
+  font-family: inherit;
   font-size: 13px;
   font-weight: 600;
   color: var(--text-soft);
-  cursor: pointer;
+  background: transparent;
+  border: none;
   border-radius: 6px;
+  cursor: pointer;
 }
-.vault-tree-folder-label:hover { background: var(--ribbon-hover); }
+button.vault-tree-folder-label:hover,
+button.vault-tree-folder-label:focus-visible { background: var(--ribbon-hover); }
+.vault-tree-folder-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Always-visible dropdown affordance — rotates from ▸ to ▾ when the folder
+   opens. */
+.vault-tree-chevron {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--subtitle);
+  transition: transform 0.15s ease;
+}
+.vault-tree-folder:not(.vault-tree-folder--collapsed) > .vault-tree-folder-label .vault-tree-chevron {
+  transform: rotate(90deg);
+}
+
+.vault-tree-folder-icon { display: inline-flex; flex-shrink: 0; }
+.vault-tree-folder-icon svg { width: 15px; height: 15px; }
+.vault-tree-folder-icon-open { display: none; }
+.vault-tree-folder:not(.vault-tree-folder--collapsed) > .vault-tree-folder-label .vault-tree-folder-icon-closed { display: none; }
+.vault-tree-folder:not(.vault-tree-folder--collapsed) > .vault-tree-folder-label .vault-tree-folder-icon-open { display: block; }
+
+/* Folders with no contents yet: greyed and inert, name aligned where a
+   folder-with-chevron's name sits (8px pad + 14px chevron + 6px gap). */
+.vault-tree-folder--empty > .vault-tree-folder-label {
+  padding-left: 28px;
+  color: var(--subtitle);
+  opacity: 0.5;
+  cursor: default;
+}
 
 .vault-tree-file-btn {
   display: block;
@@ -551,6 +588,11 @@ body.vault-resizing { cursor: col-resize; user-select: none; }
   cursor: pointer;
 }
 .vault-tree-file-btn:hover, .vault-tree-file-btn:focus-visible { background: var(--ribbon-hover); }
+.vault-tree-file-btn[aria-current="page"] {
+  background: var(--teal-bg);
+  color: var(--teal);
+  font-weight: 600;
+}
 
 .vault-panes { flex: 1; display: flex; overflow: hidden; }
 

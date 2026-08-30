@@ -7,9 +7,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const template = document.querySelector('[data-vault-pane-template]');
   const splitView = initSplitView(panesEl, template);
 
+  let sidebarApi = null;
   initSidebar(document.querySelector('[data-vault-sidebar]'), (path, name) => {
     splitView.getActivePane().openVaultFile(path, name);
-  });
+    sidebarApi?.setActive(path);
+  }).then((api) => { sidebarApi = api; });
 
   initResizeHandle(document.querySelector('[data-resize="sidebar"]'), document.querySelector('[data-vault-sidebar]'), {
     storageKey: 'forage-vault-sidebar-width',

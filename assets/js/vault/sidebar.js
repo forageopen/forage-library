@@ -1,5 +1,34 @@
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
+/* Lucide icon path data (lucide.dev, ISC) — same 24x24 stroked convention as
+   the inline SVGs in index.html, so the sidebar reads as one icon set with
+   the ribbon. */
+const ICON_PATHS = {
+  chevron: ['m9 18 6-6-6-6'],
+  folder: ['M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z'],
+  folderOpen: ['m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2'],
+};
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+function makeIcon(name, className) {
+  const svg = document.createElementNS(SVG_NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('fill', 'none');
+  svg.setAttribute('stroke', 'currentColor');
+  svg.setAttribute('stroke-width', '2');
+  svg.setAttribute('stroke-linecap', 'round');
+  svg.setAttribute('stroke-linejoin', 'round');
+  svg.setAttribute('aria-hidden', 'true');
+  if (className) svg.setAttribute('class', className);
+  for (const d of ICON_PATHS[name]) {
+    const path = document.createElementNS(SVG_NS, 'path');
+    path.setAttribute('d', d);
+    svg.appendChild(path);
+  }
+  return svg;
+}
+
 /* Pure: 'yyyy-mm-dd' (the manifest's `date` field) -> 'Mon D, YYYY'. Ported
    from ribbon.js's article-date formatter so both surfaces read the same
    way. Falls back to the raw string for anything non-ISO rather than
@@ -13,21 +42,60 @@ export function formatDate(raw) {
   return `${MONTHS[month]} ${day}, ${year}`;
 }
 
-function renderNode(node) {
-  if (node.type === 'folder') {
-    const li = document.createElement('li');
-    li.className = 'vault-tree-folder';
-    const label = document.createElement('span');
+/* Pure: a folder node with nothing to show. These render greyed-out and
+   inert — no chevron, no toggle — so they're visibly distinct from a
+   collapsed folder that does have contents. */
+export function isEmptyFolder(node) {
+  return node.type === 'folder' && (!node.children || node.children.length === 0);
+}
+
+function renderFolder(node) {
+  const li = document.createElement('li');
+  li.className = 'vault-tree-folder';
+
+  const name = document.createElement('span');
+  name.className = 'vault-tree-folder-name';
+  name.textContent = node.name;
+
+  const folderIcon = document.createElement('span');
+  folderIcon.className = 'vault-tree-folder-icon';
+
+  if (isEmptyFolder(node)) {
+    li.classList.add('vault-tree-folder--empty');
+    const label = document.createElement('div');
     label.className = 'vault-tree-folder-label';
-    label.textContent = node.name;
+    folderIcon.appendChild(makeIcon('folder'));
+    label.append(folderIcon, name);
     li.appendChild(label);
-    const ul = document.createElement('ul');
-    ul.className = 'vault-tree-children';
-    node.children.forEach((child) => ul.appendChild(renderNode(child)));
-    li.appendChild(ul);
-    label.addEventListener('click', () => li.classList.toggle('vault-tree-folder--collapsed'));
     return li;
   }
+
+  li.classList.add('vault-tree-folder--collapsed');
+  const label = document.createElement('button');
+  label.type = 'button';
+  label.className = 'vault-tree-folder-label';
+  label.setAttribute('aria-expanded', 'false');
+
+  folderIcon.appendChild(makeIcon('folder', 'vault-tree-folder-icon-closed'));
+  folderIcon.appendChild(makeIcon('folderOpen', 'vault-tree-folder-icon-open'));
+  label.append(makeIcon('chevron', 'vault-tree-chevron'), folderIcon, name);
+  li.appendChild(label);
+
+  const ul = document.createElement('ul');
+  ul.className = 'vault-tree-children';
+  node.children.forEach((child) => ul.appendChild(renderNode(child)));
+  li.appendChild(ul);
+
+  label.addEventListener('click', () => {
+    const collapsed = li.classList.toggle('vault-tree-folder--collapsed');
+    label.setAttribute('aria-expanded', String(!collapsed));
+  });
+  return li;
+}
+
+function renderNode(node) {
+  if (node.type === 'folder') return renderFolder(node);
+
   const li = document.createElement('li');
   li.className = 'vault-tree-file';
   const button = document.createElement('button');
@@ -50,7 +118,7 @@ export async function initSidebar(root, onOpen, fetchImpl = fetch) {
     manifest = await res.json();
   } catch (err) {
     root.innerHTML = `<div class="vault-status vault-status--error">Couldn't load vault index: ${err.message}</div>`;
-    return;
+    return null;
   }
 
   const ul = document.createElement('ul');
@@ -63,4 +131,29 @@ export async function initSidebar(root, onOpen, fetchImpl = fetch) {
     const btn = e.target.closest('.vault-tree-file-btn');
     if (btn) onOpen(btn.dataset.path, btn.dataset.name);
   });
+
+  return {
+    /* Mark `path` as the open doc: one persistent highlight in the tree,
+       plus un-collapse its ancestor folders so it's actually visible. In
+       split view this tracks the most recently opened file. */
+    setActive(path) {
+      let target = null;
+      root.querySelectorAll('.vault-tree-file-btn').forEach((btn) => {
+        if (btn.dataset.path === path) {
+          btn.setAttribute('aria-current', 'page');
+          target = btn;
+        } else {
+          btn.removeAttribute('aria-current');
+        }
+      });
+      if (!target) return;
+      let folder = target.closest('.vault-tree-folder');
+      while (folder) {
+        folder.classList.remove('vault-tree-folder--collapsed');
+        const label = folder.querySelector(':scope > .vault-tree-folder-label');
+        if (label && label.tagName === 'BUTTON') label.setAttribute('aria-expanded', 'true');
+        folder = folder.parentElement && folder.parentElement.closest('.vault-tree-folder');
+      }
+    },
+  };
 }
