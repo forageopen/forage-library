@@ -18,6 +18,17 @@ import { highlightSwatchesHtml } from './highlight-colors.js';
 import { contrastTextColor } from './contrast.js';
 import { formatReadingStats, formatPageStats } from './reading-stats.js';
 import { computeFitScale, isHtmlFrameSizeMessage, HTML_FRAME_MEASURE_SCRIPT } from './html-frame-fit.js';
+import {
+  clampZoom,
+  readStoredZoom,
+  writeStoredZoom,
+  readStoredDark,
+  writeStoredDark,
+  isDocDarkReadyMessage,
+  DOC_DARK_MESSAGE,
+  DOC_DARK_IFRAME_ADDON,
+  ZOOM_DEFAULT,
+} from './doc-view.js';
 
 const TEXT_DECODER = new TextDecoder('utf-8');
 const MARKDOWN_SOURCE_EXTENSIONS = new Set(['md', 'txt']);
@@ -101,6 +112,11 @@ export function createViewerPane(paneEl) {
   const nameEl = paneEl.querySelector('[data-vault-pane-name]');
   const exportMenuBtn = paneEl.querySelector('[data-action="pane-export-menu"]');
   const exportMenu = paneEl.querySelector('.vault-pane-export-menu');
+  const darkBtn = paneEl.querySelector('[data-action="pane-dark"]');
+  const zoomMenuBtn = paneEl.querySelector('[data-action="pane-zoom-menu"]');
+  const zoomMenu = paneEl.querySelector('.vault-pane-zoom-menu');
+  const zoomRange = paneEl.querySelector('[data-pane-zoom-range]');
+  const zoomValueEl = paneEl.querySelector('[data-pane-zoom-value]');
   const statsBar = paneEl.querySelector('[data-vault-pane-stats-bar]');
   const statsEl = paneEl.querySelector('[data-vault-pane-stats]');
   const progressBar = paneEl.querySelector('[data-vault-export-progress]');
@@ -124,6 +140,10 @@ export function createViewerPane(paneEl) {
 
   let currentPath = null;
   let currentName = null;
+  /* Per-pane viewer controls (see the header buttons in index.html). Both
+     start from the last persisted choice so a reload keeps the layout. */
+  let userZoom = readStoredZoom(localStorage);
+  let docDark = readStoredDark(localStorage);
   let currentSourceText = null; // only set for .md/.txt — the raw source, for "export as Markdown"
   let currentRawHtml = null; // only set for .html/.htm — the raw source, for re-download on "export as HTML"
   let currentHtmlFrame = null; // the live iframe element, while a .html/.htm file is open
@@ -140,9 +160,55 @@ export function createViewerPane(paneEl) {
     const wrap = currentHtmlFrame.parentElement;
     if (!wrap) return;
     const { width: naturalWidth, height: naturalHeight } = currentHtmlFrameNaturalSize;
-    const scale = computeFitScale(wrap.getBoundingClientRect().width, naturalWidth);
+    // Fit-to-width first (never > 1 on its own), then the visitor's own zoom
+    // multiplies on top — so 100% zoom still means "fill the pane width" for
+    // a fixed-layout doc, and >100% is allowed to overflow (wrap scrolls).
+    const scale = computeFitScale(wrap.getBoundingClientRect().width, naturalWidth) * userZoom;
     currentHtmlFrame.style.transform = `scale(${scale})`;
     wrap.style.height = `${naturalHeight * scale}px`;
+    wrap.style.overflowX = userZoom > 1 ? 'auto' : 'hidden';
+  }
+
+  /* Pushes the current dark-mode state into the open .html frame. The
+     frame's injected listener (DOC_DARK_IFRAME_ADDON) toggles a class on
+     its own <html>; doing it from inside the sandbox keeps the hue-rotate
+     filter GPU-composited so the framed doc's animations stay smooth (a
+     parent-side filter over animated frame content pegs the renderer). */
+  function postDarkState() {
+    if (currentHtmlFrame && currentHtmlFrame.contentWindow) {
+      currentHtmlFrame.contentWindow.postMessage({ source: DOC_DARK_MESSAGE, on: docDark }, '*');
+    }
+  }
+
+  /* Re-applies the two per-pane view controls (zoom + document dark mode)
+     to whatever's currently rendered. Called after every render path, since
+     each one rebuilds contentEl's class/markup and would otherwise drop the
+     state.
+
+     Zoom is universal. Dark mode only makes sense for content that doesn't
+     already follow the site theme: a rendered .html/.htm file (handled
+     inside its iframe) and a PDF/PPTX page deck (a CSS filter on contentEl,
+     safe since those are static). Themed prose (.md/.docx/.txt/spreadsheets)
+     and bare images opt out — the button hides for them. */
+  function applyDocView() {
+    const kind = ['iframe', 'deck', 'image', 'prose', 'editor']
+      .find((k) => contentEl.classList.contains('vault-pane-content--' + k)) || null;
+    const isIframe = kind === 'iframe';
+    const darkApplies = kind === 'iframe' || kind === 'deck';
+
+    contentEl.classList.toggle('vault-pane-content--dark', docDark && kind === 'deck');
+    contentEl.style.zoom = (isIframe || userZoom === 1) ? '' : String(userZoom);
+    if (isIframe) {
+      applyHtmlFrameScale();
+      postDarkState();
+    }
+
+    if (darkBtn) {
+      darkBtn.hidden = !darkApplies;
+      darkBtn.setAttribute('aria-pressed', String(docDark && darkApplies));
+    }
+    if (zoomRange) zoomRange.value = String(Math.round(userZoom * 100));
+    if (zoomValueEl) zoomValueEl.textContent = `${Math.round(userZoom * 100)}%`;
   }
 
   function handleHtmlFrameMessage(e) {
@@ -164,6 +230,15 @@ export function createViewerPane(paneEl) {
     applyHtmlFrameScale();
   }
   window.addEventListener('message', handleHtmlFrameMessage);
+
+  /* The framed doc announces when its dark-mode listener is live (its load
+     timing races our openSource call); answer with the current state so a
+     file opened while dark mode is already on comes up dark. */
+  window.addEventListener('message', (e) => {
+    if (currentHtmlFrame && e.source === currentHtmlFrame.contentWindow && isDocDarkReadyMessage(e.data)) {
+      postDarkState();
+    }
+  });
 
   if (typeof ResizeObserver !== 'undefined' && paneMain) {
     new ResizeObserver(() => applyHtmlFrameScale()).observe(paneMain);
@@ -255,6 +330,7 @@ export function createViewerPane(paneEl) {
     div.className = 'vault-status vault-status--loading';
     div.textContent = `Loading ${name}…`;
     contentEl.appendChild(div);
+    applyDocView();
   }
 
   /* An unopenable file (wrong type, fetch failure, parse error) keeps the
@@ -315,7 +391,7 @@ export function createViewerPane(paneEl) {
         // The measure script is view-only — appended to what's *displayed*,
         // never to currentRawHtml (set below), which stays the untouched
         // original bytes for re-download/export fidelity.
-        frame.srcdoc = result.html + HTML_FRAME_MEASURE_SCRIPT;
+        frame.srcdoc = result.html + HTML_FRAME_MEASURE_SCRIPT + DOC_DARK_IFRAME_ADDON;
       } else {
         currentHtmlFrame = null;
         currentHtmlFrameNaturalSize = null;
@@ -346,6 +422,7 @@ export function createViewerPane(paneEl) {
       }
       updateStats();
       updateExportMenu();
+      applyDocView();
     } catch (err) {
       currentPath = null;
       currentName = null;
@@ -354,6 +431,7 @@ export function createViewerPane(paneEl) {
       updateHeader();
       updateStats();
       updateExportMenu();
+      applyDocView();
     }
   }
 
@@ -539,6 +617,12 @@ export function createViewerPane(paneEl) {
     exportMenuBtn.setAttribute('aria-expanded', String(open));
   }
 
+  function setZoomMenuOpen(open) {
+    if (!zoomMenu || !zoomMenuBtn) return;
+    zoomMenu.hidden = !open;
+    zoomMenuBtn.setAttribute('aria-expanded', String(open));
+  }
+
   /* Per-pane header — lives inside this pane's own DOM subtree, so every
      action here is inherently scoped to THIS pane, not "whichever pane is
      active" (the old global-kebab behavior the user found confusing in
@@ -547,6 +631,23 @@ export function createViewerPane(paneEl) {
     headerEl.addEventListener('click', (e) => {
       if (e.target.closest('[data-action="pane-sidenote"]')) {
         if (sidenoteEl) sidenoteEl.hidden = !sidenoteEl.hidden;
+        return;
+      }
+      if (e.target.closest('[data-action="pane-dark"]')) {
+        docDark = !docDark;
+        writeStoredDark(localStorage, docDark);
+        applyDocView();
+        return;
+      }
+      if (e.target.closest('[data-action="pane-zoom-menu"]')) {
+        e.stopPropagation();
+        setZoomMenuOpen(zoomMenu ? zoomMenu.hidden : false);
+        return;
+      }
+      if (e.target.closest('[data-action="pane-zoom-reset"]')) {
+        userZoom = ZOOM_DEFAULT;
+        writeStoredZoom(localStorage, userZoom);
+        applyDocView();
         return;
       }
       if (e.target.closest('[data-action="pane-export-menu"]')) {
@@ -569,13 +670,27 @@ export function createViewerPane(paneEl) {
         return;
       }
     });
+    /* Live zoom while dragging the slider (input, not change, so it tracks
+       the drag) — the range's value is a whole percent; doc-view works in
+       factors. */
+    headerEl.addEventListener('input', (e) => {
+      if (!e.target.closest('[data-pane-zoom-range]')) return;
+      userZoom = clampZoom(Number(e.target.value) / 100);
+      writeStoredZoom(localStorage, userZoom);
+      applyDocView();
+    });
     document.addEventListener('click', (e) => {
       if (exportMenu && !exportMenu.hidden && !exportMenu.contains(e.target) && e.target !== exportMenuBtn && !exportMenuBtn.contains(e.target)) {
         setExportMenuOpen(false);
       }
+      if (zoomMenu && !zoomMenu.hidden && !zoomMenu.contains(e.target) && e.target !== zoomMenuBtn && !zoomMenuBtn.contains(e.target)) {
+        setZoomMenuOpen(false);
+      }
     });
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && exportMenu && !exportMenu.hidden) setExportMenuOpen(false);
+      if (e.key !== 'Escape') return;
+      if (exportMenu && !exportMenu.hidden) setExportMenuOpen(false);
+      if (zoomMenu && !zoomMenu.hidden) setZoomMenuOpen(false);
     });
   }
 
@@ -605,6 +720,7 @@ export function createViewerPane(paneEl) {
       updateHeader();
       updateStats();
       updateExportMenu();
+      applyDocView();
     },
     /* Clears this pane back to its empty, default state — the "no clarity
        how to get back to the picker" gap the user flagged. Sidenote is
@@ -625,6 +741,7 @@ export function createViewerPane(paneEl) {
       updateHeader();
       updateStats();
       updateExportMenu();
+      applyDocView();
     },
     exportHtml() {
       if (!currentName) return;
@@ -718,5 +835,6 @@ export function createViewerPane(paneEl) {
     },
   };
 
+  applyDocView(); // sync the control UI to persisted state on first render
   return api;
 }

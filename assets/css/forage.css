@@ -628,6 +628,56 @@ body.vault-resizing { cursor: col-resize; user-select: none; }
 .vault-pane-export-menu li[aria-disabled="true"] { color: var(--text-soft); opacity: 0.5; cursor: not-allowed; }
 .vault-pane-export-menu li[aria-disabled="true"]:hover, .vault-pane-export-menu li[aria-disabled="true"]:focus-visible { background: none; }
 
+/* ---------- Per-pane viewer controls: zoom + document dark mode ----------
+   Two header buttons next to "Take a note" (see viewer-pane.js). Zoom opens
+   a small slider popover, same shape as the export menu; dark mode is a
+   plain toggle. Both scoped to their own pane's DOM subtree. */
+.vault-pane-zoom-wrap { position: relative; }
+.vault-pane-zoom-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  background: var(--ribbon-bg);
+  border: 1px solid var(--ribbon-border);
+  border-radius: 8px;
+  padding: 10px;
+  min-width: 190px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.vault-pane-zoom-menu[hidden] { display: none; }
+.vault-pane-zoom-menu input[type="range"] { width: 100%; margin: 0; accent-color: var(--teal); }
+.vault-pane-zoom-row { display: flex; align-items: center; justify-content: space-between; }
+.vault-pane-zoom-row span { font-size: 12px; color: var(--text-soft); font-variant-numeric: tabular-nums; }
+.vault-pane-zoom-row button {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 5px;
+  padding: 3px 9px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.vault-pane-zoom-row button:hover, .vault-pane-zoom-row button:focus-visible { background: var(--ribbon-hover); }
+.vault-pane-header-btn[aria-pressed="true"] { background: var(--ribbon-hover); color: var(--text); }
+
+/* Document dark mode for a PDF/PPTX page deck — a near-total invert
+   (white -> charcoal, not pure black) plus a 180deg hue-rotate that lands
+   every hue back where it started, so coloured content keeps its colour
+   while white pages go dark. Kept in sync with DOC_DARK_FILTER in
+   doc-view.js. Safe as a plain element filter here because deck pages are
+   static; a rendered .html/.htm file gets the same filter injected inside
+   its iframe instead (see DOC_DARK_IFRAME_ADDON) so any animation it runs
+   stays GPU-composited. Themed prose and bare images don't get a dark
+   toggle at all — the button hides for them (see applyDocView). */
+.vault-pane-content--dark.vault-pane-content--deck { filter: invert(0.92) hue-rotate(180deg); }
+@media print {
+  .vault-pane-content--dark { filter: none !important; }
+}
+
 /* Word count / reading time — a full-width bar under the pane header,
    text right-aligned, colors pulled from the active theme like every
    other chrome piece on the page. */

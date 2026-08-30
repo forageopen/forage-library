@@ -83,6 +83,21 @@
             <button type="button" class="vault-pane-header-btn" data-action="pane-sidenote" aria-label="Sidenote" title="Take a note">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
             </button>
+            <button type="button" class="vault-pane-header-btn" data-action="pane-dark" aria-pressed="false" aria-label="Document dark mode" title="Document dark mode">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>
+            </button>
+            <div class="vault-pane-zoom-wrap">
+              <button type="button" class="vault-pane-header-btn" data-action="pane-zoom-menu" aria-haspopup="true" aria-expanded="false" aria-label="Zoom" title="Zoom">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/><path d="M8 11h6"/></svg>
+              </button>
+              <div class="vault-pane-zoom-menu" hidden>
+                <input type="range" min="50" max="200" step="10" value="100" data-pane-zoom-range aria-label="Zoom level" />
+                <div class="vault-pane-zoom-row">
+                  <span data-pane-zoom-value>100%</span>
+                  <button type="button" data-action="pane-zoom-reset">Reset</button>
+                </div>
+              </div>
+            </div>
             <div class="vault-pane-export-wrap">
               <button type="button" class="vault-pane-header-btn" data-action="pane-export-menu" aria-haspopup="true" aria-expanded="false" aria-label="Export" title="Export options">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
@@ -155,6 +170,21 @@
           <button type="button" class="vault-pane-header-btn" data-action="pane-sidenote" aria-label="Sidenote" title="Take a note">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           </button>
+          <button type="button" class="vault-pane-header-btn" data-action="pane-dark" aria-pressed="false" aria-label="Document dark mode" title="Document dark mode">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>
+          </button>
+          <div class="vault-pane-zoom-wrap">
+            <button type="button" class="vault-pane-header-btn" data-action="pane-zoom-menu" aria-haspopup="true" aria-expanded="false" aria-label="Zoom" title="Zoom">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/><path d="M8 11h6"/></svg>
+            </button>
+            <div class="vault-pane-zoom-menu" hidden>
+              <input type="range" min="50" max="200" step="10" value="100" data-pane-zoom-range aria-label="Zoom level" />
+              <div class="vault-pane-zoom-row">
+                <span data-pane-zoom-value>100%</span>
+                <button type="button" data-action="pane-zoom-reset">Reset</button>
+              </div>
+            </div>
+          </div>
           <div class="vault-pane-export-wrap">
             <button type="button" class="vault-pane-header-btn" data-action="pane-export-menu" aria-haspopup="true" aria-expanded="false" aria-label="Export" title="Export options">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
