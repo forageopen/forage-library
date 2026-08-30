@@ -542,9 +542,14 @@ body.vault-resizing { cursor: col-resize; user-select: none; }
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, letter-spacing 0.15s ease;
 }
 button.vault-tree-folder-label:hover,
-button.vault-tree-folder-label:focus-visible { background: var(--ribbon-hover); }
+button.vault-tree-folder-label:focus-visible {
+  background: var(--ribbon-hover);
+  color: var(--teal);
+  letter-spacing: 0.045em;
+}
 .vault-tree-folder-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* Always-visible dropdown affordance — rotates from ▸ to ▾ when the folder
@@ -587,8 +592,13 @@ button.vault-tree-folder-label:focus-visible { background: var(--ribbon-hover); 
   padding: 6px 8px;
   border-radius: 6px;
   cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, letter-spacing 0.15s ease;
 }
-.vault-tree-file-btn:hover, .vault-tree-file-btn:focus-visible { background: var(--ribbon-hover); }
+.vault-tree-file-btn:hover, .vault-tree-file-btn:focus-visible {
+  background: var(--ribbon-hover);
+  color: var(--teal);
+  letter-spacing: 0.045em;
+}
 .vault-tree-file-btn[aria-current="page"] {
   background: var(--teal-bg);
   color: var(--teal);
