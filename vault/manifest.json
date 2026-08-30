@@ -51,7 +51,16 @@
       "name": "About Us",
       "type": "folder",
       "path": "vault/About Us",
-      "children": []
+      "children": [
+        {
+          "name": "Author Bio.html",
+          "type": "file",
+          "path": "vault/About Us/Author Bio.html",
+          "fileType": "html",
+          "title": "Author Bio",
+          "date": "2026-08-31"
+        }
+      ]
     },
     {
       "name": "Case Studies",
