@@ -179,13 +179,46 @@ function inlineTokensToRuns(tokens, formatting = {}) {
 
 const HEADING_TAGS = { H1: 1, H2: 2, H3: 3, H4: 4, H5: 5, H6: 6 };
 
+const BLOCK_TAGS = new Set([
+  'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'P', 'DIV',
+  'BLOCKQUOTE', 'UL', 'OL', 'HR', 'PRE', 'TABLE',
+]);
+
 /** Walk a rendered content element (e.g. the .vault-content div mammoth's
- * sanitized/restyled output was assigned into) into the shared IR. */
+ * sanitized/restyled output was assigned into) into the shared IR.
+ *
+ * childNodes, not children: a contenteditable editor (the "new note"
+ * path) commonly leaves the first typed line as a bare text node — or
+ * bare <b>/<a>/<span> inline nodes — directly under root, with only
+ * later lines wrapped in <div>s. Iterating elements only silently
+ * dropped that first line from every export. Consecutive inline/text
+ * nodes are buffered and flushed as one paragraph whenever a real block
+ * element (or the end of the list) is reached. */
 export function blocksFromElement(root) {
   const blocks = [];
-  for (const child of Array.from(root.children)) {
-    appendElementBlocks(child, blocks);
+  let inlineBuffer = [];
+
+  const flushInline = () => {
+    if (inlineBuffer.length === 0) return;
+    const wrap = root.ownerDocument.createElement('div');
+    for (const node of inlineBuffer) wrap.appendChild(node.cloneNode(true));
+    const runs = elementInlineRuns(wrap, {});
+    if (runs.some((r) => r.text.trim().length > 0)) {
+      blocks.push({ kind: 'paragraph', runs });
+    }
+    inlineBuffer = [];
+  };
+
+  for (const node of Array.from(root.childNodes)) {
+    if (node.nodeType === 1 && BLOCK_TAGS.has(node.tagName)) {
+      flushInline();
+      appendElementBlocks(node, blocks);
+    } else if (node.nodeType === 1 || node.nodeType === 3) {
+      inlineBuffer.push(node);
+    }
   }
+  flushInline();
+
   if (blocks.length === 0 && (root.textContent ?? '').trim().length > 0) {
     blocks.push({ kind: 'paragraph', runs: elementInlineRuns(root, {}) });
   }
