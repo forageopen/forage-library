@@ -55,10 +55,10 @@
           "date": "2026-08-31"
         },
         {
-          "name": "What is Forage Library.html",
+          "name": "What is Forage Library.md",
           "type": "file",
-          "path": "vault/About Us/What is Forage Library.html",
-          "fileType": "html",
+          "path": "vault/About Us/What is Forage Library.md",
+          "fileType": "md",
           "title": "What is Forage Library",
           "date": "2026-08-31"
         }
