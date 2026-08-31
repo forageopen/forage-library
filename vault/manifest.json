@@ -68,7 +68,16 @@
       "name": "Case Studies",
       "type": "folder",
       "path": "vault/Case Studies",
-      "children": []
+      "children": [
+        {
+          "name": "EdTech Failure — Clever and Make School.html",
+          "type": "file",
+          "path": "vault/Case Studies/EdTech Failure — Clever and Make School.html",
+          "fileType": "html",
+          "title": "EdTech Failure: Clever & Make School",
+          "date": "2026-08-31"
+        }
+      ]
     },
     {
       "name": "Frameworks",

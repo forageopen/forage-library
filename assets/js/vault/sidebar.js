@@ -86,6 +86,7 @@ export function orderSiblings(children) {
    ("📊 Slides", "📝 Articles") get their glyph that way instead. */
 const FOLDER_ICONS = {
   'About Us': '🏛️',
+  'Case Studies': '🔍',
   Frameworks: '🧩',
   Guides: '🧭',
   Research: '🔬',
