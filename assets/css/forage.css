@@ -482,10 +482,26 @@ th { font-weight: 600; background: var(--panel); font-size: 11px; text-transform
   padding: 16px 12px;
   background: var(--bg);
 }
-/* Collapsed via the ribbon's toggle-sidebar icon — hide its resize handle
-   too (a sibling combinator, not :has(), since the handle comes AFTER the
-   sidebar in the DOM here, unlike the sidenote's handle which precedes it). */
-.vault-sidebar[hidden] ~ .vault-resize-handle[data-resize="sidebar"] { display: none; }
+/* Collapsed via the ribbon's toggle-sidebar icon (and by the welcome
+   screen) — hide its resize handle too (a sibling combinator, not :has(),
+   since the handle comes AFTER the sidebar in the DOM here, unlike the
+   sidenote's handle which precedes it). */
+.vault-sidebar--collapsed ~ .vault-resize-handle[data-resize="sidebar"] { display: none; }
+
+/* Collapse/reveal — app.js sets a negative margin-left (== the sidebar's
+   own width) to slide it off-screen left; the layout's next flex item
+   fills the gap. margin-left is the animated axis, NOT width: resize.js
+   drives `width` on every drag frame and a width transition would
+   rubber-band the drag. `--animating` is added only for the slide, so a
+   drag-resize stays instant. */
+.vault-sidebar--collapsed { opacity: 0; pointer-events: none; }
+.vault-sidebar--animating {
+  transition: margin-left 0.34s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.24s ease;
+  overflow: hidden; /* no scrollbar flash mid-slide */
+}
+@media (prefers-reduced-motion: reduce) {
+  .vault-sidebar--animating { transition: none; }
+}
 
 /* Drag-to-resize handles — one between sidebar/viewer, one between
    viewer/sidenote (assets/js/vault/resize.js wires the drag behavior;
@@ -1184,6 +1200,9 @@ button.vault-tree-folder-label:focus-visible {
   /* !important: overrides the inline width a desktop resize may have left
      in localStorage/style — stacked mobile layout always goes full-width. */
   .vault-sidebar { width: 100% !important; max-width: none; border-bottom: 1px solid var(--ribbon-border); }
+  /* Stacked layout — a horizontal margin-left slide doesn't map here, so a
+     collapsed sidebar just drops out (the logo toggle still works). */
+  .vault-sidebar--collapsed { display: none; margin-left: 0 !important; }
   .vault-sidenote { width: 100% !important; max-width: none; border-top: 1px solid var(--ribbon-border); }
   .vault-resize-handle { display: none; }
   .vault-panes--split { flex-direction: column; }

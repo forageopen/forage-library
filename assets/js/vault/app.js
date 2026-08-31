@@ -12,20 +12,77 @@ document.addEventListener('DOMContentLoaded', () => {
   const splitView = initSplitView(panesEl, template);
 
   const sidebarEl = document.querySelector('[data-vault-sidebar]');
+  const sidebarToggleBtn = document.querySelector('[data-action="toggle-sidebar"]');
 
   let sidebarApi = null;
 
+  // Resize handle first — it stamps the sidebar's inline `width`, which the
+  // collapse animation below reads to know how far to slide it off-screen.
+  initResizeHandle(document.querySelector('[data-resize="sidebar"]'), sidebarEl, {
+    storageKey: 'forage-vault-sidebar-width',
+    defaultWidth: 240,
+    direction: 1, // sidebar sits on the left; dragging right grows it
+  });
+
+  /* Sidebar collapse — toggled by the ribbon's Forage-logo icon, and also
+     used by the welcome screen (which starts the sidebar collapsed and
+     slides it back in once the visitor picks a direction). Animated on
+     `margin-left`, not `width`: resize.js drives `width` on every drag
+     frame, so a width transition would rubber-band the drag — margin-left
+     is untouched by resize. Deliberately NOT persisted: every landing
+     shows the full list, so a visitor needn't remember collapsing it. */
+  let sidebarCollapsed = false;
+  let sidebarExpandedWidth = 240;
+  function setSidebarCollapsed(next, { animate = false } = {}) {
+    if (!sidebarEl) return;
+    if (next && !sidebarCollapsed) sidebarExpandedWidth = sidebarEl.offsetWidth || sidebarExpandedWidth;
+    sidebarCollapsed = next;
+    if (animate) {
+      sidebarEl.classList.add('vault-sidebar--animating');
+      sidebarEl.addEventListener('transitionend', function done(e) {
+        if (e.propertyName !== 'margin-left') return;
+        sidebarEl.classList.remove('vault-sidebar--animating');
+        sidebarEl.removeEventListener('transitionend', done);
+      });
+    }
+    sidebarEl.style.marginLeft = sidebarCollapsed ? `-${sidebarExpandedWidth}px` : '';
+    sidebarEl.classList.toggle('vault-sidebar--collapsed', sidebarCollapsed);
+    sidebarEl.inert = sidebarCollapsed;
+    sidebarToggleBtn?.setAttribute('aria-expanded', String(!sidebarCollapsed));
+  }
+  /* Slide the sidebar in if it's hidden; optionally follow with the accent
+     pulse a beat later (once the slide has settled) — the welcome screen's
+     "Explore" button, pointing a first-time visitor at the folder list. */
+  function revealSidebar({ pulse = false } = {}) {
+    if (sidebarCollapsed) setSidebarCollapsed(false, { animate: true });
+    if (!pulse || !sidebarEl) return;
+    setTimeout(() => {
+      sidebarEl.classList.remove('vault-sidebar--pulse');
+      void sidebarEl.offsetWidth; // restart the animation if it's mid-run
+      sidebarEl.classList.add('vault-sidebar--pulse');
+      setTimeout(() => sidebarEl.classList.remove('vault-sidebar--pulse'), 1500);
+    }, 380);
+  }
+  setSidebarCollapsed(false);
+  sidebarToggleBtn?.addEventListener('click', () => setSidebarCollapsed(!sidebarCollapsed, { animate: true }));
+
   /* First-load welcome screen — sits in the initial pane in place of the
-     empty dropzone until the visitor picks a direction. "See Welcome Note"
-     opens the note; opening anything from the sidebar dismisses it too. */
+     empty dropzone until the visitor picks a direction. While it's up the
+     sidebar is collapsed; any exit (Start exploring, See Welcome Note,
+     opening a file, a #catalog= deep link) slides it back in, and the
+     closing "Explore" button slides it in + pulses without dismissing. */
   const welcome = initWelcome(document.querySelector('.vault-pane .vault-pane-main'), {
-    sidebarEl,
+    onDismiss: () => revealSidebar(),
+    onExplore: () => revealSidebar({ pulse: true }),
     onSeeWelcomeNote() {
       splitView.getActivePane().openVaultFile(WELCOME_NOTE_PATH, WELCOME_NOTE_NAME);
       sidebarApi?.setActive(WELCOME_NOTE_PATH);
     },
   });
+  if (welcome) setSidebarCollapsed(true); // hidden only while the welcome screen shows
 
+  /* welcome?.dismiss() fires onDismiss → revealSidebar(); when there's no
+     welcome screen a manual logo-collapse is left alone on purpose. */
   const openCatalog = (catalogType, path) => {
     welcome?.dismiss();
     splitView.getActivePane().openCatalog(catalogType);
@@ -58,30 +115,6 @@ document.addEventListener('DOMContentLoaded', () => {
     routeHash();
     window.addEventListener('hashchange', routeHash);
   });
-
-  initResizeHandle(document.querySelector('[data-resize="sidebar"]'), document.querySelector('[data-vault-sidebar]'), {
-    storageKey: 'forage-vault-sidebar-width',
-    defaultWidth: 240,
-    direction: 1, // sidebar sits on the left; dragging right grows it
-  });
-
-  /* Sidebar collapse — a single icon in the ribbon, independent of the
-     resize handle (collapsing hides the sidebar entirely; resizing only
-     changes its width while visible). Deliberately NOT persisted: every
-     landing on the page should show the full list of available docs, so
-     a visitor doesn't have to remember they collapsed it last time. The
-     toggle still works to collapse/expand within the current session. */
-  const sidebarToggleBtn = document.querySelector('[data-action="toggle-sidebar"]');
-  if (sidebarToggleBtn && sidebarEl) {
-    let collapsed = false;
-    const applyCollapsed = (next) => {
-      collapsed = next;
-      sidebarEl.hidden = collapsed;
-      sidebarToggleBtn.setAttribute('aria-expanded', String(!collapsed));
-    };
-    applyCollapsed(collapsed);
-    sidebarToggleBtn.addEventListener('click', () => applyCollapsed(!collapsed));
-  }
 
   // Export and Sidenote are now per-pane header controls (each button
   // lives inside its own pane's DOM subtree, so it's inherently scoped to

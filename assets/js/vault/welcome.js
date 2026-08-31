@@ -1,12 +1,15 @@
 /* First-load welcome screen for the initial pane.
  *
  * Shown once per browser (localStorage 'forage-welcome-seen') in place of
- * the empty dropzone. Dismissed by:
- *   - "Start exploring"  → reveal the normal dropzone / new-note picker
- *   - "See Welcome Note" → open vault/00-welcome-note.md (caller wires this)
- *   - opening any file from the sidebar (caller calls dismiss())
- * The closing "Explore" button does NOT dismiss — it pulses the sidebar to
- * point a first-time visitor at the folder list.
+ * the empty dropzone. While it's up the sidebar is collapsed (app.js).
+ * Exits, each of which fires onDismiss() so the caller can slide the
+ * sidebar back in:
+ *   - "Start exploring"  → dropzone / new-note picker
+ *   - "See Welcome Note" → onSeeWelcomeNote() opens vault/00-welcome-note.md
+ *   - opening any file / a #catalog= deep link (caller calls dismiss())
+ * The closing "Explore" button does NOT dismiss — it fires onExplore(), and
+ * the caller slides the sidebar in + pulses it to point the visitor at the
+ * folder list.
  *
  * Add ?welcome to the URL to force it back for testing after it's been seen.
  * All styling lives in forage.css (.vault-welcome*), token-based, so it
@@ -163,10 +166,11 @@ function markSeen() {
  * it's already been seen. Returns { dismiss } — call dismiss() when a file
  * is opened by other means — or null when nothing was shown.
  *
+ *   onDismiss():        any exit from the welcome screen (slide the sidebar in)
  *   onSeeWelcomeNote(): open vault/00-welcome-note.md
- *   sidebarEl: the <nav> to pulse from the closing "Explore" button
+ *   onExplore():        closing "Explore" — slide the sidebar in + pulse it
  */
-export function initWelcome(paneMainEl, { onSeeWelcomeNote, sidebarEl } = {}) {
+export function initWelcome(paneMainEl, { onDismiss, onSeeWelcomeNote, onExplore } = {}) {
   if (!paneMainEl) return null;
   const forced = new URLSearchParams(location.search).has('welcome');
   if (hasSeen() && !forced) return null;
@@ -184,6 +188,7 @@ export function initWelcome(paneMainEl, { onSeeWelcomeNote, sidebarEl } = {}) {
     if (dismissed) return;
     dismissed = true;
     markSeen();
+    onDismiss?.();
     el.remove();
     if (dropzone) dropzone.hidden = false;
   }
@@ -198,11 +203,7 @@ export function initWelcome(paneMainEl, { onSeeWelcomeNote, sidebarEl } = {}) {
   });
 
   el.querySelector('[data-welcome-pulse]')?.addEventListener('click', () => {
-    if (!sidebarEl) return;
-    sidebarEl.classList.remove('vault-sidebar--pulse');
-    void sidebarEl.offsetWidth; // restart the animation if it's mid-run
-    sidebarEl.classList.add('vault-sidebar--pulse');
-    setTimeout(() => sidebarEl.classList.remove('vault-sidebar--pulse'), 1500);
+    onExplore?.();
   });
 
   let toastTimer = 0;
