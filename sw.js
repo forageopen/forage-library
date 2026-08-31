@@ -101,6 +101,7 @@ const PRECACHE_ENTRIES = [
   "assets/js/vault/sidenote-store.js",
   "assets/js/vault/split-view.js",
   "assets/js/vault/viewer-pane.js",
+  "assets/js/vault/welcome-motion.js",
   "assets/js/vault/welcome.js",
   "assets/js/visitor-counter.js",
   "assets/fonts/Figtree-SemiBold.ttf",

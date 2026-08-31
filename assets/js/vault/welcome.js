@@ -16,6 +16,8 @@
  * follows every theme.
  */
 
+import { initWelcomeMotion } from './welcome-motion.js';
+
 const SEEN_KEY = 'forage-welcome-seen';
 
 const ARROW = '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>';
@@ -30,7 +32,7 @@ function stroke(paths) {
 const WELCOME_HTML = `
   <div class="vault-welcome-hero">
     <div class="vault-welcome-kicker">Forage Library</div>
-    <h1>The world is yours.<br>Go forage.</h1>
+    <h1>The world is yours.\nGo forage.</h1>
     <p class="vault-welcome-lede">An open collection of research, frameworks, and working knowledge &mdash; on AI, data rights, technology, and learning how to learn. There is no syllabus. Start with a question and follow the trail.</p>
     <div class="vault-welcome-cta">
       <button type="button" class="vault-welcome-btn vault-welcome-btn--primary" data-welcome-start>${stroke(ARROW)} Start exploring</button>
@@ -183,11 +185,16 @@ export function initWelcome(paneMainEl, { onDismiss, onSeeWelcomeNote, onExplore
   paneMainEl.prepend(el);
   if (dropzone) dropzone.hidden = true;
 
+  // Scramble-in / stagger-reveal on scroll (no-op under reduced motion).
+  // Runs synchronously before the first paint so nothing flashes static.
+  const motion = initWelcomeMotion(el);
+
   let dismissed = false;
   function dismiss() {
     if (dismissed) return;
     dismissed = true;
     markSeen();
+    motion?.destroy();
     onDismiss?.();
     el.remove();
     if (dropzone) dropzone.hidden = false;
