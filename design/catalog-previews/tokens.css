@@ -1,0 +1,178 @@
+/* Forage theme tokens — copied verbatim from assets/css/forage.css so the
+   catalog mockups render in every real theme. Preview-only; the real
+   integration reuses forage.css directly. */
+
+:root {
+  /* Sakura — light pink surfaces, burgundy text. */
+  --bg: #ffe0eb;
+  --page-bg: #fff0f5;
+  --text: #4a0e2e;
+  --text-soft: #4a0e2e;
+  --subtitle: #8a4a63;
+  --border: #f3c6d6;
+  --teal: #c2185b;
+  --teal-bg: #ffd6e5;
+  --blue: #e64980;
+  --panel: #f8e1ea;
+  --arrow: #d98aa8;
+  --error: #de350b;
+
+  --ribbon-bg: #fff0f5;
+  --ribbon-text: #4a0e2e;
+  --ribbon-muted: #8a4a63;
+  --ribbon-border: #f3c6d6;
+  --ribbon-hover: #fff5f9;
+
+  --font: Inter, "Segoe UI", Arial, sans-serif;
+  --mono: "SF Mono", "JetBrains Mono", "Fira Code", ui-monospace, Menlo, Consolas, monospace;
+}
+
+html[data-theme="cherry"] {
+  --bg: #0e0d10;
+  --page-bg: #141316;
+  --text: #ece7ea;
+  --text-soft: #ece7ea;
+  --subtitle: #a99aa1;
+  --border: #2c262a;
+  --teal: #ff2ea6;
+  --teal-bg: #3a1230;
+  --blue: #ff5ec2;
+  --panel: #1c181c;
+  --arrow: #45383e;
+  --error: #ff6b81;
+
+  --ribbon-bg: #141316;
+  --ribbon-text: #ece7ea;
+  --ribbon-muted: #a99aa1;
+  --ribbon-border: #2c262a;
+  --ribbon-hover: #1c1a1d;
+}
+
+html[data-theme="forest-brew"] {
+  --bg: #212e1e;
+  --page-bg: #283624;
+  --text: #acc54e;
+  --text-soft: #acc54e;
+  --subtitle: #8fa968;
+  --border: #3a4a34;
+  --teal: #acc54e;
+  --teal-bg: #3c4a24;
+  --blue: #c3db6e;
+  --panel: #263424;
+  --arrow: #56684c;
+  --error: #ff8a65;
+
+  --ribbon-bg: #283624;
+  --ribbon-text: #acc54e;
+  --ribbon-muted: #8fa968;
+  --ribbon-border: #3a4a34;
+  --ribbon-hover: #324230;
+}
+
+html[data-theme="tea-mist"] {
+  --bg: #cad1ab;
+  --page-bg: #d6dcbc;
+  --text: #242f21;
+  --text-soft: #242f21;
+  --subtitle: #56604e;
+  --border: #b9c293;
+  --teal: #242f21;
+  --teal-bg: #dce2c4;
+  --blue: #3d4b37;
+  --panel: #d2d8b7;
+  --arrow: #9ca876;
+  --error: #c1502e;
+
+  --ribbon-bg: #d6dcbc;
+  --ribbon-text: #242f21;
+  --ribbon-muted: #56604e;
+  --ribbon-border: #b9c293;
+  --ribbon-hover: #e3e7ce;
+}
+
+html[data-theme="blueberry"] {
+  --bg: #4b4f76;
+  --page-bg: #411b32;
+  --text: #babcd3;
+  --text-soft: #babcd3;
+  --subtitle: #9799b5;
+  --border: #5a5e82;
+  --teal: #647ebd;
+  --teal-bg: #2e3350;
+  --blue: #acbadb;
+  --panel: #3e2038;
+  --arrow: #757aa3;
+  --error: #e0708a;
+
+  --ribbon-bg: #411b32;
+  --ribbon-text: #babcd3;
+  --ribbon-muted: #9799b5;
+  --ribbon-border: #5a5e82;
+  --ribbon-hover: #5a2f49;
+}
+
+html[data-theme="kokoblu"] {
+  --bg: #31221d;
+  --page-bg: #3a2924;
+  --text: #a7bdd7;
+  --text-soft: #a7bdd7;
+  --subtitle: #8c97a3;
+  --border: #4a3a34;
+  --teal: #a7bdd7;
+  --teal-bg: #2e3a45;
+  --blue: #c3d3e6;
+  --panel: #362621;
+  --arrow: #665048;
+  --error: #e08566;
+
+  --ribbon-bg: #3a2924;
+  --ribbon-text: #a7bdd7;
+  --ribbon-muted: #8c97a3;
+  --ribbon-border: #4a3a34;
+  --ribbon-hover: #453330;
+}
+
+html[data-theme="dubai"] {
+  --bg: #2a1613;
+  --page-bg: #33201c;
+  --text: #abc44f;
+  --text-soft: #abc44f;
+  --subtitle: #8fa168;
+  --border: #43302a;
+  --teal: #abc44f;
+  --teal-bg: #3a431f;
+  --blue: #c3d876;
+  --panel: #301f1a;
+  --arrow: #5e463d;
+  --error: #e2705a;
+
+  --ribbon-bg: #33201c;
+  --ribbon-text: #abc44f;
+  --ribbon-muted: #8fa168;
+  --ribbon-border: #43302a;
+  --ribbon-hover: #402a24;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); }
+a { color: var(--blue); }
+
+/* --- shared preview chrome: theme switcher bar --- */
+.mock-bar {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 10px 16px; background: var(--ribbon-bg);
+  border-bottom: 1px solid var(--ribbon-border);
+  position: sticky; top: 0; z-index: 50;
+}
+.mock-bar h1 { font-size: 13px; font-weight: 700; color: var(--ribbon-text); margin-right: auto; }
+.mock-bar .mock-variant-links { display: flex; gap: 6px; }
+.mock-bar a.mock-vlink {
+  font-size: 12px; text-decoration: none; color: var(--ribbon-muted);
+  padding: 4px 9px; border-radius: 6px; border: 1px solid var(--ribbon-border);
+}
+.mock-bar a.mock-vlink[aria-current="page"] { color: var(--teal); border-color: var(--teal); }
+.mock-bar label { font-size: 12px; color: var(--ribbon-muted); }
+.mock-bar select {
+  font: inherit; font-size: 12px; padding: 4px 8px; border-radius: 6px;
+  background: var(--page-bg); color: var(--text); border: 1px solid var(--ribbon-border);
+}

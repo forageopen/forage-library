@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="cherry">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Catalog mockup C — Native index</title>
+<link rel="stylesheet" href="tokens.css" />
+<style>
+  .layout { display: grid; grid-template-columns: 210px 1fr; gap: 0; min-height: calc(100vh - 45px); }
+  .rail { border-right: 1px solid var(--border); padding: 22px 16px; background: var(--bg); }
+  .rail h3 { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: var(--subtitle); margin: 18px 0 8px; }
+  .rail h3:first-child { margin-top: 0; }
+  .rail-sec { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; background: none; border: none; color: var(--text-soft); font: inherit; font-size: 13px; font-weight: 600; padding: 6px 8px; border-radius: 6px; cursor: pointer; }
+  .rail-sec svg { width: 15px; height: 15px; }
+  .rail-sec:hover { background: var(--ribbon-hover); color: var(--teal); }
+  .rail-sec[aria-current="true"] { background: var(--teal-bg); color: var(--teal); }
+  .rail-sec .n { margin-left: auto; font-weight: 500; color: var(--subtitle); font-size: 11px; }
+  .rail-tag { display: block; width: 100%; text-align: left; background: none; border: none; color: var(--text-soft); font: inherit; font-size: 12px; padding: 4px 8px; border-radius: 5px; cursor: pointer; }
+  .rail-tag:hover { color: var(--teal); }
+  .rail-tag[aria-pressed="true"] { color: var(--teal); font-weight: 700; }
+  .rail-tag[aria-pressed="true"]::before { content: "› "; }
+
+  .main { padding: 26px 34px 80px; max-width: 900px; }
+  .lede { color: var(--subtitle); font-size: 13px; margin-bottom: 20px; }
+  .head-row { display: flex; align-items: baseline; gap: 12px; margin-bottom: 4px; }
+  .head-row h1 { font-size: 24px; font-weight: 800; letter-spacing: -.01em; }
+  .head-row .n { font-size: 13px; color: var(--subtitle); }
+  .searchbox { position: relative; margin: 16px 0 22px; }
+  .searchbox svg { position: absolute; left: 2px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--subtitle); }
+  .searchbox input { width: 100%; font: inherit; font-size: 14px; padding: 8px 4px 8px 26px; background: transparent; color: var(--text); border: none; border-bottom: 1px solid var(--border); }
+  .searchbox input:focus { outline: none; border-bottom-color: var(--teal); }
+
+  .index { border-top: 1px solid var(--border); }
+  .row { display: block; width: 100%; text-align: left; background: none; border: none; border-bottom: 1px solid var(--border); padding: 16px 4px; cursor: pointer; }
+  .row:hover { background: var(--ribbon-hover); }
+  .row-top { display: flex; align-items: baseline; gap: 10px; }
+  .row-title { font-size: 16px; font-weight: 700; color: var(--text); }
+  .row-title .mono { font-family: var(--mono); }
+  .row-meta { margin-left: auto; font-size: 11px; color: var(--subtitle); font-variant-numeric: tabular-nums; }
+  .row-desc { font-size: 13px; line-height: 1.55; color: var(--text-soft); margin: 5px 0 7px; }
+  .row-tags { display: flex; gap: 12px; flex-wrap: wrap; }
+  .row-tags span { font-size: 11px; color: var(--subtitle); }
+  .row-tags span::before { content: "#"; opacity: .5; }
+
+  .empty { padding: 60px 4px; color: var(--subtitle); font-size: 14px; }
+
+  /* full-pane reader */
+  .reader { max-width: 900px; }
+  .back { display: inline-flex; align-items: center; gap: 6px; font: inherit; font-size: 12.5px; font-weight: 600; color: var(--subtitle); background: none; border: none; cursor: pointer; padding: 0; margin-bottom: 16px; }
+  .back svg { width: 15px; height: 15px; }
+  .back:hover { color: var(--teal); }
+  .reader h1 { font-size: 26px; font-weight: 800; letter-spacing: -.01em; }
+  .reader .r-desc { font-size: 14px; line-height: 1.6; color: var(--text-soft); margin: 8px 0 14px; }
+  .reader .r-tags { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+  .reader .r-tags span { font-size: 11.5px; color: var(--subtitle); }
+  .reader .r-tags span::before { content: "#"; opacity: .5; }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; font: inherit; font-size: 12.5px; font-weight: 600; padding: 7px 13px; border-radius: 7px; border: 1px solid var(--border); background: var(--page-bg); color: var(--text); cursor: pointer; text-decoration: none; }
+  .btn svg { width: 14px; height: 14px; }
+  .btn:hover { border-color: var(--teal); color: var(--teal); }
+  .btn--primary { background: var(--teal); color: #fff; border-color: var(--teal); }
+  .btn--primary:hover { color: #fff; opacity: .9; }
+  .btn[aria-disabled="true"] { opacity: .45; cursor: not-allowed; }
+  .btn.is-done { color: var(--teal); border-color: var(--teal); }
+
+  .files { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 12px; }
+  .files button { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--text-soft); cursor: pointer; }
+  .files button:hover { border-color: var(--teal); color: var(--teal); }
+  .files button[aria-current="true"] { background: var(--teal-bg); color: var(--teal); border-color: var(--teal); }
+
+  .toggle-bar { position: sticky; top: 45px; z-index: 20; display: flex; align-items: center; gap: 4px; background: var(--bg); border-bottom: 1px solid var(--border); padding: 8px 0; margin-bottom: 4px; }
+  .seg { display: flex; gap: 2px; }
+  .seg button { display: inline-flex; align-items: center; gap: 5px; font: inherit; font-size: 12.5px; font-weight: 600; padding: 5px 11px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--subtitle); cursor: pointer; }
+  .seg button svg { width: 13px; height: 13px; }
+  .seg button[aria-selected="true"] { background: var(--teal-bg); color: var(--teal); border-color: var(--teal); }
+  .toggle-bar .fname { font-family: var(--mono); font-size: 11px; color: var(--subtitle); margin-left: 6px; }
+  .toggle-bar .spacer { margin-left: auto; }
+
+  .doc { position: relative; }
+  .doc.clamped .doc-inner { max-height: 60vh; overflow: hidden; }
+  .doc.clamped::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 90px; pointer-events: none; background: linear-gradient(to bottom, transparent, var(--bg)); }
+  pre.code { margin: 0; padding: 16px 0; overflow-x: auto; font-family: var(--mono); font-size: 12.5px; line-height: 1.65; color: var(--text); white-space: pre; }
+  .prose { font-size: 14.5px; line-height: 1.7; color: var(--text-soft); padding-top: 8px; }
+  .prose h1 { font-size: 21px; margin: 18px 0 8px; color: var(--text); }
+  .prose h2 { font-size: 16.5px; margin: 18px 0 8px; color: var(--text); }
+  .prose h3 { font-size: 14.5px; margin: 14px 0 5px; color: var(--text); }
+  .prose p { margin: 10px 0; }
+  .prose ul, .prose ol { margin: 10px 0 10px 22px; }
+  .prose li { margin: 4px 0; }
+  .prose code { font-family: var(--mono); font-size: 12.5px; background: var(--teal-bg); padding: 1px 5px; border-radius: 4px; }
+  .prose pre.md-pre { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; overflow-x: auto; margin: 10px 0; }
+  .prose pre.md-pre code { background: none; padding: 0; }
+  .clampbtn { display: inline-flex; align-items: center; gap: 5px; margin-top: 14px; font: inherit; font-size: 12.5px; font-weight: 600; color: var(--teal); background: none; border: none; cursor: pointer; }
+  .clampbtn svg { width: 13px; height: 13px; }
+
+  @media (max-width: 780px) { .layout { grid-template-columns: 1fr; } .rail { border-right: none; border-bottom: 1px solid var(--border); } }
+</style>
+</head>
+<body>
+<div class="layout">
+  <nav class="rail">
+    <h3>Catalog</h3>
+    <div data-rail-sections></div>
+    <h3>Filter by tag</h3>
+    <div data-rail-tags></div>
+  </nav>
+  <main class="main" data-main></main>
+</div>
+
+<script src="sample-data.js"></script>
+<script>
+(function () {
+  const SECTIONS = ['skills', 'agents', 'commands'];
+  const LABEL = { skills: 'Skills', agents: 'Agents', commands: 'Commands' };
+  let active = 'skills';
+  let query = '';
+  let activeTags = new Set();
+  let readerSlug = null;
+  let viewMode = 'preview';
+  let openKey = null;
+
+  initThemeBar('c');
+
+  const railSecEl = document.querySelector('[data-rail-sections]');
+  const railTagEl = document.querySelector('[data-rail-tags]');
+  const mainEl = document.querySelector('[data-main]');
+
+  function renderRail() {
+    railSecEl.innerHTML = SECTIONS.map((s) => `<button class="rail-sec" data-section="${s}" aria-current="${s === active}">${icon(SECTION_ICON[s])}${LABEL[s]}<span class="n">${FORAGE_CATALOG.sections[s].length}</span></button>`).join('');
+    railTagEl.innerHTML = allTags(FORAGE_CATALOG.sections[active]).map((t) => `<button class="rail-tag" data-tag="${t}" aria-pressed="${activeTags.has(t)}">${t}</button>`).join('') || '<div style="font-size:11px;color:var(--subtitle);padding:4px 8px">—</div>';
+  }
+  railSecEl.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-section]'); if (!b) return;
+    active = b.dataset.section; query = ''; activeTags.clear(); readerSlug = null; render();
+  });
+  railTagEl.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-tag]'); if (!b) return;
+    const t = b.dataset.tag; activeTags.has(t) ? activeTags.delete(t) : activeTags.add(t); render();
+  });
+
+  function currentEntries() {
+    return FORAGE_CATALOG.sections[active].filter((e) => {
+      if (query) { const hay = (e.title + ' ' + e.description + ' ' + e.tags.join(' ')).toLowerCase(); if (!hay.includes(query)) return false; }
+      if (activeTags.size && ![...activeTags].some((t) => e.tags.includes(t))) return false;
+      return true;
+    });
+  }
+
+  function rowHtml(entry) {
+    return `<button class="row" data-slug="${entry.slug}">
+      <div class="row-top">
+        <span class="row-title">${entry.title}</span>
+        <span class="row-meta">${entry.files.length} file${entry.files.length > 1 ? 's' : ''} · ${fmtBytes(entry.totalBytes)} · ${fmtDate(entry.updated)}</span>
+      </div>
+      <div class="row-desc">${entry.description}</div>
+      <div class="row-tags">${entry.tags.map((t) => `<span>${t}</span>`).join('')}</div>
+    </button>`;
+  }
+
+  function renderList() {
+    renderRail();
+    const entries = currentEntries();
+    mainEl.innerHTML = `
+      <p class="lede">Variant C — Forage-native. A typographic index: a left rail of tag filters, plain rows, and a full-pane reader with the <code>Code / Preview</code> toggle pinned to the top. No cards, minimal chrome, leans hardest on the theme.</p>
+      <div class="head-row"><h1>${LABEL[active]}</h1><span class="n">${entries.length} of ${FORAGE_CATALOG.sections[active].length}</span></div>
+      <div class="searchbox">${icon('search')}<input type="search" placeholder="Search ${LABEL[active].toLowerCase()}…" data-search value="${query.replace(/"/g, '&quot;')}" /></div>
+      ${entries.length
+        ? `<div class="index">${entries.map(rowHtml).join('')}</div>`
+        : `<div class="empty">${FORAGE_CATALOG.sections[active].length === 0 ? LABEL[active] + ' — coming soon. Real entries land here as repos are published.' : 'Nothing matches that filter.'}</div>`}
+    `;
+    const s = mainEl.querySelector('[data-search]');
+    if (s) {
+      s.addEventListener('input', () => { clearTimeout(s._d); s._d = setTimeout(() => { query = s.value.trim().toLowerCase(); const pos = s.selectionStart; renderList(); const n = mainEl.querySelector('[data-search]'); n.focus(); n.setSelectionRange(pos, pos); }, 160); });
+    }
+  }
+
+  function renderReader() {
+    renderRail();
+    const entry = FORAGE_CATALOG.sections[active].find((x) => x.slug === readerSlug);
+    if (!entry) { readerSlug = null; return renderList(); }
+    const key = openKey || entry.primaryKey;
+    const raw = getDoc(key);
+    const fname = key.split('/').pop();
+    const isLong = raw.length > 1100;
+    const contentHtml = viewMode === 'code'
+      ? `<pre class="code">${raw.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</pre>`
+      : `<div class="prose">${mdToHtml(raw)}</div>`;
+    const ghBtn = entry.github
+      ? `<a class="btn" href="${entry.github}" target="_blank" rel="noopener">${icon('github')} View on GitHub</a>`
+      : `<span class="btn" aria-disabled="true" title="Stage 2 — one repo per entry">${icon('github')} GitHub · coming soon</span>`;
+    const files = entry.files.length > 1
+      ? `<div class="files">${entry.files.map((f) => `<button data-file="${f.key}" aria-current="${f.key === key}">${f.path.split('/').slice(-2).join('/')}</button>`).join('')}</div>`
+      : '';
+    mainEl.innerHTML = `
+      <div class="reader">
+        <button class="back" data-back>${icon('arrowLeft')} All ${LABEL[active].toLowerCase()}</button>
+        <h1>${entry.title}</h1>
+        <p class="r-desc">${entry.description}</p>
+        <div class="r-tags">${entry.tags.map((t) => `<span>${t}</span>`).join('')}</div>
+        <div class="actions">
+          <button class="btn btn--primary" data-download>${icon('download')} Download ${entry.files.length > 1 ? '.zip' : '.md'}</button>
+          ${ghBtn}
+        </div>
+        ${files}
+        <div class="toggle-bar">
+          <div class="seg">
+            <button data-mode="code" aria-selected="${viewMode === 'code'}">${icon('code')} Code</button>
+            <button data-mode="preview" aria-selected="${viewMode === 'preview'}">${icon('eye')} Preview</button>
+          </div>
+          <span class="fname">${fname}</span>
+          <span class="spacer"></span>
+          <button class="btn" data-copy>${icon('copy')}<span>Copy</span></button>
+        </div>
+        <div class="doc ${isLong ? 'clamped' : ''}" data-doc>
+          <div class="doc-inner">${contentHtml}</div>
+        </div>
+        ${isLong ? `<button class="clampbtn" data-clamp>${icon('chevron')} Show full document</button>` : ''}
+      </div>`;
+  }
+
+  mainEl.addEventListener('click', (e) => {
+    if (readerSlug) {
+      const entry = FORAGE_CATALOG.sections[active].find((x) => x.slug === readerSlug);
+      if (e.target.closest('[data-back]')) { readerSlug = null; openKey = null; viewMode = 'preview'; renderList(); return; }
+      if (e.target.closest('[data-mode]')) { viewMode = e.target.closest('[data-mode]').dataset.mode; renderReader(); return; }
+      if (e.target.closest('[data-file]')) { openKey = e.target.closest('[data-file]').dataset.file; renderReader(); return; }
+      if (e.target.closest('[data-clamp]')) {
+        const doc = mainEl.querySelector('[data-doc]'); const btn = e.target.closest('[data-clamp]');
+        doc.classList.toggle('clamped');
+        const clamped = doc.classList.contains('clamped');
+        btn.innerHTML = icon('chevron') + (clamped ? ' Show full document' : ' Collapse');
+        btn.querySelector('svg').style.transform = clamped ? '' : 'rotate(180deg)';
+        return;
+      }
+      if (e.target.closest('[data-copy]')) { copyText(getDoc(openKey || entry.primaryKey), e.target.closest('[data-copy]')); return; }
+      if (e.target.closest('[data-download]')) { alert('Mockup: real build zips ' + entry.files.map((f) => f.path).join(', ')); return; }
+      return;
+    }
+    const row = e.target.closest('[data-slug]');
+    if (row) { readerSlug = row.dataset.slug; viewMode = 'preview'; openKey = null; renderReader(); window.scrollTo(0, 0); }
+  });
+
+  function render() { readerSlug ? renderReader() : renderList(); }
+  render();
+})();
+</script>
+</body>
+</html>
