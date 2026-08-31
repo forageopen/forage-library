@@ -50,18 +50,26 @@ function randGlyph() {
 }
 
 /* Cycle each character through random glyphs, then lock it to the real
-   one — staggered from the left, or from the centre out (`from:
-   'center'`, used for the headline). Whitespace never scrambles. */
-function scrambleText(el, { charStagger = 18, hold = 320, from = 'left' } = {}) {
+   one — staggered from the left, or from the centre out (`from: 'center'`,
+   the headline). The per-character stagger auto-scales to `duration`, so a
+   long paragraph resolves in the same split second as a short title
+   instead of crawling. Whitespace never scrambles. */
+function scrambleText(el, { from = 'left', duration = 420 } = {}) {
   const text = el.dataset.motionText || el.textContent;
   el.dataset.motionText = text;
   const n = text.length;
   const centre = (n - 1) / 2;
-  const startAt = [];
+  const hold = Math.min(140, duration * 0.4); // how long each char churns before locking
+  const spread = Math.max(1, duration - hold);
+
+  const dist = [];
+  let maxDist = 1;
   for (let i = 0; i < n; i++) {
-    startAt.push((from === 'center' ? Math.abs(i - centre) : i) * charStagger);
+    const d = from === 'center' ? Math.abs(i - centre) : i;
+    dist.push(d);
+    if (d > maxDist) maxDist = d;
   }
-  const total = Math.max(0, ...startAt) + hold;
+  const perDist = spread / maxDist;
   const t0 = performance.now();
 
   el.setAttribute('aria-label', text); // screen readers read the real text, not the churn
@@ -74,10 +82,10 @@ function scrambleText(el, { charStagger = 18, hold = 320, from = 'left' } = {}) 
     for (let i = 0; i < n; i++) {
       const ch = text[i];
       if (SKIP_CHARS.has(ch)) out += ch;
-      else out += t - startAt[i] >= hold ? ch : randGlyph();
+      else out += t - dist[i] * perDist >= hold ? ch : randGlyph();
     }
     el.textContent = out;
-    if (t < total) {
+    if (t < duration) {
       requestAnimationFrame(frame);
     } else {
       el.textContent = text;
@@ -95,11 +103,15 @@ function revealGroup(group, extra = []) {
   group.dataset.motionDone = '1';
 
   group.querySelectorAll('[data-motion="text"]').forEach((el, i) => {
-    setTimeout(() => scrambleText(el, { from: el.dataset.motionFrom || 'left' }), i * 65);
+    const headline = el.dataset.motionFrom === 'center';
+    setTimeout(
+      () => scrambleText(el, { from: headline ? 'center' : 'left', duration: headline ? 620 : 400 }),
+      i * 40,
+    );
   });
 
   [...group.querySelectorAll('[data-motion="reveal"]'), ...extra].forEach((el, i) => {
-    el.style.transitionDelay = `${110 + i * 55}ms`;
+    el.style.transitionDelay = `${70 + i * 40}ms`;
     requestAnimationFrame(() => el.classList.add('vault-welcome-in'));
   });
 }
