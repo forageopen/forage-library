@@ -151,6 +151,13 @@
           "path": "vault/Research/Agents"
         },
         {
+          "name": "Commands",
+          "type": "catalog",
+          "catalogType": "commands",
+          "icon": "terminal",
+          "path": "vault/Research/Commands"
+        },
+        {
           "name": "Skills",
           "type": "catalog",
           "catalogType": "skills",
