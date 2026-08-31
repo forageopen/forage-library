@@ -971,6 +971,10 @@ button.vault-tree-folder-label:focus-visible {
    parse, or a download with no Content-Length. */
 .vault-status--loading { display: flex; flex-direction: column; align-items: center; gap: 12px; }
 .vault-loading-label { font-size: 13px; color: var(--subtitle); }
+/* The real status line under the shader pill (the pill cycles a playful
+   gerund — see loading-phrases.js). Dim, tabular so a "page 3 of 12"
+   counter doesn't jitter. */
+.vault-loading-sub { font-size: 12px; opacity: 0.8; font-variant-numeric: tabular-nums; }
 
 .vault-loading-stage {
   position: relative;
