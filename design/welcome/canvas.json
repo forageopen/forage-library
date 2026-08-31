@@ -1,0 +1,11 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 1180, "h": 2400, "title": "Welcome screen (first load)" },
+    { "file": "StartExploring.dc.html", "x": 1360, "y": 0, "w": 1180, "h": 900, "title": "CTA: Start exploring" },
+    { "file": "WelcomeNote.dc.html", "x": 2720, "y": 0, "w": 1180, "h": 980, "title": "CTA: See Welcome Note" }
+  ],
+  "annotations": [
+    { "id": "flow-note", "x": 0, "y": -150, "w": 900, "text": "Forage Library — welcome screen UX\n\nShows once per session on landing (replaces the empty dropzone). Two calls to action:\n  • Start exploring  → dismiss, fall back to today's file picker / new note\n  • See Welcome Note  → open 00-welcome-note.md in the normal viewer\n\nCherry (dark) theme shown — it's the default. Screen re-themes with the rest of the app." }
+  ],
+  "launch": { "view": "canvas" }
+}
