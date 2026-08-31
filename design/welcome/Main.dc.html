@@ -1,0 +1,363 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Figtree:wght@600&family=Inter:wght@400;500;600;700&display=swap");
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "Inter", "Segoe UI", Arial, sans-serif;
+      background: #1c181c;
+      color: #ece7ea;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: #ff5ec2; text-decoration: none; }
+    a:hover { color: #ff2ea6; }
+
+    .app { display: flex; flex-direction: column; min-height: 100%; }
+
+    /* ---- ribbon ---- */
+    .ribbon {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; padding: 10px 20px;
+      background: #141316; border-bottom: 1px solid #2c262a;
+      position: sticky; top: 0; z-index: 5;
+    }
+    .ribbon-left { display: flex; align-items: center; gap: 10px; }
+    .ribbon-logo {
+      width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+      border-radius: 6px; color: #ece7ea;
+    }
+    .ribbon-logo svg { width: 22px; height: 22px; }
+    .ribbon-title {
+      font-family: "Figtree", "Segoe UI", sans-serif; font-weight: 600;
+      font-size: 14px; text-transform: uppercase; letter-spacing: 0.02em; color: #ece7ea;
+    }
+    .ribbon-actions { display: flex; align-items: center; gap: 6px; color: #a99aa1; }
+    .ribbon-btn {
+      width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+      border-radius: 6px; background: transparent; border: none; color: inherit; cursor: pointer;
+    }
+    .ribbon-btn svg { width: 16px; height: 16px; }
+    .ribbon-btn:hover { background: #1c1a1d; color: #ece7ea; }
+
+    /* ---- body row ---- */
+    .row { display: flex; flex: 1; min-height: 0; }
+    .sidebar {
+      width: 240px; flex-shrink: 0; background: #0e0d10;
+      padding: 16px 12px; border-right: 1px solid #2c262a;
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; color: #ece7ea; padding: 6px 8px; border-radius: 6px;
+    }
+    .nav-item svg { width: 14px; height: 14px; flex-shrink: 0; color: #a99aa1; }
+    .nav-item .chev { margin-left: auto; color: #6f6570; }
+    .nav-item.is-active { background: #3a1230; color: #ff2ea6; font-weight: 600; }
+    .nav-item.is-active svg { color: #ff2ea6; }
+    .nav-emoji { width: 14px; text-align: center; font-size: 12px; line-height: 1; }
+
+    /* ---- main / welcome ---- */
+    .main { flex: 1; background: #1c181c; padding: 40px; overflow: hidden; }
+    .welcome { max-width: 720px; margin: 0 auto; }
+
+    .hero { padding: 28px 0 8px; }
+    .kicker {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+      color: #ff2ea6; margin-bottom: 18px;
+    }
+    .hero h1 {
+      font-family: "Figtree", "Segoe UI", sans-serif; font-weight: 600;
+      font-size: 42px; line-height: 1.08; letter-spacing: -0.01em; color: #ece7ea;
+      text-wrap: balance;
+    }
+    .hero p.lede {
+      margin-top: 18px; font-size: 16px; line-height: 1.65; color: #a99aa1; max-width: 60ch;
+      text-wrap: pretty;
+    }
+    .cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: inherit; font-size: 14px; font-weight: 600;
+      padding: 11px 20px; border-radius: 8px; cursor: pointer; border: 1px solid transparent;
+    }
+    .btn svg { width: 15px; height: 15px; }
+    .btn--primary { background: #ff2ea6; color: #141316; border-color: #ff2ea6; }
+    .btn--primary:hover { opacity: 0.9; }
+    .btn--ghost { background: transparent; color: #ece7ea; border-color: #2c262a; }
+    .btn--ghost:hover { border-color: #ff2ea6; color: #ff2ea6; }
+    .cta-note { margin-top: 12px; font-size: 12.5px; color: #6f6570; }
+
+    hr.rule { border: none; border-top: 1px solid #2c262a; margin: 48px 0; }
+
+    section { margin-top: 44px; }
+    .sec-title {
+      font-family: "Figtree", "Segoe UI", sans-serif; font-weight: 600;
+      font-size: 22px; color: #ece7ea; letter-spacing: -0.005em;
+    }
+    .sec-intro { margin-top: 12px; font-size: 14.5px; line-height: 1.7; color: #a99aa1; text-wrap: pretty; }
+
+    .cards { margin-top: 24px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .card {
+      border: 1px solid #2c262a; border-radius: 12px; background: #141316; padding: 18px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .card-icon {
+      width: 34px; height: 34px; border-radius: 9px; background: #3a1230; color: #ff2ea6;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .card-icon svg { width: 18px; height: 18px; }
+    .card h3 { font-size: 14.5px; font-weight: 700; color: #ece7ea; }
+    .card p { font-size: 13px; line-height: 1.6; color: #a99aa1; }
+
+    .diagram {
+      margin-top: 24px; border: 1px solid #2c262a; border-radius: 12px; background: #141316;
+      padding: 24px; overflow-x: auto;
+    }
+    .diagram svg { display: block; width: 100%; height: auto; }
+
+    .chips { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip {
+      font-family: inherit; font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 999px;
+      color: #a99aa1; background: transparent; border: 1px solid #2c262a;
+      position: relative; cursor: pointer;
+    }
+    .chip:hover, .chip:focus-visible { color: #ece7ea; border-color: #6f6570; outline: none; }
+    .chip::after {
+      content: "Coming soon"; position: absolute; bottom: calc(100% + 7px); left: 50%;
+      transform: translateX(-50%); white-space: nowrap;
+      background: #0e0d10; color: #ece7ea; border: 1px solid #2c262a;
+      font-size: 11px; font-weight: 600; padding: 4px 8px; border-radius: 6px;
+      opacity: 0; pointer-events: none; transition: opacity 0.12s ease;
+    }
+    .chip:hover::after, .chip:focus-visible::after { opacity: 1; }
+
+    .toast {
+      position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%);
+      background: #0e0d10; color: #ece7ea; border: 1px solid #ff2ea6;
+      font-size: 12.5px; font-weight: 600; padding: 9px 16px; border-radius: 999px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4); z-index: 20;
+    }
+
+    .section--closing { margin-top: 68px; margin-bottom: 28px; }
+    .section--closing .sec-title { font-size: 24px; }
+    .section--closing .cta-row { margin-top: 22px; }
+
+    @keyframes forage-sidebar-pulse {
+      0% { box-shadow: inset 0 0 0 0 rgba(255,46,166,0); }
+      15% { box-shadow: inset 0 0 0 2px #ff2ea6, inset 0 0 24px 0 rgba(255,46,166,0.35); }
+      100% { box-shadow: inset 0 0 0 0 rgba(255,46,166,0); }
+    }
+    .sidebar.is-pulse { animation: forage-sidebar-pulse 1.4s ease; }
+    @media (prefers-reduced-motion: reduce) {
+      .sidebar.is-pulse { animation: none; box-shadow: inset 0 0 0 2px #ff2ea6; }
+    }
+  </style>
+</helmet>
+
+<div class="app">
+  <sc-if value="{{ showToast }}" hint-placeholder-val="{{ true }}">
+    <div class="toast">Coming soon</div>
+  </sc-if>
+  <!-- ribbon -->
+  <div class="ribbon">
+    <div class="ribbon-left">
+      <span class="ribbon-logo" title="Toggle navigation">
+        <svg viewBox="0 0 685.7 651.3" fill="currentColor" aria-hidden="true"><path d="M148.7,527.2c-2.6,0-5.1-.2-7.7-.6c-34-5.6-49-32.2-55.4-43.6l-.2-.4C76,466,59.5,432.1,54.2,391.8c-.8-6.2-2.2-22.5,3.2-41.6c5.6-19.7,16.7-35.7,32-46.4c29.7-20.6,71.6-30.2,110.9-37.8c4-30.4,8.2-61.3,12.9-89.9c-17.6,1.6-34.8,2.6-51.6,3c-47.9,1.2-92-1.9-143.1-10.3c-12-2-20.2-13.3-18.2-25.3c2-12,13.3-20.2,25.3-18.2c52.4,8.6,112.4,14.4,196.2,5.7c9.1-41.6,19-67.4,33-87c18.6-26,44.4-39.7,81-43.2c33.9-3.2,63.9,5.5,84.7,24.3c15.9,14.4,25,33.7,25.1,53.1c.1,17.2-8.5,34-24.2,47.1c-14.6,12.2-34.9,21.3-60.2,27c-36,8-69.9,14.2-102.2,18.7c-4.8,26.9-9,56.9-13,86.9c72-11.7,128.1-14.2,130.7-14.3c12.2-.5,22.5,8.9,23,21.1c.5,12.2-9,22.5-21.1,23l0,0c-.7,0-63,2.8-138.6,16c-5.6,42-11.6,84-19.2,118.8c-11.4,51.9-25,81.3-44.1,95.5C168.1,524.1,158.6,527.3,148.7,527.2z"/></svg>
+      </span>
+      <span class="ribbon-title">Forage Library</span>
+    </div>
+    <div class="ribbon-actions">
+      <button class="ribbon-btn" title="Change theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg></button>
+      <button class="ribbon-btn" title="Make available offline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg></button>
+      <button class="ribbon-btn" title="More options"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg></button>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- sidebar -->
+    <nav class="sidebar {{sidebarCls}}">
+      <div class="nav-item is-active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        Welcome Note
+      </div>
+      <div class="nav-item"><span class="nav-emoji">🏛️</span> About Us <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg> Case Studies <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></div>
+      <div class="nav-item"><span class="nav-emoji">🧩</span> Frameworks <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg> Guides <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg> Lesson Learned <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg> Research <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></div>
+      <div class="nav-item"><span class="nav-emoji">📊</span> Slides <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></div>
+      <div class="nav-item"><span class="nav-emoji">📝</span> Articles <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></div>
+    </nav>
+
+    <!-- welcome screen -->
+    <main class="main">
+      <div class="welcome">
+
+        <div class="hero">
+          <div class="kicker">Forage Library</div>
+          <h1>The world is yours.<br>Go forage.</h1>
+          <p class="lede">An open collection of research, frameworks, and working knowledge &mdash; on AI, data rights, technology, and learning how to learn. There is no syllabus. Start with a question and follow the trail.</p>
+          <div class="cta-row">
+            <button class="btn btn--primary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              Start exploring
+            </button>
+            <button class="btn btn--ghost">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+              See Welcome Note
+            </button>
+          </div>
+          <p class="cta-note">Start exploring opens the file picker &amp; a blank note &middot; See Welcome Note opens the note from Adam</p>
+        </div>
+
+        <hr class="rule">
+
+        <section>
+          <div class="sec-title">A library built for agency</div>
+          <p class="sec-intro">Knowledge should not leave you waiting for the next lesson. Forage is for people who want to explore, understand, and act.</p>
+          <div class="cards">
+            <div class="card">
+              <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></div>
+              <h3>Research openly</h3>
+              <p>Find research, references, frameworks, and hard-won practical notes across AI, technology, data rights, and ethical learning.</p>
+            </div>
+            <div class="card">
+              <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="6" r="2.5"/><circle cx="19" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M6.8 7.7 10.4 15.9M17.2 7.7 13.6 15.9M7.5 6h9"/></svg></div>
+              <h3>Build with intelligent systems</h3>
+              <p>Use agentic tools to investigate ideas, connect information, test possibilities, and move from a thought to something real.</p>
+            </div>
+            <div class="card">
+              <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M7 21h10M6 6h12M6 6l-3 6a3 3 0 0 0 6 0Zm12 0-3 6a3 3 0 0 0 6 0ZM12 6 6 4M12 6l6-2"/></svg></div>
+              <h3>Play by the rules</h3>
+              <p>Understand the systems around you &mdash; their constraints, incentives, and boundaries &mdash; before you decide how to move within them.</p>
+            </div>
+            <div class="card">
+              <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><rect x="5" y="13" width="3.5" height="7"/><rect x="10.25" y="9" width="3.5" height="11"/><rect x="15.5" y="5" width="3.5" height="15"/></svg></div>
+              <h3>Build your capacity</h3>
+              <p>Start from what you can do now. Skills, judgment, and tools compound over time.</p>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <div class="sec-title">Learn at your pace</div>
+          <p class="sec-intro">There is no prescribed route. You might arrive with a question, follow a reference, open a dataset, or disappear down an unexpected rabbit hole &mdash; that is part of the point. Go deeper when curiosity pulls you in; move on when it does not; come back when you are ready.</p>
+          <div class="diagram">
+            <svg viewBox="0 0 680 190" role="img" aria-label="A branching path: Question leads to Research, then Framework, Experiment, and Insight, with side branches">
+              <defs>
+                <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="#6f6570"/></marker>
+              </defs>
+              <g fill="none" stroke="#45383e" stroke-width="2" marker-end="url(#ah)">
+                <path d="M96 95 H150"/>
+                <path d="M246 95 H300"/>
+                <path d="M396 95 C 430 95, 430 50, 470 50"/>
+                <path d="M396 95 C 430 95, 430 140, 470 140"/>
+                <path d="M566 50 C 600 50, 600 95, 620 95" opacity="0.5"/>
+              </g>
+              <g font-family="Inter, sans-serif" font-size="12" font-weight="600" text-anchor="middle">
+                <g><rect x="20" y="78" width="76" height="34" rx="8" fill="#3a1230" stroke="#ff2ea6"/><text x="58" y="99" fill="#ff2ea6">Question</text></g>
+                <g><rect x="150" y="78" width="96" height="34" rx="8" fill="#141316" stroke="#2c262a"/><text x="198" y="99" fill="#ece7ea">Research</text></g>
+                <g><rect x="300" y="78" width="96" height="34" rx="8" fill="#141316" stroke="#2c262a"/><text x="348" y="99" fill="#ece7ea">Framework</text></g>
+                <g><rect x="470" y="33" width="96" height="34" rx="8" fill="#141316" stroke="#2c262a"/><text x="518" y="54" fill="#ece7ea">Experiment</text></g>
+                <g><rect x="470" y="123" width="96" height="34" rx="8" fill="#141316" stroke="#2c262a"/><text x="518" y="144" fill="#ece7ea">Rabbit hole</text></g>
+                <g><rect x="620" y="78" width="56" height="34" rx="8" fill="#3a1230" stroke="#ff2ea6"/><text x="648" y="99" fill="#ff2ea6">Insight</text></g>
+              </g>
+            </svg>
+          </div>
+        </section>
+
+        <section>
+          <div class="sec-title">Where intelligent systems fit</div>
+          <p class="sec-intro">Agentic systems can search, organise, analyse, and prototype alongside you. Forage explores how they become working partners &mdash; without giving up judgment, ownership, or responsibility.</p>
+          <div class="diagram">
+            <svg viewBox="0 0 680 210" role="img" aria-label="A loop: you to agent to tools to knowledge to action, and result back through reflection to you">
+              <defs>
+                <marker id="ah2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="#6f6570"/></marker>
+              </defs>
+              <g fill="none" stroke="#45383e" stroke-width="2" marker-end="url(#ah2)">
+                <path d="M92 55 H150"/>
+                <path d="M232 55 H290"/>
+                <path d="M372 55 H430"/>
+                <path d="M512 55 H545 C 560 55, 560 70, 560 90 L 560 120"/>
+              </g>
+              <g fill="none" stroke="#ff2ea6" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#ah2)">
+                <path d="M470 150 H 120 C 100 150, 100 120, 100 90 L 100 78"/>
+              </g>
+              <g font-family="Inter, sans-serif" font-size="12" font-weight="600" text-anchor="middle">
+                <g><rect x="24" y="38" width="68" height="34" rx="8" fill="#3a1230" stroke="#ff2ea6"/><text x="58" y="59" fill="#ff2ea6">You</text></g>
+                <g><rect x="150" y="38" width="82" height="34" rx="8" fill="#141316" stroke="#2c262a"/><text x="191" y="59" fill="#ece7ea">Agent</text></g>
+                <g><rect x="290" y="38" width="82" height="34" rx="8" fill="#141316" stroke="#2c262a"/><text x="331" y="59" fill="#ece7ea">Tools</text></g>
+                <g><rect x="430" y="38" width="82" height="34" rx="8" fill="#141316" stroke="#2c262a"/><text x="471" y="59" fill="#ece7ea">Knowledge</text></g>
+                <g><rect x="519" y="120" width="82" height="34" rx="8" fill="#141316" stroke="#2c262a"/><text x="560" y="141" fill="#ece7ea">Action</text></g>
+                <g><rect x="410" y="133" width="90" height="34" rx="8" fill="#141316" stroke="#45383e"/><text x="455" y="154" fill="#a99aa1">Result</text></g>
+                <g><text x="250" y="185" fill="#a99aa1" font-weight="500" font-size="11">result &rarr; reflection &rarr; you</text></g>
+              </g>
+            </svg>
+          </div>
+          <p class="sec-intro" style="margin-top:16px;color:#ece7ea;font-weight:500;">Human curiosity. Machine leverage. Personal agency.</p>
+        </section>
+
+        <section>
+          <div class="sec-title">Open by design</div>
+          <p class="sec-intro">Knowledge grows when people can inspect it, question it, reuse it, and build on it. Everything here is meant to be taken and used.</p>
+          <div class="chips">
+            <button class="chip" onClick="{{ soon }}">Inspect</button>
+            <button class="chip" onClick="{{ soon }}">Fork</button>
+            <button class="chip" onClick="{{ soon }}">Adapt</button>
+            <button class="chip" onClick="{{ soon }}">Contribute</button>
+          </div>
+        </section>
+
+        <section class="section--closing">
+          <div class="sec-title">Start foraging</div>
+          <div class="cta-row">
+            <button class="btn btn--primary" onClick="{{ explore }}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg>
+              Explore
+            </button>
+            <button class="btn btn--ghost">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+              See Welcome Note
+            </button>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { pulse: false, toast: false };
+  }
+  renderVals() {
+    return {
+      sidebarCls: this.state.pulse ? 'is-pulse' : '',
+      showToast: this.state.toast,
+      explore: () => {
+        this.setState({ pulse: false });
+        setTimeout(() => this.setState({ pulse: true }), 20);
+        setTimeout(() => this.setState({ pulse: false }), 1500);
+      },
+      soon: () => {
+        clearTimeout(this._toastTimer);
+        this.setState({ toast: true });
+        this._toastTimer = setTimeout(() => this.setState({ toast: false }), 1600);
+      },
+    };
+  }
+}
+</script>
+</body>
+</html>

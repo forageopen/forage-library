@@ -5,3 +5,6 @@ Thumbs.db
 *.log
 .worktrees/
 .superpowers/
+
+# seeded design-canvas payload (regenerate with design/welcome via seed-canvas.mjs)
+design/welcome/forage-welcome-screen.html

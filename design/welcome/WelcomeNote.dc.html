@@ -1,0 +1,107 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Figtree:wght@600&family=Inter:wght@400;500;600;700&display=swap");
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: "Inter","Segoe UI",Arial,sans-serif; background: #1c181c; color: #ece7ea; -webkit-font-smoothing: antialiased; }
+    a { color: #ff5ec2; text-decoration: none; } a:hover { color: #ff2ea6; }
+    .app { display: flex; flex-direction: column; height: 100%; }
+    .ribbon { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 10px 20px; background: #141316; border-bottom: 1px solid #2c262a; }
+    .ribbon-left { display: flex; align-items: center; gap: 10px; }
+    .ribbon-logo { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #ece7ea; }
+    .ribbon-logo svg { width: 22px; height: 22px; }
+    .ribbon-title { font-family: "Figtree","Segoe UI",sans-serif; font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 0.02em; }
+    .ribbon-actions { display: flex; align-items: center; gap: 6px; color: #a99aa1; }
+    .ribbon-btn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 6px; background: transparent; border: none; color: inherit; }
+    .ribbon-btn svg { width: 16px; height: 16px; }
+    .row { display: flex; flex: 1; min-height: 0; }
+    .sidebar { width: 240px; flex-shrink: 0; background: #0e0d10; padding: 16px 12px; border-right: 1px solid #2c262a; display: flex; flex-direction: column; gap: 2px; }
+    .nav-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #ece7ea; padding: 6px 8px; border-radius: 6px; }
+    .nav-item svg.folder { width: 14px; height: 14px; flex-shrink: 0; color: #a99aa1; }
+    .nav-item .chev { margin-left: auto; width: 13px; height: 13px; color: #6f6570; }
+    .nav-item.is-active { background: #3a1230; color: #ff2ea6; font-weight: 600; }
+    .nav-item.is-active svg.folder { color: #ff2ea6; }
+    .nav-emoji { width: 14px; text-align: center; font-size: 12px; }
+
+    .pane { flex: 1; display: flex; flex-direction: column; min-width: 0; background: #1c181c; }
+    .pane-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 16px; border-bottom: 1px solid #2c262a; background: #141316; }
+    .pane-name { font-size: 13px; font-weight: 600; color: #ece7ea; }
+    .pane-actions { display: flex; align-items: center; gap: 4px; color: #a99aa1; }
+    .pane-actions button { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 6px; background: transparent; border: none; color: inherit; }
+    .pane-actions button svg { width: 16px; height: 16px; }
+    .stats-bar { padding: 6px 16px; border-bottom: 1px solid #2c262a; background: #141316; font-size: 11px; color: #a99aa1; }
+    .pane-main { flex: 1; overflow-y: auto; padding: 40px; }
+    .content { max-width: 720px; margin: 0 auto; }
+    .content h1 { font-size: 28px; font-weight: 700; margin-bottom: 18px; color: #ece7ea; }
+    .content p { font-size: 14px; line-height: 1.75; color: #ece7ea; margin-bottom: 14px; }
+    .content p.sig { margin-top: 24px; font-weight: 600; color: #ece7ea; }
+
+    .caption { position: absolute; left: 40px; bottom: 18px; font-size: 12px; color: #6f6570; max-width: 62ch; }
+    .caption b { color: #a99aa1; font-weight: 600; }
+  </style>
+</helmet>
+
+<div class="app">
+  <div class="ribbon">
+    <div class="ribbon-left">
+      <span class="ribbon-logo"><svg viewBox="0 0 685.7 651.3" fill="currentColor" aria-hidden="true"><path d="M148.7,527.2c-2.6,0-5.1-.2-7.7-.6c-34-5.6-49-32.2-55.4-43.6l-.2-.4C76,466,59.5,432.1,54.2,391.8c-.8-6.2-2.2-22.5,3.2-41.6c5.6-19.7,16.7-35.7,32-46.4c29.7-20.6,71.6-30.2,110.9-37.8c4-30.4,8.2-61.3,12.9-89.9c-17.6,1.6-34.8,2.6-51.6,3c-47.9,1.2-92-1.9-143.1-10.3c-12-2-20.2-13.3-18.2-25.3c2-12,13.3-20.2,25.3-18.2c52.4,8.6,112.4,14.4,196.2,5.7c9.1-41.6,19-67.4,33-87c18.6-26,44.4-39.7,81-43.2c33.9-3.2,63.9,5.5,84.7,24.3c15.9,14.4,25,33.7,25.1,53.1c.1,17.2-8.5,34-24.2,47.1c-14.6,12.2-34.9,21.3-60.2,27c-36,8-69.9,14.2-102.2,18.7c-4.8,26.9-9,56.9-13,86.9c72-11.7,128.1-14.2,130.7-14.3c12.2-.5,22.5,8.9,23,21.1c.5,12.2-9,22.5-21.1,23l0,0c-.7,0-63,2.8-138.6,16c-5.6,42-11.6,84-19.2,118.8c-11.4,51.9-25,81.3-44.1,95.5C168.1,524.1,158.6,527.3,148.7,527.2z"/></svg></span>
+      <span class="ribbon-title">Forage Library</span>
+    </div>
+    <div class="ribbon-actions">
+      <button class="ribbon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg></button>
+      <button class="ribbon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg></button>
+      <button class="ribbon-btn"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg></button>
+    </div>
+  </div>
+
+  <div class="row" style="position:relative;">
+    <nav class="sidebar">
+      <div class="nav-item is-active"><svg class="folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Welcome Note</div>
+      <div class="nav-item"><span class="nav-emoji">🏛️</span> About Us <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></div>
+      <div class="nav-item"><svg class="folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg> Case Studies <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></div>
+      <div class="nav-item"><span class="nav-emoji">🧩</span> Frameworks <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></div>
+      <div class="nav-item"><svg class="folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg> Guides <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></div>
+      <div class="nav-item"><svg class="folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg> Research <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></div>
+      <div class="nav-item"><span class="nav-emoji">📊</span> Slides <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></div>
+      <div class="nav-item"><span class="nav-emoji">📝</span> Articles <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></div>
+    </nav>
+
+    <section class="pane">
+      <div class="pane-header">
+        <span class="pane-name">00-welcome-note.md</span>
+        <div class="pane-actions">
+          <button title="Read along"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>
+          <button title="Take a note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
+          <button title="Document dark mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg></button>
+          <button title="Zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/><path d="M8 11h6"/></svg></button>
+          <button title="Export"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg></button>
+          <button title="Close file"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+      </div>
+      <div class="stats-bar">246 words &middot; about 1 min read</div>
+      <div class="pane-main">
+        <div class="content">
+          <h1>Welcome Note</h1>
+          <p>Over the years, through my work in research and development, product design, learning and development, creative work, and technology, I've come across a lot of knowledge that usually takes years to encounter properly. Some of it comes from research, some from working on real projects, and some from simply making enough mistakes to understand why something works the way it does.</p>
+          <p>I started putting these things together because I wanted to make that knowledge easier to reach. Not by reducing everything into simple answers, but by bringing together the ideas, methods, references, and practical experience that can help someone understand a subject and eventually use it for themselves.</p>
+          <p>That is what Forage Library is becoming. A place where I can collect and organise the things I've learned, the things I'm still learning, and the things I think are worth passing on. Some of the material here may be useful to someone already working in the field. Some may be useful to someone who has never encountered the subject before.</p>
+          <p>If something I've spent years learning can eventually help someone understand their first product idea, work through a hobby project, make sense of a research paper, or build something they otherwise would not have known how to build, then the effort is worth it.</p>
+          <p>Insyallah, maybe one day, some of this knowledge will find its way to a primary school kid working on a hobby project and give them a head start I never had.</p>
+          <p class="sig">Muhammad Adam Rosman</p>
+        </div>
+      </div>
+    </section>
+
+    <p class="caption"><b>After "See Welcome Note"</b> &mdash; opens <code>00-welcome-note.md</code> in the normal document viewer (rendered prose, read-along, sidenote, export all available), exactly as clicking it in the sidebar does today.</p>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
