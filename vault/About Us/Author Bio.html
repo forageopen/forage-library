@@ -77,5 +77,22 @@ h1{
     </div>
   </div>
 </div>
+<script>
+  // Ensure social links open in a new tab even when this page is rendered
+  // inside the vault viewer's iframe (where a bare target="_blank" can be blocked).
+  document.querySelectorAll('.social a').forEach(function (link) {
+    link.addEventListener('click', function (e) {
+      var url = link.href;
+      if (!url) return;
+      e.preventDefault();
+      var win = window.open(url, '_blank', 'noopener');
+      if (!win) {
+        // Popup blocked (sandboxed iframe): fall back to opening in the top window.
+        try { window.top.location.href = url; }
+        catch (err) { window.location.href = url; }
+      }
+    });
+  });
+</script>
 </body>
 </html>

@@ -584,7 +584,7 @@ export function createViewerPane(paneEl) {
         wrap.className = 'vault-html-frame-wrap';
         const frame = document.createElement('iframe');
         frame.className = 'vault-html-frame';
-        frame.setAttribute('sandbox', 'allow-scripts');
+        frame.setAttribute('sandbox', 'allow-scripts allow-popups allow-popups-to-escape-sandbox');
         frame.setAttribute('title', name);
         wrap.appendChild(frame);
         contentEl.appendChild(wrap);
