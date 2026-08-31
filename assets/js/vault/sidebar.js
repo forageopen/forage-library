@@ -74,6 +74,7 @@ export function orderSiblings(children) {
 const FOLDER_ICONS = {
   'About Us': '🏛️',
   Frameworks: '🧩',
+  Guides: '🧭',
 };
 
 function fillFolderIcon(container, node, withOpenState) {

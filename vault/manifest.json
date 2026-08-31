@@ -121,7 +121,16 @@
       "name": "Guides",
       "type": "folder",
       "path": "vault/Guides",
-      "children": []
+      "children": [
+        {
+          "name": "who-this-is-for.md",
+          "type": "file",
+          "path": "vault/Guides/who-this-is-for.md",
+          "fileType": "md",
+          "title": "Who This Library Is For",
+          "date": "2026-08-31"
+        }
+      ]
     },
     {
       "name": "Lesson Learned",
