@@ -13,6 +13,7 @@ import {
 import { elementToJpegBlob, slidesToJpegBlobs, pageFileName } from './export-image.js';
 import { blocksToDocxBlob } from './export-docx.js';
 import { blocksFromTokens, blocksFromElement } from './document-model.js';
+import { createFloatImageController, blobToDataUrl } from './paste-image.js';
 import { initResizeHandle } from './resize.js';
 import { highlightSwatchesHtml } from './highlight-colors.js';
 import { contrastTextColor } from './contrast.js';
@@ -452,6 +453,18 @@ export function createViewerPane(paneEl) {
     renderReadState('idle');
   }
 
+  /* The floating-image controller for the main-pane note editor (drag +
+     aspect-locked resize of a pasted `<img data-forage-float>`, see
+     paste-image.js). Built fresh in startNewNote() against that run's
+     editor body; torn down wherever the editor markup is replaced. */
+  let floatController = null;
+  function destroyFloatController() {
+    if (floatController) {
+      floatController.destroy();
+      floatController = null;
+    }
+  }
+
   /* Single click toggles play/pause/resume; a quick double click resets.
      The click is deferred ~200ms so the first click of a double doesn't
      also fire a toggle. */
@@ -491,6 +504,7 @@ export function createViewerPane(paneEl) {
     showContent();
     destroyLoadingBar();
     destroyReader();
+    destroyFloatController();
     contentEl.className = 'vault-pane-content';
     contentEl.innerHTML = '';
     loadingStartedAt = performance.now();
@@ -520,6 +534,7 @@ export function createViewerPane(paneEl) {
   function renderError(name, message) {
     destroyLoadingBar();
     destroyReader();
+    destroyFloatController();
     contentEl.hidden = true;
     dropzone.hidden = false;
     if (dropzoneMessage) {
@@ -554,6 +569,7 @@ export function createViewerPane(paneEl) {
       if (seq !== loadSeq) return; // a newer open superseded this one during the dwell
       destroyLoadingBar();
       destroyReader();
+      destroyFloatController();
       contentEl.className = 'vault-pane-content vault-pane-content--' + result.kind;
       if (result.kind === 'iframe') {
         /* A hand-authored .html file's raw markup can carry its own
@@ -772,6 +788,51 @@ export function createViewerPane(paneEl) {
     }
   });
 
+  /* Paste a clipboard image into the note editor as a floating "In Front of
+     Text" overlay (Word's wrap mode) — Windows' Snipping Tool drops a PNG on
+     the clipboard, so Ctrl+V is the whole entry point; there's deliberately
+     no ribbon button. Delegated on contentEl like the rest of the editor
+     wiring, since .vault-editor-body is re-injected every startNewNote().
+     The <img> is built here by hand (never execCommand('insertHTML') of
+     clipboard markup) so nothing untrusted reaches the DOM. */
+  contentEl.addEventListener('paste', async (e) => {
+    const editorBody = e.target.closest && e.target.closest('.vault-editor-body');
+    if (!editorBody) return;
+    const items = Array.from((e.clipboardData && e.clipboardData.items) || []);
+    const imageItem = items.find((it) => it.kind === 'file' && it.type.startsWith('image/'));
+    if (!imageItem) return; // ordinary text/HTML paste — leave it to the browser
+    e.preventDefault();
+    const file = imageItem.getAsFile();
+    if (!file) return;
+    let dataUrl;
+    try {
+      dataUrl = await blobToDataUrl(file);
+    } catch (err) {
+      return;
+    }
+    const img = document.createElement('img');
+    img.setAttribute('data-forage-float', '');
+    img.alt = '';
+    // An <img> inside a contenteditable is natively drag-and-droppable —
+    // that hijacks the pointer before our own drag handler ever sees a
+    // mousemove. Turn it off so the float controller can move/resize it.
+    img.draggable = false;
+    img.style.position = 'absolute';
+    img.src = dataUrl;
+    await img.decode().catch(() => {});
+    const naturalWidth = img.naturalWidth || 320;
+    const maxWidth = Math.max(64, editorBody.clientWidth - 48);
+    const width = Math.round(Math.min(naturalWidth, maxWidth));
+    const nth = editorBody.querySelectorAll('img[data-forage-float]').length;
+    img.style.width = `${width}px`;
+    img.style.height = 'auto';
+    img.style.left = `${24 + nth * 16}px`;
+    img.style.top = `${24 + nth * 16}px`;
+    editorBody.appendChild(img);
+    editorBody.dispatchEvent(new Event('input', { bubbles: true }));
+    if (floatController) floatController.select(img);
+  });
+
   initDropzone(dropzone, openLocalFile);
 
   /* Keeps the PDF "x/y pages" stat in sync while scrolling through the
@@ -935,6 +996,7 @@ export function createViewerPane(paneEl) {
       showContent();
       destroyLoadingBar();
       destroyReader();
+      destroyFloatController();
       currentName = NEW_DOCUMENT_NAME;
       currentSourceText = null;
       contentEl.className = 'vault-pane-content vault-pane-content--editor';
@@ -942,7 +1004,14 @@ export function createViewerPane(paneEl) {
         + `<div class="vault-editor-title" contenteditable="true" data-editor-title>${NEW_DOCUMENT_NAME}</div>`
         + '<div class="vault-content vault-editor-body" contenteditable="true" data-placeholder="Start typing…"></div>';
       const body = contentEl.querySelector('.vault-editor-body');
-      if (body) body.focus();
+      if (body) {
+        body.focus();
+        floatController = createFloatImageController(body, contentEl, {
+          // A completed drag/resize should refresh the stats + export menu
+          // the same way typing does — reuse the delegated 'input' handler.
+          onChange: () => body.dispatchEvent(new Event('input', { bubbles: true })),
+        });
+      }
       updateHeader();
       updateStats();
       updateExportMenu();
@@ -955,6 +1024,7 @@ export function createViewerPane(paneEl) {
     closeFile() {
       destroyLoadingBar();
       destroyReader();
+      destroyFloatController();
       currentPath = null;
       currentName = null;
       currentSourceText = null;

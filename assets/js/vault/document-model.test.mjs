@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { marked } from 'marked';
 import { JSDOM } from 'jsdom';
-import { blocksFromTokens, blocksFromElement } from './document-model.js';
+import { blocksFromTokens, blocksFromElement, imageBlockFromElement } from './document-model.js';
 
 // --- blocksFromTokens (real marked.lexer output) ---
 
@@ -101,4 +101,43 @@ test('walks a code block, preserving a language- class', () => {
   const el = elementFromHtml('<pre><code class="language-python">x = 1</code></pre>');
   const blocks = blocksFromElement(el);
   assert.deepEqual(blocks[0], { kind: 'codeBlock', lang: 'python', text: 'x = 1' });
+});
+
+// --- floating pasted images (note editor's <img data-forage-float>) ---
+
+const FLOAT_IMG = '<img data-forage-float src="data:image/png;base64,iVBORw0KGgo=" '
+  + 'style="position:absolute;left:48px;top:24px;width:300px;height:150px">';
+
+test('lifts a top-level floating pasted image into an image block, alongside the text', () => {
+  const el = elementFromHtml(`<p>Notes above.</p>${FLOAT_IMG}<div>and below</div>`);
+  const blocks = blocksFromElement(el);
+  assert.deepEqual(blocks.map((b) => b.kind), ['paragraph', 'image', 'paragraph']);
+  assert.deepEqual(blocks[1], {
+    kind: 'image',
+    mime: 'image/png',
+    dataUrl: 'data:image/png;base64,iVBORw0KGgo=',
+    xPx: 48,
+    yPx: 24,
+    wPx: 300,
+    hPx: 150,
+  });
+});
+
+test('an ordinary rendered <img> (no float marker) is still ignored', () => {
+  const el = elementFromHtml('<p>text <img src="data:image/png;base64,iVBORw0KGgo="> more</p>');
+  const blocks = blocksFromElement(el);
+  assert.deepEqual(blocks, [{ kind: 'paragraph', runs: [{ text: 'text ' }, { text: ' more' }] }]);
+});
+
+test('imageBlockFromElement rejects a float image whose src is not a data URL', () => {
+  const el = elementFromHtml('<img data-forage-float src="https://example.com/x.png" style="width:10px">');
+  assert.equal(imageBlockFromElement(el.firstChild), null);
+});
+
+test('imageBlockFromElement derives height from width and natural aspect when height is auto', () => {
+  const el = elementFromHtml('<img data-forage-float src="data:image/png;base64,iVBORw0KGgo=" style="width:200px;height:auto">');
+  const img = el.firstChild;
+  Object.defineProperty(img, 'naturalWidth', { value: 400 });
+  Object.defineProperty(img, 'naturalHeight', { value: 200 });
+  assert.equal(imageBlockFromElement(img).hPx, 100);
 });

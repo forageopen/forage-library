@@ -455,7 +455,7 @@ th { font-weight: 600; background: var(--panel); font-size: 11px; text-transform
      pane" marker in the DOM/CSS to key off of, so scoping print to just
      one pane isn't done here. */
   .vault-layout { height: auto; display: block; }
-  .vault-sidebar, .vault-dropzone, .vault-sidenote, .vault-editor-toolbar, .vault-resize-handle, .vault-pane-header, .vault-pane-stats-bar, .vault-export-progress { display: none !important; }
+  .vault-sidebar, .vault-dropzone, .vault-sidenote, .vault-editor-toolbar, .vault-resize-handle, .vault-pane-header, .vault-pane-stats-bar, .vault-export-progress, .vault-float-selection { display: none !important; }
   .vault-panes { display: block; }
   .vault-pane, .vault-pane-body { display: block; }
   .vault-pane-main { overflow: visible; padding: 0; background: #fff; }
@@ -917,6 +917,46 @@ button.vault-tree-folder-label:focus-visible {
   content: attr(data-placeholder);
   color: var(--subtitle);
 }
+
+/* Floating pasted image ("In Front of Text", see paste-image.js) — absolutely
+   positioned inside the editor body, overlaying the text; text is never
+   reflowed. Geometry (left/top/width) is inline on the element. */
+.vault-pane-content--editor { position: relative; }
+.vault-editor-body { position: relative; }
+.vault-editor-body img[data-forage-float] {
+  position: absolute;
+  max-width: none;
+  cursor: move;
+  user-select: none;
+  -webkit-user-drag: none;
+  touch-action: none; /* a touch drag moves the image, never scrolls */
+}
+
+/* Selection outline + aspect-locked corner handles. Rendered into
+   .vault-pane-content--editor, OUTSIDE .vault-editor-body, so it never lands
+   in editorBody.outerHTML (HTML export), the html2canvas capture (JPEG
+   export), or the document IR (.docx export). */
+.vault-float-selection {
+  position: absolute;
+  z-index: 5;
+  border: 1px solid var(--teal);
+  pointer-events: none;
+}
+.vault-float-handle {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  margin: -7px;
+  background: var(--page-bg);
+  border: 1px solid var(--teal);
+  border-radius: 2px;
+  pointer-events: auto;
+  touch-action: none;
+}
+.vault-float-handle[data-corner="nw"] { left: 0; top: 0; cursor: nwse-resize; }
+.vault-float-handle[data-corner="ne"] { right: 0; top: 0; cursor: nesw-resize; }
+.vault-float-handle[data-corner="sw"] { left: 0; bottom: 0; cursor: nesw-resize; }
+.vault-float-handle[data-corner="se"] { right: 0; bottom: 0; cursor: nwse-resize; }
 
 .vault-status { padding: 24px; font-size: 13px; color: var(--subtitle); text-align: center; }
 .vault-status--error { color: var(--error); }
