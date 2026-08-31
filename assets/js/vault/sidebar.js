@@ -88,6 +88,7 @@ const FOLDER_ICONS = {
   'About Us': '🏛️',
   Frameworks: '🧩',
   Guides: '🧭',
+  Research: '🔬',
 };
 
 function fillFolderIcon(container, node, withOpenState) {
