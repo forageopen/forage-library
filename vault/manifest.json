@@ -142,7 +142,22 @@
       "name": "Research",
       "type": "folder",
       "path": "vault/Research",
-      "children": []
+      "children": [
+        {
+          "name": "Agents",
+          "type": "catalog",
+          "catalogType": "agents",
+          "icon": "bot",
+          "path": "vault/Research/Agents"
+        },
+        {
+          "name": "Skills",
+          "type": "catalog",
+          "catalogType": "skills",
+          "icon": "sparkles",
+          "path": "vault/Research/Skills"
+        }
+      ]
     }
   ]
 }
