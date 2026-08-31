@@ -455,7 +455,7 @@ th { font-weight: 600; background: var(--panel); font-size: 11px; text-transform
      pane" marker in the DOM/CSS to key off of, so scoping print to just
      one pane isn't done here. */
   .vault-layout { height: auto; display: block; }
-  .vault-sidebar, .vault-dropzone, .vault-sidenote, .vault-editor-toolbar, .vault-resize-handle, .vault-pane-header, .vault-pane-stats-bar, .vault-export-progress, .vault-float-selection { display: none !important; }
+  .vault-sidebar, .vault-dropzone, .vault-sidenote, .vault-editor-toolbar, .vault-resize-handle, .vault-pane-header, .vault-pane-stats-bar, .vault-export-progress, .vault-float-selection, .vault-welcome { display: none !important; }
   .vault-panes { display: block; }
   .vault-pane, .vault-pane-body { display: block; }
   .vault-pane-main { overflow: visible; padding: 0; background: #fff; }
@@ -1180,4 +1180,131 @@ button.vault-tree-folder-label:focus-visible {
   .vault-resize-handle { display: none; }
   .vault-panes--split { flex-direction: column; }
   .vault-panes--split .vault-pane { border-right: none; border-bottom: 1px solid var(--ribbon-border); }
+}
+
+/* ============================================================
+   Welcome screen — first-load landing inside the initial pane
+   (assets/js/vault/welcome.js). Shown once per browser
+   (localStorage 'forage-welcome-seen'); dismissed by "Start
+   exploring", "See Welcome Note", or opening any file. Styled
+   purely with existing theme tokens so it follows every theme.
+   ============================================================ */
+.vault-welcome { max-width: 720px; margin: 0 auto; padding-bottom: 24px; }
+
+.vault-welcome-hero { padding: 24px 0 8px; }
+.vault-welcome-kicker {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--teal); margin-bottom: 16px;
+}
+.vault-welcome-hero h1 {
+  font-family: "Figtree", var(--font); font-weight: 600;
+  font-size: 40px; line-height: 1.08; letter-spacing: -0.01em;
+  color: var(--text); text-wrap: balance;
+}
+.vault-welcome-lede {
+  margin-top: 16px; font-size: 16px; line-height: 1.65;
+  color: var(--subtitle); max-width: 60ch; text-wrap: pretty;
+}
+
+.vault-welcome-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+.vault-welcome-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: inherit; font-size: 14px; font-weight: 600;
+  padding: 11px 20px; border-radius: 8px; cursor: pointer;
+  border: 1px solid transparent;
+}
+.vault-welcome-btn svg { width: 15px; height: 15px; }
+.vault-welcome-btn--primary { background: var(--teal); color: #fff; border-color: var(--teal); }
+.vault-welcome-btn--primary:hover { opacity: 0.9; }
+.vault-welcome-btn--ghost { background: transparent; color: var(--text); border-color: var(--border); }
+.vault-welcome-btn--ghost:hover, .vault-welcome-btn--ghost:focus-visible { border-color: var(--teal); color: var(--teal); outline: none; }
+.vault-welcome-hint { margin-top: 12px; font-size: 12.5px; color: var(--subtitle); opacity: 0.75; }
+
+.vault-welcome-rule { border: none; border-top: 1px solid var(--border); margin: 44px 0; }
+
+.vault-welcome-section { margin-top: 44px; }
+.vault-welcome-section--closing { margin-top: 68px; }
+.vault-welcome-sec-title {
+  font-family: "Figtree", var(--font); font-weight: 600;
+  font-size: 22px; color: var(--text); letter-spacing: -0.005em;
+}
+.vault-welcome-section--closing .vault-welcome-sec-title { font-size: 24px; }
+.vault-welcome-section--closing .vault-welcome-cta { margin-top: 22px; }
+.vault-welcome-sec-intro {
+  margin-top: 12px; font-size: 14.5px; line-height: 1.7;
+  color: var(--subtitle); text-wrap: pretty;
+}
+
+.vault-welcome-cards {
+  margin-top: 22px; display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;
+}
+.vault-welcome-card {
+  border: 1px solid var(--border); border-radius: 12px;
+  background: var(--page-bg); padding: 18px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.vault-welcome-card-icon {
+  width: 34px; height: 34px; border-radius: 9px;
+  background: var(--teal-bg); color: var(--teal);
+  display: flex; align-items: center; justify-content: center;
+}
+.vault-welcome-card-icon svg { width: 18px; height: 18px; }
+.vault-welcome-card h3 { font-size: 14.5px; font-weight: 700; color: var(--text); margin: 0; }
+.vault-welcome-card p { font-size: 13px; line-height: 1.6; color: var(--subtitle); margin: 0; }
+
+.vault-welcome-diagram {
+  margin-top: 22px; border: 1px solid var(--border); border-radius: 12px;
+  background: var(--page-bg); padding: 22px; overflow-x: auto;
+}
+.vault-welcome-diagram svg { display: block; width: 100%; height: auto; min-width: 520px; }
+.vw-edge { stroke: var(--arrow); fill: none; }
+.vw-edge-accent { stroke: var(--teal); fill: none; }
+.vw-arrowhead { fill: var(--arrow); }
+.vw-node { fill: var(--page-bg); stroke: var(--border); }
+.vw-node-accent { fill: var(--teal-bg); stroke: var(--teal); }
+.vw-node-muted { fill: var(--page-bg); stroke: var(--arrow); }
+.vw-label { fill: var(--text); font-family: var(--font); font-size: 12px; font-weight: 600; }
+.vw-label-accent { fill: var(--teal); font-family: var(--font); font-size: 12px; font-weight: 600; }
+.vw-label-muted { fill: var(--subtitle); font-family: var(--font); font-size: 11px; font-weight: 500; }
+.vault-welcome-tagline { margin-top: 14px; font-size: 14.5px; font-weight: 500; color: var(--text); }
+
+.vault-welcome-chips { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 8px; }
+.vault-welcome-chip {
+  font-family: inherit; font-size: 12px; font-weight: 600;
+  padding: 6px 12px; border-radius: 999px;
+  color: var(--subtitle); background: transparent; border: 1px solid var(--border);
+  position: relative; cursor: pointer;
+}
+.vault-welcome-chip:hover, .vault-welcome-chip:focus-visible { color: var(--text); border-color: var(--subtitle); outline: none; }
+.vault-welcome-chip::after {
+  content: "Coming soon"; position: absolute; bottom: calc(100% + 7px); left: 50%;
+  transform: translateX(-50%); white-space: nowrap;
+  background: var(--bg); color: var(--text); border: 1px solid var(--border);
+  font-size: 11px; font-weight: 600; padding: 4px 8px; border-radius: 6px;
+  opacity: 0; pointer-events: none; transition: opacity 0.12s ease;
+}
+.vault-welcome-chip:hover::after, .vault-welcome-chip:focus-visible::after { opacity: 1; }
+
+.vault-welcome-toast {
+  position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%);
+  background: var(--bg); color: var(--text); border: 1px solid var(--teal);
+  font-size: 12.5px; font-weight: 600; padding: 9px 16px; border-radius: 999px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35); z-index: 200;
+}
+
+/* "Explore" (closing) draws the eye to the folder list without dismissing. */
+@keyframes forage-sidebar-pulse {
+  0% { box-shadow: inset 0 0 0 0 transparent; }
+  15% { box-shadow: inset 0 0 0 2px var(--teal); }
+  100% { box-shadow: inset 0 0 0 0 transparent; }
+}
+.vault-sidebar--pulse { animation: forage-sidebar-pulse 1.4s ease; }
+@media (prefers-reduced-motion: reduce) {
+  .vault-sidebar--pulse { animation: none; box-shadow: inset 0 0 0 2px var(--teal); }
+}
+
+@media (max-width: 640px) {
+  .vault-welcome-hero h1 { font-size: 30px; }
+  .vault-welcome-cards { grid-template-columns: 1fr; }
 }

@@ -1,14 +1,33 @@
 import { initSidebar } from './sidebar.js';
 import { initSplitView } from './split-view.js';
 import { initResizeHandle } from './resize.js';
+import { initWelcome } from './welcome.js';
+
+const WELCOME_NOTE_PATH = 'vault/00-welcome-note.md';
+const WELCOME_NOTE_NAME = '00-welcome-note.md';
 
 document.addEventListener('DOMContentLoaded', () => {
   const panesEl = document.querySelector('[data-vault-panes]');
   const template = document.querySelector('[data-vault-pane-template]');
   const splitView = initSplitView(panesEl, template);
 
+  const sidebarEl = document.querySelector('[data-vault-sidebar]');
+
   let sidebarApi = null;
-  initSidebar(document.querySelector('[data-vault-sidebar]'), (path, name) => {
+
+  /* First-load welcome screen — sits in the initial pane in place of the
+     empty dropzone until the visitor picks a direction. "See Welcome Note"
+     opens the note; opening anything from the sidebar dismisses it too. */
+  const welcome = initWelcome(document.querySelector('.vault-pane .vault-pane-main'), {
+    sidebarEl,
+    onSeeWelcomeNote() {
+      splitView.getActivePane().openVaultFile(WELCOME_NOTE_PATH, WELCOME_NOTE_NAME);
+      sidebarApi?.setActive(WELCOME_NOTE_PATH);
+    },
+  });
+
+  initSidebar(sidebarEl, (path, name) => {
+    welcome?.dismiss();
     splitView.getActivePane().openVaultFile(path, name);
     sidebarApi?.setActive(path);
   }).then((api) => { sidebarApi = api; });
@@ -26,7 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
      a visitor doesn't have to remember they collapsed it last time. The
      toggle still works to collapse/expand within the current session. */
   const sidebarToggleBtn = document.querySelector('[data-action="toggle-sidebar"]');
-  const sidebarEl = document.querySelector('[data-vault-sidebar]');
   if (sidebarToggleBtn && sidebarEl) {
     let collapsed = false;
     const applyCollapsed = (next) => {
