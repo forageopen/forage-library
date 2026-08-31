@@ -1,0 +1,7 @@
+{
+  "title": "Founder Voice",
+  "tags": ["writing", "voice", "storytelling", "communication", "founder"],
+  "github": null,
+  "primary": "SKILL.md",
+  "description": "Write in the voice of an aspiring founder telling the story of what they're building - terse, concrete, unpolished, not corporate-brochure prose. Strong for founder's notes, About and welcome pages, project and product intros, and for explaining a technical idea through a plain everyday mental model. Generalized from a personal writing-voice skill (upstream: github.com/0xwolfk/write-like-adam); carries no personal identity."
+}
