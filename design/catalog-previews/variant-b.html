@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="cherry">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Catalog mockup B — Gallery (responsive)</title>
+<link rel="stylesheet" href="tokens.css" />
+<style>
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 22px 24px 80px; }
+  .lede { color: var(--subtitle); font-size: 13px; margin: 4px 0 16px; line-height: 1.55; }
+
+  /* pane-width simulator (mockup only — stands in for the real split-view pane) */
+  .simbar { display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--subtitle); margin-bottom: 18px; padding: 10px 12px; border: 1px dashed var(--border); border-radius: 10px; }
+  .simbar input[type=range] { flex: 1; accent-color: var(--teal); max-width: 460px; }
+  .simbar b { color: var(--text); font-variant-numeric: tabular-nums; }
+  .simbar .presets { display: flex; gap: 6px; }
+  .simbar .presets button { font: inherit; font-size: 11px; padding: 3px 8px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--text-soft); cursor: pointer; }
+  .simbar .presets button:hover { border-color: var(--teal); color: var(--teal); }
+
+  .paneframe { border: 1px solid var(--border); border-radius: 12px; padding: 16px; background: color-mix(in srgb, var(--panel) 40%, transparent); margin: 0 auto; transition: max-width .12s ease; }
+
+  /* the catalog is a container — cards react to the PANE width, not the viewport */
+  .catalog { container-type: inline-size; }
+
+  .tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+  .tab { display: flex; align-items: center; gap: 7px; padding: 8px 13px; font-size: 12.5px; font-weight: 700; color: var(--subtitle); background: var(--panel); border: 1px solid var(--border); border-radius: 999px; cursor: pointer; }
+  .tab svg { width: 14px; height: 14px; }
+  .tab[aria-selected="true"] { color: #fff; background: var(--teal); border-color: var(--teal); }
+  @container (max-width: 360px) { .tab .lbl { display: none; } .tab { padding: 8px 11px; } }
+
+  .toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+  .toolbar:empty { display: none; }
+  .tagfilter { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 999px; cursor: pointer; color: var(--subtitle); background: var(--panel); border: 1px solid var(--border); white-space: nowrap; flex-shrink: 0; }
+  .chip[aria-pressed="true"] { color: var(--teal); background: var(--teal-bg); border-color: var(--teal); }
+  /* a narrow split pane: one scrollable row of tags instead of a tall wrapped block */
+  @container (max-width: 430px) {
+    .tagfilter { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
+  }
+
+  /* GRID — auto-fills 1 → 5 columns to whatever the pane can hold
+     (1180 / 210 ≈ 5; a half-split pane ≈ 2; a narrow split pane ≈ 1) */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(198px, 1fr)); gap: 14px; }
+
+  .card { border: 1px solid var(--border); border-radius: 13px; background: var(--panel); overflow: hidden; cursor: pointer; container-type: inline-size; transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
+  .card:hover { transform: translateY(-4px); box-shadow: 0 16px 36px rgba(0,0,0,.2); border-color: var(--teal); }
+  .card-body { display: block; }
+
+  /* --- base: the tightest poster (≈200px card, 5-across in a full pane) --- */
+  .card-banner { height: 56px; display: flex; align-items: center; justify-content: center; position: relative; background: linear-gradient(150deg, var(--teal), var(--blue)); }
+  .card-banner svg { width: 22px; height: 22px; color: #fff; }
+  .card-banner .type-badge { display: none; position: absolute; left: 11px; top: 10px; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; color: #fff; background: rgba(0,0,0,.22); padding: 3px 7px; border-radius: 999px; }
+
+  .card-inner { padding: 11px 12px 12px; display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+  .card-title { font-size: 13.5px; font-weight: 800; color: var(--text); line-height: 1.25; }
+  .card-desc { font-size: 12px; line-height: 1.5; color: var(--text-soft); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .card-tags { display: flex; gap: 5px; flex-wrap: nowrap; overflow: hidden; -webkit-mask-image: linear-gradient(to right, #000 82%, transparent); mask-image: linear-gradient(to right, #000 82%, transparent); }
+  .pill { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 999px; color: var(--teal); background: var(--teal-bg); white-space: nowrap; }
+  .card-meta { font-size: 10px; color: var(--subtitle); display: flex; gap: 7px; flex-wrap: wrap; }
+  .card-meta .m-date { display: none; }
+
+  /* --- roomier card: more of the blurb, the update date, a divider --- */
+  @container (min-width: 234px) {
+    .card-banner { height: 72px; }
+    .card-banner svg { width: 28px; height: 28px; }
+    .card-banner .type-badge { display: inline-block; }
+    .card-inner { padding: 13px 15px 15px; gap: 9px; }
+    .card-title { font-size: 15px; }
+    .card-desc { font-size: 12.5px; -webkit-line-clamp: 3; }
+    .card-tags { flex-wrap: wrap; -webkit-mask-image: none; mask-image: none; }
+    .card-meta { font-size: 10.5px; border-top: 1px solid var(--border); padding-top: 9px; }
+    .card-meta .m-date { display: inline; }
+  }
+  @container (min-width: 290px) {
+    .card-banner { height: 86px; }
+    .card-banner svg { width: 33px; height: 33px; }
+    .card-title { font-size: 15.5px; }
+  }
+
+  .empty { text-align: center; padding: 60px 20px; color: var(--subtitle); }
+  .empty svg { width: 38px; height: 38px; opacity: .5; }
+  .empty p { margin-top: 12px; font-size: 13.5px; }
+
+  /* drawer */
+  .scrim { position: fixed; inset: 0; background: rgba(0,0,0,.44); opacity: 0; pointer-events: none; transition: opacity .2s ease; z-index: 90; }
+  .scrim.show { opacity: 1; pointer-events: auto; }
+  .drawer { position: fixed; top: 0; right: 0; height: 100%; width: min(560px, 94vw); background: var(--page-bg); border-left: 1px solid var(--border); box-shadow: -20px 0 50px rgba(0,0,0,.3); z-index: 100; transform: translateX(100%); transition: transform .24s cubic-bezier(.4,0,.2,1); display: flex; flex-direction: column; }
+  .drawer.show { transform: translateX(0); }
+  .drawer-banner { padding: 20px 22px; background: linear-gradient(150deg, var(--teal), var(--blue)); color: #fff; position: relative; }
+  .drawer-banner .type-badge { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; background: rgba(0,0,0,.2); padding: 3px 8px; border-radius: 999px; }
+  .drawer-banner h2 { font-size: 21px; font-weight: 800; margin: 10px 0 6px; }
+  .drawer-banner p { font-size: 13px; line-height: 1.5; opacity: .95; }
+  .drawer-close { position: absolute; right: 14px; top: 14px; background: rgba(0,0,0,.2); border: none; color: #fff; width: 30px; height: 30px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+  .drawer-close svg { width: 16px; height: 16px; }
+  .drawer-scroll { flex: 1; overflow-y: auto; padding: 18px 22px 40px; display: flex; flex-direction: column; gap: 16px; }
+  .drawer-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; font: inherit; font-size: 12.5px; font-weight: 700; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--panel); color: var(--text); cursor: pointer; text-decoration: none; }
+  .btn svg { width: 14px; height: 14px; }
+  .btn:hover { border-color: var(--teal); color: var(--teal); }
+  .btn--primary { background: var(--teal); color: #fff; border-color: var(--teal); }
+  .btn--primary:hover { color: #fff; opacity: .9; }
+  .btn[aria-disabled="true"] { opacity: .45; cursor: not-allowed; }
+  .btn.is-done { color: var(--teal); border-color: var(--teal); }
+  .viewer { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .viewer-head { display: flex; align-items: center; gap: 4px; background: var(--ribbon-bg); border-bottom: 1px solid var(--border); padding: 6px 8px; }
+  .seg { display: flex; gap: 2px; }
+  .seg button { display: inline-flex; align-items: center; gap: 5px; font: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 6px; border: none; background: transparent; color: var(--subtitle); cursor: pointer; }
+  .seg button svg { width: 13px; height: 13px; }
+  .seg button[aria-selected="true"] { background: var(--panel); color: var(--text); }
+  .viewer-head .fname { font-family: var(--mono); font-size: 11px; color: var(--subtitle); margin-left: 4px; }
+  .viewer-head .spacer { margin-left: auto; }
+  .viewer-body { position: relative; }
+  .viewer-body.clamped .content { max-height: 300px; overflow: hidden; }
+  .viewer-body.clamped::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 64px; pointer-events: none; background: linear-gradient(to bottom, transparent, var(--page-bg)); }
+  .content { background: var(--page-bg); }
+  pre.code { margin: 0; padding: 14px 16px; overflow-x: auto; font-family: var(--mono); font-size: 11.5px; line-height: 1.6; color: var(--text); white-space: pre; }
+  .prose { padding: 4px 16px 14px; font-size: 13px; line-height: 1.65; color: var(--text-soft); }
+  .prose h1 { font-size: 18px; margin: 12px 0 6px; color: var(--text); }
+  .prose h2 { font-size: 14.5px; margin: 12px 0 6px; color: var(--text); }
+  .prose h3 { font-size: 13px; margin: 10px 0 4px; color: var(--text); }
+  .prose p { margin: 7px 0; }
+  .prose ul, .prose ol { margin: 7px 0 7px 18px; }
+  .prose code { font-family: var(--mono); font-size: 11.5px; background: var(--teal-bg); padding: 1px 5px; border-radius: 4px; }
+  .prose pre.md-pre { background: var(--ribbon-bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; overflow-x: auto; margin: 7px 0; }
+  .prose pre.md-pre code { background: none; padding: 0; }
+  .expandbar { display: flex; justify-content: center; padding: 8px; border-top: 1px solid var(--border); background: var(--ribbon-bg); }
+  .expandbar button { font: inherit; font-size: 12px; font-weight: 700; color: var(--teal); background: none; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; }
+  .expandbar button svg { width: 13px; height: 13px; }
+  .filelist-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--subtitle); margin-bottom: 6px; }
+  .filerow { display: flex; align-items: center; gap: 7px; padding: 6px 8px; border-radius: 6px; font-family: var(--mono); font-size: 11.5px; color: var(--text-soft); background: transparent; border: none; cursor: pointer; text-align: left; width: 100%; }
+  .filerow svg { width: 13px; height: 13px; color: var(--subtitle); flex-shrink: 0; }
+  .filerow:hover { background: var(--ribbon-hover); color: var(--teal); }
+  .filerow .fbytes { margin-left: auto; color: var(--subtitle); }
+  .filerow--active { color: var(--teal); background: var(--teal-bg); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="lede">Variant B2 — the gallery, with <strong>smaller cards on a container-query grid</strong>. The grid fills 1&nbsp;&rarr;&nbsp;5 columns to whatever the pane can hold (full pane ≈ 5, half-split ≈ 2, narrow split ≈ 1). Each card also restyles off <em>its own</em> width: tighter cards drop to a 2-line blurb, a shorter banner and no update date; roomier cards get the full poster. Drag the simulator to preview a split pane.</p>
+
+  <div class="simbar">
+    <span>Pane width</span>
+    <input type="range" min="240" max="1180" value="1180" data-sim />
+    <b data-simval>1180px</b>
+    <span class="presets">
+      <button data-preset="320">narrow split</button>
+      <button data-preset="520">half split</button>
+      <button data-preset="1180">full</button>
+    </span>
+  </div>
+
+  <div class="paneframe" data-paneframe>
+    <div class="catalog">
+      <div class="tabs" role="tablist" data-tabs></div>
+      <div class="toolbar">
+        <div class="tagfilter" data-tagfilter></div>
+      </div>
+      <div class="grid" data-grid></div>
+    </div>
+  </div>
+</div>
+
+<div class="scrim" data-scrim></div>
+<aside class="drawer" data-drawer aria-hidden="true"></aside>
+
+<script src="sample-data.js"></script>
+<script>
+(function () {
+  const SECTIONS = ['skills', 'agents', 'commands'];
+  const LABEL = { skills: 'Skills', agents: 'Agents', commands: 'Commands' };
+  const TYPEBADGE = { skills: 'Skill', agents: 'Agent', commands: 'Command' };
+  let active = 'skills';
+  let activeTags = new Set();
+  let drawerSlug = null;
+  let viewMode = 'preview';
+  let openKey = null;
+
+  initThemeBar('b');
+
+  const tabsEl = document.querySelector('[data-tabs]');
+  const gridEl = document.querySelector('[data-grid]');
+  const tagEl = document.querySelector('[data-tagfilter]');
+  const scrimEl = document.querySelector('[data-scrim]');
+  const drawerEl = document.querySelector('[data-drawer]');
+  const paneframe = document.querySelector('[data-paneframe]');
+  const sim = document.querySelector('[data-sim]');
+  const simval = document.querySelector('[data-simval]');
+
+  function applySim(px) { paneframe.style.maxWidth = px + 'px'; simval.textContent = px + 'px'; sim.value = px; }
+  sim.addEventListener('input', () => applySim(+sim.value));
+  document.querySelectorAll('[data-preset]').forEach((b) => b.addEventListener('click', () => applySim(+b.dataset.preset)));
+
+  tabsEl.innerHTML = SECTIONS.map((s) => {
+    const n = FORAGE_CATALOG.sections[s].length;
+    return `<button class="tab" role="tab" data-section="${s}" aria-selected="${s === active}">${icon(SECTION_ICON[s])}<span class="lbl">${LABEL[s]} · ${n}</span></button>`;
+  }).join('');
+  tabsEl.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-section]'); if (!t) return;
+    active = t.dataset.section; activeTags.clear(); closeDrawer();
+    tabsEl.querySelectorAll('.tab').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.section === active)));
+    render();
+  });
+
+  function currentEntries() {
+    return FORAGE_CATALOG.sections[active].filter((e) => {
+      if (activeTags.size && ![...activeTags].some((t) => e.tags.includes(t))) return false;
+      return true;
+    });
+  }
+  function renderTags() {
+    tagEl.innerHTML = allTags(FORAGE_CATALOG.sections[active]).map((t) => `<button class="chip" data-tag="${t}" aria-pressed="${activeTags.has(t)}">${t}</button>`).join('');
+  }
+  tagEl.addEventListener('click', (e) => {
+    const c = e.target.closest('[data-tag]'); if (!c) return;
+    const t = c.dataset.tag; activeTags.has(t) ? activeTags.delete(t) : activeTags.add(t); render();
+  });
+
+  function cardHtml(entry) {
+    return `<article class="card" data-slug="${entry.slug}">
+      <div class="card-body">
+        <div class="card-banner"><span class="type-badge">${TYPEBADGE[active]}</span>${icon(SECTION_ICON[active])}</div>
+        <div class="card-inner">
+          <div class="card-title">${entry.title}</div>
+          <p class="card-desc">${entry.description}</p>
+          <div class="card-tags">${entry.tags.map((t) => `<span class="pill">${t}</span>`).join('')}</div>
+          <div class="card-meta"><span>${entry.files.length} file${entry.files.length > 1 ? 's' : ''}</span><span>${fmtBytes(entry.totalBytes)}</span><span class="m-date">${fmtDate(entry.updated)}</span></div>
+        </div>
+      </div>
+    </article>`;
+  }
+
+  function render() {
+    renderTags();
+    const entries = currentEntries();
+    if (!entries.length) {
+      gridEl.style.display = 'block';
+      gridEl.innerHTML = `<div class="empty">${icon(SECTION_ICON[active])}<p>${
+        FORAGE_CATALOG.sections[active].length === 0 ? LABEL[active] + ' — coming soon.' : 'Nothing matches that filter.'}</p></div>`;
+      return;
+    }
+    gridEl.style.display = 'grid';
+    gridEl.innerHTML = entries.map(cardHtml).join('');
+  }
+
+  gridEl.addEventListener('click', (e) => {
+    const card = e.target.closest('.card'); if (!card) return;
+    drawerSlug = card.dataset.slug; viewMode = 'preview'; openKey = null;
+    renderDrawer(); openDrawer();
+  });
+
+  function viewerHtml(entry) {
+    const key = openKey || entry.primaryKey;
+    const raw = getDoc(key);
+    const fname = key.split('/').pop();
+    const contentHtml = viewMode === 'code'
+      ? `<pre class="code">${raw.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</pre>`
+      : `<div class="prose">${mdToHtml(raw)}</div>`;
+    const isLong = raw.length > 900;
+    return `<div class="viewer">
+      <div class="viewer-head">
+        <div class="seg">
+          <button data-mode="code" aria-selected="${viewMode === 'code'}">${icon('code')} Code</button>
+          <button data-mode="preview" aria-selected="${viewMode === 'preview'}">${icon('eye')} Preview</button>
+        </div>
+        <span class="fname">${fname}</span><span class="spacer"></span>
+        <button class="btn" data-copy>${icon('copy')}<span>Copy</span></button>
+      </div>
+      <div class="viewer-body ${isLong ? 'clamped' : ''}" data-vbody><div class="content">${contentHtml}</div></div>
+      ${isLong ? `<div class="expandbar"><button data-toggleclamp>${icon('chevron')} Show full document</button></div>` : ''}
+    </div>`;
+  }
+  function fileListHtml(entry) {
+    if (entry.files.length < 2) return '';
+    const key = openKey || entry.primaryKey;
+    return `<div><div class="filelist-label">${entry.files.length} files in this bundle</div>
+      ${entry.files.map((f) => `<button class="filerow ${f.key === key ? 'filerow--active' : ''}" data-file="${f.key}">${icon('file')} ${f.path.split('/').slice(-2).join('/')}<span class="fbytes">${fmtBytes(f.bytes)}</span></button>`).join('')}</div>`;
+  }
+
+  function renderDrawer() {
+    const entry = FORAGE_CATALOG.sections[active].find((x) => x.slug === drawerSlug);
+    if (!entry) return;
+    const ghBtn = entry.github
+      ? `<a class="btn" href="${entry.github}" target="_blank" rel="noopener">${icon('github')} View on GitHub</a>`
+      : `<span class="btn" aria-disabled="true" title="Stage 2">${icon('github')} GitHub · coming soon</span>`;
+    drawerEl.innerHTML = `
+      <div class="drawer-banner">
+        <button class="drawer-close" data-close>${icon('x')}</button>
+        <span class="type-badge">${TYPEBADGE[active]}</span>
+        <h2>${entry.title}</h2>
+        <p>${entry.description}</p>
+      </div>
+      <div class="drawer-scroll">
+        <div class="drawer-tags">${entry.tags.map((t) => `<span class="pill">${t}</span>`).join('')}</div>
+        <div class="actions">
+          <button class="btn btn--primary" data-download>${icon('download')} Download ${entry.files.length > 1 ? '.zip' : '.md'}</button>
+          ${ghBtn}
+        </div>
+        ${fileListHtml(entry)}
+        ${viewerHtml(entry)}
+        <div style="font-size:11px;color:var(--subtitle)">Updated ${fmtDate(entry.updated)} · ${fmtBytes(entry.totalBytes)} total</div>
+      </div>`;
+  }
+
+  drawerEl.addEventListener('click', (e) => {
+    const entry = FORAGE_CATALOG.sections[active].find((x) => x.slug === drawerSlug);
+    if (e.target.closest('[data-close]')) { closeDrawer(); return; }
+    if (e.target.closest('[data-mode]')) { viewMode = e.target.closest('[data-mode]').dataset.mode; renderDrawer(); return; }
+    if (e.target.closest('[data-file]')) { openKey = e.target.closest('[data-file]').dataset.file; renderDrawer(); return; }
+    if (e.target.closest('[data-toggleclamp]')) {
+      const body = drawerEl.querySelector('[data-vbody]');
+      const btn = e.target.closest('[data-toggleclamp]');
+      body.classList.toggle('clamped');
+      const clamped = body.classList.contains('clamped');
+      btn.innerHTML = icon('chevron') + (clamped ? ' Show full document' : ' Collapse');
+      btn.querySelector('svg').style.transform = clamped ? '' : 'rotate(180deg)';
+      return;
+    }
+    if (e.target.closest('[data-copy]')) { copyText(getDoc(openKey || entry.primaryKey), e.target.closest('[data-copy]')); return; }
+    if (e.target.closest('[data-download]')) { alert('Mockup: real build zips ' + entry.files.map((f) => f.path).join(', ')); return; }
+  });
+
+  function openDrawer() { scrimEl.classList.add('show'); drawerEl.classList.add('show'); drawerEl.setAttribute('aria-hidden', 'false'); }
+  function closeDrawer() { scrimEl.classList.remove('show'); drawerEl.classList.remove('show'); drawerEl.setAttribute('aria-hidden', 'true'); drawerSlug = null; }
+  scrimEl.addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+
+  render();
+})();
+</script>
+</body>
+</html>

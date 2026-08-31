@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="cherry">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Catalog mockup A — Dense grid</title>
+<link rel="stylesheet" href="tokens.css" />
+<style>
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 24px 80px; }
+  .lede { color: var(--subtitle); font-size: 13px; margin: 4px 0 22px; }
+
+  /* section tabs */
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 18px; }
+  .tab {
+    display: flex; align-items: center; gap: 7px; padding: 9px 14px; font-size: 13px; font-weight: 600;
+    color: var(--subtitle); background: none; border: none; border-bottom: 2px solid transparent;
+    cursor: pointer; margin-bottom: -1px;
+  }
+  .tab svg { width: 15px; height: 15px; }
+  .tab:hover { color: var(--text); }
+  .tab[aria-selected="true"] { color: var(--teal); border-bottom-color: var(--teal); }
+  .tab .count { font-weight: 500; color: var(--subtitle); font-variant-numeric: tabular-nums; }
+
+  /* toolbar */
+  .toolbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+  .searchbox { position: relative; flex: 0 1 300px; }
+  .searchbox svg { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: var(--subtitle); }
+  .searchbox input {
+    width: 100%; font: inherit; font-size: 13px; padding: 7px 10px 7px 30px; border-radius: 7px;
+    background: var(--page-bg); color: var(--text); border: 1px solid var(--border);
+  }
+  .searchbox input:focus { outline: none; border-color: var(--teal); }
+  .tagfilter { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip {
+    font-size: 11px; font-weight: 600; padding: 4px 9px; border-radius: 999px; cursor: pointer;
+    color: var(--subtitle); background: transparent; border: 1px solid var(--border);
+  }
+  .chip:hover { color: var(--text); border-color: var(--subtitle); }
+  .chip[aria-pressed="true"] { color: var(--teal); background: var(--teal-bg); border-color: var(--teal); }
+
+  /* grid */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 12px; }
+  .card {
+    border: 1px solid var(--border); border-radius: 10px; background: var(--panel);
+    padding: 14px; cursor: pointer; transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(0,0,0,.16); border-color: var(--teal); }
+  .card--open { grid-column: 1 / -1; cursor: default; transform: none; box-shadow: 0 10px 30px rgba(0,0,0,.2); }
+  .card--open:hover { transform: none; }
+  .card-head { display: flex; align-items: center; gap: 9px; }
+  .card-icon { display: flex; width: 30px; height: 30px; flex-shrink: 0; align-items: center; justify-content: center;
+    border-radius: 8px; background: var(--teal-bg); color: var(--teal); }
+  .card-icon svg { width: 17px; height: 17px; }
+  .card-title { font-size: 14px; font-weight: 700; color: var(--text); }
+  .card-desc { font-size: 12.5px; line-height: 1.5; color: var(--text-soft); }
+  .card:not(.card--open) .card-desc { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .card-tags { display: flex; gap: 5px; flex-wrap: wrap; }
+  .pill { font-size: 10.5px; font-weight: 600; padding: 2px 7px; border-radius: 999px; color: var(--subtitle); background: var(--teal-bg); }
+  .card-meta { font-family: var(--mono); font-size: 10.5px; color: var(--subtitle); display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* expanded body */
+  .body { margin-top: 4px; border-top: 1px solid var(--border); padding-top: 14px; display: flex; flex-direction: column; gap: 14px; }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px; font: inherit; font-size: 12px; font-weight: 600;
+    padding: 6px 12px; border-radius: 7px; border: 1px solid var(--border); background: var(--page-bg);
+    color: var(--text); cursor: pointer; text-decoration: none;
+  }
+  .btn svg { width: 14px; height: 14px; }
+  .btn:hover { border-color: var(--teal); color: var(--teal); }
+  .btn--primary { background: var(--teal); color: #fff; border-color: var(--teal); }
+  .btn--primary:hover { color: #fff; opacity: .9; }
+  .btn[aria-disabled="true"] { opacity: .45; cursor: not-allowed; }
+  .btn[aria-disabled="true"]:hover { border-color: var(--border); color: var(--text); }
+  .btn.is-done { color: var(--teal); border-color: var(--teal); }
+
+  /* github-style file viewer */
+  .viewer { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .viewer-head { display: flex; align-items: center; gap: 4px; background: var(--ribbon-bg); border-bottom: 1px solid var(--border); padding: 6px 8px; }
+  .seg { display: flex; gap: 2px; }
+  .seg button {
+    display: inline-flex; align-items: center; gap: 5px; font: inherit; font-size: 12px; font-weight: 600;
+    padding: 5px 10px; border-radius: 6px; border: none; background: transparent; color: var(--subtitle); cursor: pointer;
+  }
+  .seg button svg { width: 13px; height: 13px; }
+  .seg button[aria-selected="true"] { background: var(--panel); color: var(--text); }
+  .viewer-head .fname { font-family: var(--mono); font-size: 11px; color: var(--subtitle); margin-left: 4px; }
+  .viewer-head .spacer { margin-left: auto; }
+  .viewer-body { position: relative; }
+  .viewer-body.clamped .content { max-height: 320px; overflow: hidden; }
+  .viewer-body.clamped::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 70px; pointer-events: none;
+    background: linear-gradient(to bottom, transparent, var(--page-bg));
+  }
+  .content { background: var(--page-bg); }
+  pre.code { margin: 0; padding: 14px 16px; overflow-x: auto; font-family: var(--mono); font-size: 12px; line-height: 1.6; color: var(--text); white-space: pre; }
+  .prose { padding: 6px 18px 16px; font-size: 13.5px; line-height: 1.65; color: var(--text-soft); }
+  .prose h1 { font-size: 19px; margin: 14px 0 6px; color: var(--text); }
+  .prose h2 { font-size: 15px; margin: 14px 0 6px; color: var(--text); }
+  .prose h3 { font-size: 13.5px; margin: 12px 0 4px; color: var(--text); }
+  .prose p { margin: 8px 0; }
+  .prose ul, .prose ol { margin: 8px 0 8px 20px; }
+  .prose li { margin: 3px 0; }
+  .prose code { font-family: var(--mono); font-size: 12px; background: var(--teal-bg); padding: 1px 5px; border-radius: 4px; }
+  .prose pre.md-pre { background: var(--ribbon-bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; overflow-x: auto; margin: 8px 0; }
+  .prose pre.md-pre code { background: none; padding: 0; }
+  .expandbar { display: flex; justify-content: center; padding: 8px; border-top: 1px solid var(--border); background: var(--ribbon-bg); }
+  .expandbar button { font: inherit; font-size: 12px; font-weight: 600; color: var(--teal); background: none; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; }
+  .expandbar button svg { width: 13px; height: 13px; }
+
+  .filelist { display: flex; flex-direction: column; gap: 2px; }
+  .filelist-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--subtitle); margin-bottom: 4px; }
+  .filerow { display: flex; align-items: center; gap: 7px; padding: 5px 8px; border-radius: 6px; font-family: var(--mono); font-size: 11.5px; color: var(--text-soft); background: transparent; border: none; cursor: pointer; text-align: left; width: 100%; }
+  .filerow svg { width: 13px; height: 13px; color: var(--subtitle); flex-shrink: 0; }
+  .filerow:hover { background: var(--ribbon-hover); color: var(--teal); }
+  .filerow .fbytes { margin-left: auto; color: var(--subtitle); }
+  .filerow--active { color: var(--teal); background: var(--teal-bg); }
+
+  .empty { text-align: center; padding: 60px 20px; color: var(--subtitle); }
+  .empty svg { width: 34px; height: 34px; opacity: .5; }
+  .empty p { margin-top: 10px; font-size: 13px; }
+  .closebtn { align-self: flex-end; background: none; border: none; color: var(--subtitle); cursor: pointer; display: inline-flex; }
+  .closebtn svg { width: 16px; height: 16px; }
+  @media (max-width: 620px) { .grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="lede">Variant A — a dense, GitHub-flavoured grid. Compact bordered cards; click one to expand it inline into a full-width panel with a <code>Code / Preview</code> file viewer, copy, show-full, and download.</p>
+  <div class="tabs" role="tablist" data-tabs></div>
+  <div class="toolbar">
+    <div class="searchbox"><span data-search-icon></span><input type="search" placeholder="Search this section…" data-search /></div>
+    <div class="tagfilter" data-tagfilter></div>
+  </div>
+  <div class="grid" data-grid></div>
+</div>
+
+<script src="sample-data.js"></script>
+<script>
+(function () {
+  const SECTIONS = ['skills', 'agents', 'commands'];
+  const LABEL = { skills: 'Skills', agents: 'Agents', commands: 'Commands' };
+  let active = 'skills';
+  let query = '';
+  let activeTags = new Set();
+  let openSlug = null;
+  let viewMode = {}; // slug -> 'code' | 'preview'
+  let openFileKey = {}; // slug -> file key being shown
+
+  initThemeBar('a');
+  document.querySelector('[data-search-icon]').innerHTML = icon('search');
+
+  const tabsEl = document.querySelector('[data-tabs]');
+  const gridEl = document.querySelector('[data-grid]');
+  const searchEl = document.querySelector('[data-search]');
+  const tagEl = document.querySelector('[data-tagfilter]');
+
+  tabsEl.innerHTML = SECTIONS.map((s) => {
+    const n = FORAGE_CATALOG.sections[s].length;
+    return `<button class="tab" role="tab" data-section="${s}" aria-selected="${s === active}">${icon(SECTION_ICON[s])}${LABEL[s]} <span class="count">${n}</span></button>`;
+  }).join('');
+  tabsEl.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-section]');
+    if (!t) return;
+    active = t.dataset.section; query = ''; activeTags.clear(); openSlug = null; searchEl.value = '';
+    tabsEl.querySelectorAll('.tab').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.section === active)));
+    render();
+  });
+
+  let debounce;
+  searchEl.addEventListener('input', () => {
+    clearTimeout(debounce);
+    debounce = setTimeout(() => { query = searchEl.value.trim().toLowerCase(); render(); }, 140);
+  });
+
+  function currentEntries() {
+    return FORAGE_CATALOG.sections[active].filter((e) => {
+      if (query) {
+        const hay = (e.title + ' ' + e.description + ' ' + e.tags.join(' ')).toLowerCase();
+        if (!hay.includes(query)) return false;
+      }
+      if (activeTags.size) {
+        if (![...activeTags].some((t) => e.tags.includes(t))) return false;
+      }
+      return true;
+    });
+  }
+
+  function renderTags() {
+    const tags = allTags(FORAGE_CATALOG.sections[active]);
+    tagEl.innerHTML = tags.map((t) => `<button class="chip" data-tag="${t}" aria-pressed="${activeTags.has(t)}">${t}</button>`).join('');
+  }
+  tagEl.addEventListener('click', (e) => {
+    const c = e.target.closest('[data-tag]');
+    if (!c) return;
+    const t = c.dataset.tag;
+    activeTags.has(t) ? activeTags.delete(t) : activeTags.add(t);
+    render();
+  });
+
+  function fileViewer(entry) {
+    const mode = viewMode[entry.slug] || 'preview';
+    const key = openFileKey[entry.slug] || entry.primaryKey;
+    const raw = getDoc(key);
+    const fname = key.split('/').pop();
+    const contentHtml = mode === 'code'
+      ? `<pre class="code">${raw.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</pre>`
+      : `<div class="prose">${mdToHtml(raw)}</div>`;
+    const isLong = raw.length > 900;
+    return `
+      <div class="viewer" data-viewer>
+        <div class="viewer-head">
+          <div class="seg">
+            <button data-mode="code" aria-selected="${mode === 'code'}">${icon('code')} Code</button>
+            <button data-mode="preview" aria-selected="${mode === 'preview'}">${icon('eye')} Preview</button>
+          </div>
+          <span class="fname">${fname}</span>
+          <span class="spacer"></span>
+          <button class="btn" data-copy>${icon('copy')}<span>Copy</span></button>
+        </div>
+        <div class="viewer-body ${isLong ? 'clamped' : ''}" data-vbody>
+          <div class="content">${contentHtml}</div>
+        </div>
+        ${isLong ? `<div class="expandbar"><button data-toggleclamp>${icon('chevron')} Show full document</button></div>` : ''}
+      </div>`;
+  }
+
+  function fileList(entry) {
+    if (entry.files.length < 2) return '';
+    const key = openFileKey[entry.slug] || entry.primaryKey;
+    return `<div class="filelist">
+      <div class="filelist-label">${entry.files.length} files in this bundle</div>
+      ${entry.files.map((f) => `<button class="filerow ${f.key === key ? 'filerow--active' : ''}" data-file="${f.key}">${icon('file')} ${f.path.split('/').slice(-2).join('/')} <span class="fbytes">${fmtBytes(f.bytes)}</span></button>`).join('')}
+    </div>`;
+  }
+
+  function cardHtml(entry) {
+    const open = entry.slug === openSlug;
+    const meta = `<span>${entry.files.length} file${entry.files.length > 1 ? 's' : ''}</span><span>${fmtBytes(entry.totalBytes)}</span><span>updated ${fmtDate(entry.updated)}</span>`;
+    const ghBtn = entry.github
+      ? `<a class="btn" href="${entry.github}" target="_blank" rel="noopener">${icon('github')} View on GitHub</a>`
+      : `<span class="btn" aria-disabled="true" title="Linking each entry to its own repo is Stage 2">${icon('github')} GitHub · coming soon</span>`;
+    return `<article class="card ${open ? 'card--open' : ''}" data-slug="${entry.slug}">
+      ${open ? `<button class="closebtn" data-close>${icon('x')}</button>` : ''}
+      <div class="card-head">
+        <span class="card-icon">${icon(SECTION_ICON[active])}</span>
+        <span class="card-title">${entry.title}</span>
+      </div>
+      <p class="card-desc">${entry.description}</p>
+      <div class="card-tags">${entry.tags.map((t) => `<span class="pill">${t}</span>`).join('')}</div>
+      <div class="card-meta">${meta}</div>
+      ${open ? `<div class="body">
+        <div class="actions">
+          <button class="btn btn--primary" data-download>${icon('download')} Download ${entry.files.length > 1 ? '.zip' : '.md'}</button>
+          ${ghBtn}
+        </div>
+        ${fileList(entry)}
+        ${fileViewer(entry)}
+      </div>` : ''}
+    </article>`;
+  }
+
+  function render() {
+    renderTags();
+    const entries = currentEntries();
+    if (!entries.length) {
+      gridEl.style.display = 'block';
+      gridEl.innerHTML = `<div class="empty">${icon(SECTION_ICON[active])}<p>${
+        FORAGE_CATALOG.sections[active].length === 0
+          ? LABEL[active] + ' — coming soon. This section fills up as repos are published.'
+          : 'Nothing matches that filter.'}</p></div>`;
+      return;
+    }
+    gridEl.style.display = 'grid';
+    gridEl.innerHTML = entries.map(cardHtml).join('');
+  }
+
+  gridEl.addEventListener('click', (e) => {
+    const card = e.target.closest('.card');
+    if (!card) return;
+    const slug = card.dataset.slug;
+    const entry = FORAGE_CATALOG.sections[active].find((x) => x.slug === slug);
+
+    if (e.target.closest('[data-close]')) { openSlug = null; render(); return; }
+    if (e.target.closest('[data-mode]')) { viewMode[slug] = e.target.closest('[data-mode]').dataset.mode; render(); return; }
+    if (e.target.closest('[data-file]')) { openFileKey[slug] = e.target.closest('[data-file]').dataset.file; render(); return; }
+    if (e.target.closest('[data-toggleclamp]')) {
+      const body = card.querySelector('[data-vbody]');
+      const btn = e.target.closest('[data-toggleclamp]');
+      body.classList.toggle('clamped');
+      btn.innerHTML = icon('chevron') + (body.classList.contains('clamped') ? ' Show full document' : ' Collapse');
+      btn.querySelector('svg').style.transform = body.classList.contains('clamped') ? '' : 'rotate(180deg)';
+      return;
+    }
+    if (e.target.closest('[data-copy]')) {
+      const key = openFileKey[slug] || entry.primaryKey;
+      copyText(getDoc(key), e.target.closest('[data-copy]'));
+      return;
+    }
+    if (e.target.closest('[data-download]')) {
+      alert('Mockup: real build zips ' + entry.files.map((f) => f.path).join(', ') + ' with JSZip and downloads ' + entry.slug + (entry.files.length > 1 ? '.zip' : '.md'));
+      return;
+    }
+    if (!card.classList.contains('card--open')) {
+      openSlug = slug;
+      viewMode[slug] = viewMode[slug] || 'preview';
+      render();
+      requestAnimationFrame(() => document.querySelector('.card--open')?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+    }
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="cherry">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Research catalog — UI mockups</title>
+<link rel="stylesheet" href="tokens.css" />
+<style>
+  .wrap { max-width: 760px; margin: 0 auto; padding: 60px 24px; }
+  h1 { font-size: 26px; margin-bottom: 8px; }
+  p.sub { color: var(--subtitle); font-size: 14px; line-height: 1.6; margin-bottom: 32px; }
+  .opt { display: block; text-decoration: none; color: inherit; border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; background: var(--panel); transition: border-color .12s, transform .12s; }
+  .opt:hover { border-color: var(--teal); transform: translateY(-2px); }
+  .opt h2 { font-size: 17px; color: var(--teal); margin-bottom: 5px; }
+  .opt span { font-size: 13px; color: var(--text-soft); line-height: 1.55; }
+  .note { margin-top: 28px; font-size: 12.5px; color: var(--subtitle); line-height: 1.6; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Research catalog — 3 UI directions</h1>
+  <p class="sub">Stage 1 mockups for the Skills / Agents / Commands dashboard under <strong>Research</strong>. Same fixture data + the real Forage theme tokens in all three. Pick one (or a blend) and it becomes the integrated <code>catalog-view.js</code>. Use the theme switcher at the top of each to check Cherry + a light theme.</p>
+
+  <a class="opt" href="variant-a.html">
+    <h2>A · Dense grid (GitHub-flavoured)</h2>
+    <span>Compact bordered cards in a tight grid. Click a card and it expands inline to a full-width panel with a GitHub-style <code>Code / Preview</code> file header, copy, show-full/collapse, a bundle file list, and download. Fastest to scan when there are many entries.</span>
+  </a>
+  <a class="opt" href="variant-b.html">
+    <h2>B · Marketplace gallery</h2>
+    <span>Big cards with a coloured category banner and a large Lucide glyph, generous spacing, strong hover lift. Clicking opens a detail drawer that slides in from the right (the aitmpl.com component-page feel). Most "product marketplace".</span>
+  </a>
+  <a class="opt" href="variant-c.html">
+    <h2>C · Native index</h2>
+    <span>No cards. A typographic index of rows with a left rail of tag filters, opening into a full-pane reader with the <code>Code / Preview</code> toggle pinned to the top. Quietest, closest to the existing Forage document viewer.</span>
+  </a>
+
+  <p class="note">All three: 2-line/3-line clamped descriptions, tag filter + search, Code vs rendered Preview, Copy, Show-full/Collapse for long docs, per-bundle file list, and a disabled "GitHub · coming soon" button (flips live in Stage 2 when each entry gets its own repo). Download is stubbed with an alert in the mockups — the real build zips the bundle client-side with JSZip.</p>
+</div>
+<script src="sample-data.js"></script>
+<script>initThemeBar('index');</script>
+</body>
+</html>
