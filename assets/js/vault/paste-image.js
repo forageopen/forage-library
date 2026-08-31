@@ -170,15 +170,27 @@ export function createFloatImageController(editorBody, overlayHost, { onChange }
     overlayHost.appendChild(overlay);
   }
 
+  /* The per-pane zoom slider (viewer-pane's applyDocView) sets a CSS `zoom`
+     on overlayHost. getBoundingClientRect() then reports post-zoom screen
+     pixels, but the values we write to style.left / style.width on elements
+     *inside* that container are interpreted pre-zoom — so every screen
+     measurement has to be divided back down by the zoom factor. */
+  function currentZoom() {
+    let z = parseFloat(overlayHost.style.zoom);
+    if (!(z > 0)) z = parseFloat(getComputedStyle(overlayHost).zoom);
+    return z > 0 ? z : 1;
+  }
+
   function refresh() {
     if (!selected || !overlay) return;
     if (!selected.isConnected) { deselect(); return; }
+    const zoom = currentZoom();
     const imgRect = selected.getBoundingClientRect();
     const hostRect = overlayHost.getBoundingClientRect();
-    overlay.style.left = `${imgRect.left - hostRect.left}px`;
-    overlay.style.top = `${imgRect.top - hostRect.top}px`;
-    overlay.style.width = `${imgRect.width}px`;
-    overlay.style.height = `${imgRect.height}px`;
+    overlay.style.left = `${(imgRect.left - hostRect.left) / zoom}px`;
+    overlay.style.top = `${(imgRect.top - hostRect.top) / zoom}px`;
+    overlay.style.width = `${imgRect.width / zoom}px`;
+    overlay.style.height = `${imgRect.height / zoom}px`;
   }
 
   function select(img) {
@@ -228,19 +240,21 @@ export function createFloatImageController(editorBody, overlayHost, { onChange }
      the pointer suppresses the browser's own image drag-and-drop. Falls
      back to document-level listeners if capture isn't available. */
   function startDrag(e, mode, corner, captureEl) {
-    const rect = selected.getBoundingClientRect();
     drag = {
       mode,
       corner,
       captureEl,
       pointerId: e.pointerId,
       captured: false,
+      zoom: currentZoom(),
       startX: e.clientX,
       startY: e.clientY,
       startLeft: parseFloat(selected.style.left) || 0,
       startTop: parseFloat(selected.style.top) || 0,
-      startW: rect.width,
-      startH: rect.height,
+      // offsetWidth/Height are pre-zoom CSS px, matching style.width below —
+      // getBoundingClientRect would be post-zoom and drift the resize.
+      startW: selected.offsetWidth,
+      startH: selected.offsetHeight,
     };
     try {
       captureEl.setPointerCapture(e.pointerId);
@@ -269,8 +283,8 @@ export function createFloatImageController(editorBody, overlayHost, { onChange }
 
   function onMove(e) {
     if (!drag || !selected) return;
-    const dx = e.clientX - drag.startX;
-    const dy = e.clientY - drag.startY;
+    const dx = (e.clientX - drag.startX) / drag.zoom;
+    const dy = (e.clientY - drag.startY) / drag.zoom;
     if (drag.mode === 'move') {
       const pos = clampFloatPosition({
         x: drag.startLeft + dx,
@@ -326,6 +340,9 @@ export function createFloatImageController(editorBody, overlayHost, { onChange }
   document.addEventListener('keydown', onKey);
   window.addEventListener('resize', refresh);
   mo.observe(editorBody, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
+  // Re-align the overlay when the pane zoom changes (applyDocView rewrites
+  // overlayHost's inline style.zoom).
+  mo.observe(overlayHost, { attributes: true, attributeFilter: ['style'] });
 
   return {
     select,
