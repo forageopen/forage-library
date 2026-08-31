@@ -7,6 +7,14 @@ const ICON_PATHS = {
   chevron: ['m9 18 6-6-6-6'],
   folder: ['M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z'],
   folderOpen: ['m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2'],
+  /* Catalog-section glyphs (Skills / Agents / Commands) — keyed to the
+     manifest node's `icon` field (set by scripts/generate-manifest.mjs). */
+  sparkles: [
+    'M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .962 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.962 0z',
+    'M20 3v4', 'M22 5h-4', 'M4 17v2', 'M5 18H3',
+  ],
+  bot: ['M12 8V4H8', 'M4 8h16a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2Z', 'M2 14h2', 'M20 14h2', 'M15 13v2', 'M9 13v2'],
+  terminal: ['m7 11 2-2-2-2', 'M11 13h4', 'M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z'],
 };
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -54,6 +62,11 @@ export function isEmptyFolder(node) {
 export const PINNED_PATHS = [
   'vault/00-welcome-note.md',
   'vault/About Us/What is Forage Library.md',
+  // The Research catalog sections, in a deliberate order (manifest order is
+  // alphabetical: Agents, Commands, Skills).
+  'vault/Research/Skills',
+  'vault/Research/Agents',
+  'vault/Research/Commands',
 ];
 
 /* Pure: reorder a folder's (or the root's) children so pinned entries come
@@ -134,8 +147,26 @@ function renderFolder(node) {
   return li;
 }
 
+/* A `type: "catalog"` node (Research/Skills | Agents | Commands): one
+   clickable row with a Lucide glyph that opens the card dashboard in the
+   active pane. The individual entries never appear in the tree — they
+   live in the dashboard — so this is a leaf, not a collapsible folder. */
+function renderCatalogNode(node) {
+  const li = document.createElement('li');
+  li.className = 'vault-tree-file';
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'vault-tree-catalog-btn';
+  button.dataset.catalogType = node.catalogType;
+  button.dataset.path = node.path;
+  button.append(makeIcon(node.icon || 'sparkles'), document.createTextNode(node.name));
+  li.appendChild(button);
+  return li;
+}
+
 function renderNode(node) {
   if (node.type === 'folder') return renderFolder(node);
+  if (node.type === 'catalog') return renderCatalogNode(node);
 
   const li = document.createElement('li');
   li.className = 'vault-tree-file';
@@ -150,7 +181,7 @@ function renderNode(node) {
   return li;
 }
 
-export async function initSidebar(root, onOpen, fetchImpl = fetch) {
+export async function initSidebar(root, onOpen, onOpenCatalog = () => {}, fetchImpl = fetch) {
   root.innerHTML = '<div class="vault-status vault-status--loading">Loading vault…</div>';
   let manifest;
   try {
@@ -169,17 +200,22 @@ export async function initSidebar(root, onOpen, fetchImpl = fetch) {
   root.appendChild(ul);
 
   root.addEventListener('click', (e) => {
+    const catalogBtn = e.target.closest('.vault-tree-catalog-btn');
+    if (catalogBtn) {
+      onOpenCatalog(catalogBtn.dataset.catalogType, catalogBtn.dataset.path);
+      return;
+    }
     const btn = e.target.closest('.vault-tree-file-btn');
     if (btn) onOpen(btn.dataset.path, btn.dataset.name);
   });
 
   return {
-    /* Mark `path` as the open doc: one persistent highlight in the tree,
-       plus un-collapse its ancestor folders so it's actually visible. In
-       split view this tracks the most recently opened file. */
+    /* Mark `path` as the open doc/catalog: one persistent highlight in the
+       tree, plus un-collapse its ancestor folders so it's actually
+       visible. In split view this tracks the most recently opened one. */
     setActive(path) {
       let target = null;
-      root.querySelectorAll('.vault-tree-file-btn').forEach((btn) => {
+      root.querySelectorAll('.vault-tree-file-btn, .vault-tree-catalog-btn').forEach((btn) => {
         if (btn.dataset.path === path) {
           btn.setAttribute('aria-current', 'page');
           target = btn;

@@ -1,0 +1,380 @@
+{
+  "sections": {
+    "skills": [
+      {
+        "type": "skill",
+        "slug": "anti-dma",
+        "title": "Anti-DMA (DISSER)",
+        "description": "Deploy this skill whenever a user presents a debate scenario, argument exchange, dialogue transcript, or conversational conflict and wants to: (1) identify B-Type rhetorical patterns -- ad hominem, tu quoque, anti-intellectual framing, identity polarization, outcome epistemology, or affect-driven persuasion moves, (2) construct a counter-argument that holds under epistemic pressure, (3) analyze a speaker or public figure's discourse for manipulation tactics, or (4) build epistemic self-defense capacity. Trigger when user asks \"what's wrong with this argument\", \"how do I counter this\", \"what fallacy is this\", \"B-type people\", or pastes any dialogue where one party attacks the person instead of the claim. Also trigger for discourse analysis of political speech, social media rhetoric, or populist anti-elitist framing.",
+        "tags": [
+          "rhetoric",
+          "epistemics",
+          "debate",
+          "discourse-analysis",
+          "forage"
+        ],
+        "github": null,
+        "featured": false,
+        "primary": "vault/Research/Skills/anti-dma/SKILL.md",
+        "files": [
+          {
+            "path": "vault/Research/Skills/anti-dma/SKILL.md",
+            "ext": "md",
+            "bytes": 10540
+          }
+        ],
+        "totalBytes": 10540,
+        "updated": "2026-08-31"
+      },
+      {
+        "type": "skill",
+        "slug": "review-board",
+        "title": "FRD Review Board",
+        "description": "Runs the FRD Review Board — invokes all four Tier-A domain custodians (obgyn-custodian, pharmacology-custodian, bioinformatics-custodian, biotechnologist-custodian) against a hypothesis in parallel, aggregates their verdicts under a strict rule, and persists the result as a real `review` node linked from the hypothesis. Implements the \"REVIEW BOARD\" node from ADR-021's own pipeline diagram, deferred until enough custodians existed to make aggregation meaningful. Use when asked to \"review\", \"run the review board on\", or \"aggregate custodian verdicts for\" a specific hypothesis.",
+        "tags": [
+          "orchestration",
+          "review",
+          "custodian",
+          "fibroid-research"
+        ],
+        "github": null,
+        "featured": false,
+        "primary": "vault/Research/Skills/review-board/SKILL.md",
+        "files": [
+          {
+            "path": "vault/Research/Skills/review-board/SKILL.md",
+            "ext": "md",
+            "bytes": 5869
+          }
+        ],
+        "totalBytes": 5869,
+        "updated": "2026-08-31"
+      },
+      {
+        "type": "skill",
+        "slug": "transcript-cleaner",
+        "title": "Transcript Cleaner",
+        "description": "Deploy this skill whenever the user uploads or pastes a video or audio transcript and wants to extract clean, verbatim quotes from one or more speakers. Trigger on phrases like \"clean this transcript\", \"extract quotes from\", \"isolate what X said\", \"strip the host commentary\", \"get Jensen's statements\", \"clean this interview\", \"clean this keynote\", \"clean this panel\", or any request where the source is a transcript and the goal is a clean speaker-only quote document. Also trigger when the user uploads a .txt file that appears to be an auto-generated or NoteGPT-style transcript. Output is always a .md file written via filesystem:write_file. Never paraphrase, summarize, or interpret — verbatim extraction only.",
+        "tags": [
+          "transcript",
+          "extraction",
+          "verbatim",
+          "media"
+        ],
+        "github": null,
+        "featured": false,
+        "primary": "vault/Research/Skills/transcript-cleaner/SKILL.md",
+        "files": [
+          {
+            "path": "vault/Research/Skills/transcript-cleaner/SKILL.md",
+            "ext": "md",
+            "bytes": 7174
+          }
+        ],
+        "totalBytes": 7174,
+        "updated": "2026-08-31"
+      },
+      {
+        "type": "skill",
+        "slug": "work-style",
+        "title": "Work Style — Implementation Engineer",
+        "description": "Implementation-engineer work style — act as the builder, not a consultant. Do investigation, implementation, debugging, validation, and integration yourself; don't stop at a first-pass implementation; validate at small/controlled scale before expanding; don't ask the user to manually inspect anything you can inspect through your own tooling; only stop for a genuine external blocker (auth, CAPTCHA, unavailable access) or a decision needing explicit authorization; maintain a PROJECT_STATUS.md; never silently change requirements. Use when the user invokes it directly, or references \"critical work attitude\" / \"implementation engineer mode\" / wants fewer check-ins and more autonomous end-to-end execution.",
+        "tags": [
+          "workflow",
+          "conduct",
+          "autonomy",
+          "process"
+        ],
+        "github": null,
+        "featured": false,
+        "primary": "vault/Research/Skills/work-style/SKILL.md",
+        "files": [
+          {
+            "path": "vault/Research/Skills/work-style/SKILL.md",
+            "ext": "md",
+            "bytes": 3688
+          }
+        ],
+        "totalBytes": 3688,
+        "updated": "2026-08-31"
+      }
+    ],
+    "agents": [
+      {
+        "type": "agent",
+        "slug": "bioinformatics-custodian",
+        "title": "Bioinformatics Custodian",
+        "description": "Bioinformatics Custodian (computational biologist) in the FRD Stakeholder Custodian Architecture (.ai/DECISIONS.md ADR-021). Invoke when a hypothesis's computational-modelling, data-integration, or network/prediction reasoning needs review — after evidence or candidate-chain fields (target/ingredient/delivery/mechanism/risk) change, before a hypothesis's findings are treated as credible. Not for building or fixing anything — read-only review only.",
+        "tags": [
+          "review",
+          "custodian",
+          "bioinformatics",
+          "computational-biology",
+          "fibroid-research"
+        ],
+        "github": null,
+        "featured": false,
+        "primary": "vault/Research/Agents/bioinformatics-custodian.md",
+        "files": [
+          {
+            "path": "vault/Research/Agents/bioinformatics-custodian.md",
+            "ext": "md",
+            "bytes": 7961
+          }
+        ],
+        "totalBytes": 7961,
+        "updated": "2026-08-31"
+      },
+      {
+        "type": "agent",
+        "slug": "biotechnologist-custodian",
+        "title": "Biotechnologist Custodian",
+        "description": "Biotechnologist Custodian in the FRD Stakeholder Custodian Architecture (.ai/DECISIONS.md ADR-021). Invoke when a hypothesis's biological-engineering plausibility or experimental feasibility needs review — after evidence or candidate-chain fields (target/ingredient/delivery/mechanism/risk) change, before a hypothesis's findings are treated as credible. Not for building or fixing anything — read-only review only.",
+        "tags": [
+          "review",
+          "custodian",
+          "biotech",
+          "feasibility",
+          "fibroid-research"
+        ],
+        "github": null,
+        "featured": false,
+        "primary": "vault/Research/Agents/biotechnologist-custodian.md",
+        "files": [
+          {
+            "path": "vault/Research/Agents/biotechnologist-custodian.md",
+            "ext": "md",
+            "bytes": 7776
+          }
+        ],
+        "totalBytes": 7776,
+        "updated": "2026-08-31"
+      },
+      {
+        "type": "agent",
+        "slug": "code-cleaner",
+        "title": "Code Cleaner",
+        "description": "Measures a codebase against a fixed quality bar (module token budget, cognitive & cyclomatic complexity, Halstead, CRAP, mutation score, dead/duplicate code, any/unknown) and reports where it stands — and, on explicit request, closes one module's gaps at a time with structural refactors only. Use when asked to \"audit code quality\", \"check complexity\", \"clean up <module>\", enforce these thresholds, or assess whether a codebase is within them. Defaults to a read-only audit; only edits when told to fix a specific module. Never writes tests that assert expected behaviour.",
+        "tags": [
+          "code-quality",
+          "refactor",
+          "audit",
+          "complexity",
+          "reviewer"
+        ],
+        "github": null,
+        "featured": false,
+        "primary": "vault/Research/Agents/code-cleaner/code-cleaner.md",
+        "files": [
+          {
+            "path": "vault/Research/Agents/code-cleaner/code-cleaner.md",
+            "ext": "md",
+            "bytes": 15166
+          },
+          {
+            "path": "vault/Research/Agents/code-cleaner/code-cleaner.thresholds.md",
+            "ext": "md",
+            "bytes": 8798
+          },
+          {
+            "path": "vault/Research/Agents/code-cleaner/example-audit.md",
+            "ext": "md",
+            "bytes": 14862
+          },
+          {
+            "path": "vault/Research/Agents/code-cleaner/PLAN.md",
+            "ext": "md",
+            "bytes": 11148
+          },
+          {
+            "path": "vault/Research/Agents/code-cleaner/README.md",
+            "ext": "md",
+            "bytes": 5691
+          }
+        ],
+        "totalBytes": 55665,
+        "updated": "2026-08-31"
+      },
+      {
+        "type": "agent",
+        "slug": "cross-domain-reviewer",
+        "title": "Cross-Domain Reviewer",
+        "description": "Tier B Cross-Domain Reviewer in the FRD Stakeholder Custodian Architecture (.ai/DECISIONS.md ADR-021). Invoke after a Review Board run exists for a hypothesis (data/graph/review/*.md) — traces the hypothesis's causal chain across jurisdiction boundaries and checks whether each cross-domain transition is actually evidenced, not just independently plausible within each domain. Not a fifth domain custodian and not a re-aggregator of their verdicts — it reviews the seams between domains, which no single Tier A custodian or the Review Board's aggregation rule ever checks. Read-only, no write access.",
+        "tags": [
+          "review",
+          "cross-domain",
+          "causal-chain",
+          "fibroid-research"
+        ],
+        "github": null,
+        "featured": false,
+        "primary": "vault/Research/Agents/cross-domain-reviewer.md",
+        "files": [
+          {
+            "path": "vault/Research/Agents/cross-domain-reviewer.md",
+            "ext": "md",
+            "bytes": 9477
+          }
+        ],
+        "totalBytes": 9477,
+        "updated": "2026-08-31"
+      },
+      {
+        "type": "agent",
+        "slug": "ia-ui-ux-architect",
+        "title": "IA / UI / UX Architect",
+        "description": "FRD IA/UI/UX Architect — from the user's \"FRD IA/UI/UX Agent Specification\" (.ai/DECISIONS.md ADR-023), layered alongside the FRD Stakeholder Custodian Architecture (ADR-021) and the FRD Claude Code Operating Protocol (ADR-022). Invoke when a new feature needs information architecture placement, UX/UI design, or drift review before being handed to the Builder for implementation. Generative, not read-only — the only FRD agent with write access, and it is scoped to exactly two files.",
+        "tags": [
+          "ia",
+          "ux",
+          "ui",
+          "architecture",
+          "fibroid-research"
+        ],
+        "github": null,
+        "featured": false,
+        "primary": "vault/Research/Agents/ia-ui-ux-architect.md",
+        "files": [
+          {
+            "path": "vault/Research/Agents/ia-ui-ux-architect.md",
+            "ext": "md",
+            "bytes": 15590
+          }
+        ],
+        "totalBytes": 15590,
+        "updated": "2026-08-31"
+      },
+      {
+        "type": "agent",
+        "slug": "malaysian-media-law-custodian",
+        "title": "Malaysian Media-Law Custodian",
+        "description": "Virtual legal-partner / custodian for assessing a client's exposure under Malaysian media, speech, content and communications law. Works from the COMMANDER \"Malaysian Acts\" corpus, treating it as a dated secondary reference, not as the current law. Use to assess a communication or scenario for legal exposure, run a pre-publication risk filter over a draft, build a prosecution-element matrix for an allegation or charge, work a civil-defamation letter of demand, or produce a structured brief on a provision. Produces risk maps and questions for a lawyer — never \"you're fine\" verdicts, never final court/police/press copy. An internal tool for whoever advises the client; a Malaysian advocate & solicitor must be in the loop, and this is not a substitute for one.",
+        "tags": [
+          "legal",
+          "malaysia",
+          "media-law",
+          "custodian",
+          "advisor"
+        ],
+        "github": null,
+        "featured": false,
+        "primary": "vault/Research/Agents/malaysian-media-law-custodian/malaysian-media-law-custodian.md",
+        "files": [
+          {
+            "path": "vault/Research/Agents/malaysian-media-law-custodian/client-intake-template.md",
+            "ext": "md",
+            "bytes": 5136
+          },
+          {
+            "path": "vault/Research/Agents/malaysian-media-law-custodian/corpus-gaps.md",
+            "ext": "md",
+            "bytes": 5987
+          },
+          {
+            "path": "vault/Research/Agents/malaysian-media-law-custodian/corpus-manifest.md",
+            "ext": "md",
+            "bytes": 8430
+          },
+          {
+            "path": "vault/Research/Agents/malaysian-media-law-custodian/example-review.md",
+            "ext": "md",
+            "bytes": 33585
+          },
+          {
+            "path": "vault/Research/Agents/malaysian-media-law-custodian/malaysian-media-law-custodian.md",
+            "ext": "md",
+            "bytes": 21747
+          },
+          {
+            "path": "vault/Research/Agents/malaysian-media-law-custodian/output-templates.md",
+            "ext": "md",
+            "bytes": 8760
+          },
+          {
+            "path": "vault/Research/Agents/malaysian-media-law-custodian/README.md",
+            "ext": "md",
+            "bytes": 9230
+          }
+        ],
+        "totalBytes": 92875,
+        "updated": "2026-08-31"
+      },
+      {
+        "type": "agent",
+        "slug": "obgyn-custodian",
+        "title": "OB/GYN Custodian",
+        "description": "OB/GYN Domain Custodian in the FRD Stakeholder Custodian Architecture (.ai/DECISIONS.md ADR-021). Invoke when a hypothesis's clinical/gynecological relevance needs review — after evidence or candidate-chain fields (target/ingredient/delivery/mechanism/risk) change, before a hypothesis's findings are treated as credible. Not for building or fixing anything — read-only review only.",
+        "tags": [
+          "review",
+          "custodian",
+          "obgyn",
+          "clinical",
+          "fibroid-research"
+        ],
+        "github": null,
+        "featured": false,
+        "primary": "vault/Research/Agents/obgyn-custodian.md",
+        "files": [
+          {
+            "path": "vault/Research/Agents/obgyn-custodian.md",
+            "ext": "md",
+            "bytes": 7653
+          }
+        ],
+        "totalBytes": 7653,
+        "updated": "2026-08-31"
+      },
+      {
+        "type": "agent",
+        "slug": "pharmacology-custodian",
+        "title": "Pharmacology Custodian",
+        "description": "Pharmacology Custodian (pharmacologist / pharmacologist-toxicologist) in the FRD Stakeholder Custodian Architecture (.ai/DECISIONS.md ADR-021). Invoke when a hypothesis's compound-target interaction, pharmacodynamics/pharmacokinetics, dose-response, or toxicity/systemic-effect reasoning needs review — after evidence or candidate-chain fields (target/ingredient/delivery/mechanism/risk) change, before a hypothesis's findings are treated as credible. Not for building or fixing anything — read-only review only.",
+        "tags": [
+          "review",
+          "custodian",
+          "pharmacology",
+          "toxicology",
+          "fibroid-research"
+        ],
+        "github": null,
+        "featured": false,
+        "primary": "vault/Research/Agents/pharmacology-custodian.md",
+        "files": [
+          {
+            "path": "vault/Research/Agents/pharmacology-custodian.md",
+            "ext": "md",
+            "bytes": 7972
+          }
+        ],
+        "totalBytes": 7972,
+        "updated": "2026-08-31"
+      },
+      {
+        "type": "agent",
+        "slug": "product-requirements-agent",
+        "title": "Product / Requirements Agent",
+        "description": "Product/Requirements Agent from the FRD Claude Code Operating Protocol (.ai/DECISIONS.md ADR-022), layered alongside the FRD Stakeholder Custodian Architecture (ADR-021). Invoke when a task's scope, information architecture, UI/UX consistency, requirements completeness, or acceptance-criteria conformance needs review — before an implementation is treated as satisfying the spec, or when a new feature/page/workflow request needs a scope check before build. Not for building or fixing anything — read-only review only.",
+        "tags": [
+          "review",
+          "product",
+          "requirements",
+          "scope",
+          "fibroid-research"
+        ],
+        "github": null,
+        "featured": false,
+        "primary": "vault/Research/Agents/product-requirements-agent.md",
+        "files": [
+          {
+            "path": "vault/Research/Agents/product-requirements-agent.md",
+            "ext": "md",
+            "bytes": 8299
+          }
+        ],
+        "totalBytes": 8299,
+        "updated": "2026-08-31"
+      }
+    ],
+    "commands": []
+  }
+}

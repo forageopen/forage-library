@@ -21,6 +21,7 @@ import { formatReadingStats, formatPageStats } from './reading-stats.js';
 import { computeFitScale, isHtmlFrameSizeMessage, HTML_FRAME_MEASURE_SCRIPT } from './html-frame-fit.js';
 import { createLoadingBar, MIN_VISIBLE_MS } from './loading-bar.js';
 import { createReadAloud } from './read-aloud.js';
+import { createCatalogView } from './catalog-view.js';
 import {
   clampZoom,
   readStoredZoom,
@@ -155,6 +156,8 @@ export function createViewerPane(paneEl) {
   let currentPdfBuffer = null; // the raw bytes, while a .pdf is open — for the lazy photo-region pass
   let pdfPhotoRegions = null;  // per-page photo rects once extractPhotoRegions has run
   let pdfPhotoPass = null;     // the in-flight extractPhotoRegions promise (dedupes concurrent triggers)
+  let currentKind = null;      // 'catalog' while the Research dashboard is showing (else null)
+  let catalogView = null;      // the createCatalogView instance for this pane, built lazily
 
   /* Rescales the open .html frame's transform so its natural (unscaled)
      pixel size fills the pane's current width exactly — recomputed on
@@ -263,6 +266,19 @@ export function createViewerPane(paneEl) {
      embedded pictures are left alone and the themed text follows the site
      theme. Hidden for themed prose, a bare opened image, and the editor. */
   function applyDocView() {
+    // The Research catalog dashboard has no zoom / dark / read-along /
+    // export — its own toolbar is the only chrome. Hide the per-doc
+    // buttons and leave contentEl untouched.
+    if (currentKind === 'catalog') {
+      contentEl.style.zoom = '';
+      if (darkBtn) darkBtn.hidden = true;
+      if (readBtn) readBtn.hidden = true;
+      if (zoomMenuBtn) zoomMenuBtn.parentElement.hidden = true;
+      if (exportMenuBtn) exportMenuBtn.parentElement.hidden = true;
+      return;
+    }
+    if (zoomMenuBtn) zoomMenuBtn.parentElement.hidden = false;
+    if (exportMenuBtn) exportMenuBtn.parentElement.hidden = false;
     const kind = ['iframe', 'deck', 'image', 'prose', 'editor']
       .find((k) => contentEl.classList.contains('vault-pane-content--' + k)) || null;
     const isIframe = kind === 'iframe';
@@ -337,7 +353,7 @@ export function createViewerPane(paneEl) {
      "x/y pages" instead, tracking scroll position through the deck. */
   function updateStats() {
     if (!statsBar || !statsEl) return;
-    if (!currentName) {
+    if (!currentName || currentKind === 'catalog') {
       statsBar.hidden = true;
       return;
     }
@@ -371,7 +387,7 @@ export function createViewerPane(paneEl) {
      CSV export. */
   function updateExportMenu() {
     if (!exportMenu) return;
-    const open = !!currentName;
+    const open = !!currentName && currentKind !== 'catalog';
     const relevant = {
       html: open,
       // A raw .html file renders into an isolated sandboxed iframe (see
@@ -424,6 +440,17 @@ export function createViewerPane(paneEl) {
       activeLoadingBar = null;
     }
     setLoadProgress = () => {};
+  }
+
+  /* The Research catalog dashboard (catalog-view.js) — a card grid + a
+     slide-in drawer with its own delegated listeners. Torn down wherever
+     the pane content is replaced, same as the loading bar / reader. */
+  function destroyCatalogView() {
+    if (catalogView) {
+      catalogView.destroy();
+      catalogView = null;
+    }
+    if (currentKind === 'catalog') currentKind = null;
   }
 
   /* Word-by-word "read along" (read-aloud.js). The reader is built lazily
@@ -505,6 +532,7 @@ export function createViewerPane(paneEl) {
     destroyLoadingBar();
     destroyReader();
     destroyFloatController();
+    destroyCatalogView();
     contentEl.className = 'vault-pane-content';
     contentEl.innerHTML = '';
     loadingStartedAt = performance.now();
@@ -535,6 +563,7 @@ export function createViewerPane(paneEl) {
     destroyLoadingBar();
     destroyReader();
     destroyFloatController();
+    destroyCatalogView();
     contentEl.hidden = true;
     dropzone.hidden = false;
     if (dropzoneMessage) {
@@ -570,6 +599,7 @@ export function createViewerPane(paneEl) {
       destroyLoadingBar();
       destroyReader();
       destroyFloatController();
+      destroyCatalogView();
       contentEl.className = 'vault-pane-content vault-pane-content--' + result.kind;
       if (result.kind === 'iframe') {
         /* A hand-authored .html file's raw markup can carry its own
@@ -983,6 +1013,31 @@ export function createViewerPane(paneEl) {
     el: paneEl,
     openVaultFile,
     openLocalFile,
+    /* Open the Research catalog dashboard (Skills / Agents / Commands) in
+       this pane, optionally with one entry's drawer already open. Reuses
+       one createCatalogView instance per pane. */
+    openCatalog(catalogType, slug = null) {
+      const label = { skills: 'Skills', agents: 'Agents', commands: 'Commands' }[catalogType] || 'Research';
+      destroyLoadingBar();
+      destroyReader();
+      destroyFloatController();
+      showContent();
+      currentPath = null;
+      currentName = label;
+      currentSourceText = null;
+      currentRawHtml = null;
+      currentKind = 'catalog';
+      if (!catalogView) {
+        catalogView = createCatalogView(contentEl, {
+          onOpenFile: (path, name) => { currentKind = null; openVaultFile(path, name); },
+        });
+      }
+      catalogView.render(catalogType, slug);
+      updateHeader();
+      updateStats();
+      updateExportMenu();
+      applyDocView();
+    },
     toggleSidenote() {
       if (sidenoteEl) sidenoteEl.hidden = !sidenoteEl.hidden;
     },
@@ -997,6 +1052,7 @@ export function createViewerPane(paneEl) {
       destroyLoadingBar();
       destroyReader();
       destroyFloatController();
+      destroyCatalogView();
       currentName = NEW_DOCUMENT_NAME;
       currentSourceText = null;
       contentEl.className = 'vault-pane-content vault-pane-content--editor';
@@ -1025,6 +1081,7 @@ export function createViewerPane(paneEl) {
       destroyLoadingBar();
       destroyReader();
       destroyFloatController();
+      destroyCatalogView();
       currentPath = null;
       currentName = null;
       currentSourceText = null;

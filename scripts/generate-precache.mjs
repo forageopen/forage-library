@@ -48,7 +48,7 @@ const ASSET_DIRS = ['css', 'js', 'fonts', 'icons', 'vendor'];
 /* Root-level files (relative to the SW scope) the shell can't work
    without. '' is the scope root itself — the URL a bare visit resolves
    to — which the SW serves from cache on an offline navigation. */
-const ROOT_SHELL_PATHS = ['', 'index.html', 'sw.js', 'vault/manifest.json'];
+const ROOT_SHELL_PATHS = ['', 'index.html', 'sw.js', 'vault/manifest.json', 'vault/Research/catalog.json'];
 
 function walkFiles(absDir, relBase, out) {
   for (const name of readdirSync(absDir).sort((a, b) => a.localeCompare(b))) {

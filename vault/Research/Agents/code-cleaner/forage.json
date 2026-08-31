@@ -1,0 +1,6 @@
+{
+  "title": "Code Cleaner",
+  "tags": ["code-quality", "refactor", "audit", "complexity", "reviewer"],
+  "github": null,
+  "primary": "code-cleaner.md"
+}

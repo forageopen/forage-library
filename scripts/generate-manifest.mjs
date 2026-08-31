@@ -70,6 +70,16 @@ export function deriveDate(absPath) {
   return mtime.toISOString().slice(0, 10);
 }
 
+/* The three Research/ subfolders that render as a card dashboard instead
+   of a normal file tree. The sidebar shows a single clickable row per
+   section (with the given Lucide icon) — never the individual entries —
+   and catalog.json (scripts/generate-catalog.mjs) drives the dashboard. */
+const CATALOG_SECTIONS = {
+  'Research/Skills': { catalogType: 'skills', icon: 'sparkles' },
+  'Research/Agents': { catalogType: 'agents', icon: 'bot' },
+  'Research/Commands': { catalogType: 'commands', icon: 'terminal' },
+};
+
 export function buildTree(absDir, relDir) {
   const entries = readdirSync(absDir).sort((a, b) => a.localeCompare(b));
   const children = [];
@@ -79,6 +89,11 @@ export function buildTree(absDir, relDir) {
     const relPath = relDir ? `${relDir}/${name}` : name;
     const stat = statSync(absPath);
     if (stat.isDirectory()) {
+      const catalog = CATALOG_SECTIONS[relPath];
+      if (catalog) {
+        children.push({ name, type: 'catalog', catalogType: catalog.catalogType, icon: catalog.icon, path: `vault/${relPath}` });
+        continue;
+      }
       children.push({ name, type: 'folder', path: `vault/${relPath}`, children: buildTree(absPath, relPath) });
     } else {
       const ext = path.extname(name).toLowerCase();

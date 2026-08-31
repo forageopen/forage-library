@@ -26,11 +26,38 @@ document.addEventListener('DOMContentLoaded', () => {
     },
   });
 
-  initSidebar(sidebarEl, (path, name) => {
+  const openCatalog = (catalogType, path) => {
     welcome?.dismiss();
-    splitView.getActivePane().openVaultFile(path, name);
-    sidebarApi?.setActive(path);
-  }).then((api) => { sidebarApi = api; });
+    splitView.getActivePane().openCatalog(catalogType);
+    if (path) sidebarApi?.setActive(path);
+  };
+
+  initSidebar(
+    sidebarEl,
+    (path, name) => {
+      welcome?.dismiss();
+      // Opening a normal file leaves any #catalog= deep link stale — clear
+      // it so a reload doesn't jump back to the dashboard.
+      if (location.hash.startsWith('#catalog=')) history.replaceState(null, '', location.pathname + location.search);
+      splitView.getActivePane().openVaultFile(path, name);
+      sidebarApi?.setActive(path);
+    },
+    (catalogType, path) => openCatalog(catalogType, path),
+  ).then((api) => {
+    sidebarApi = api;
+    // Honour a deep link like #catalog=agents or #catalog=agents/code-cleaner
+    // on first load, and on any later hashchange.
+    const routeHash = () => {
+      const m = /^#catalog=([a-z]+)(?:\/([^/?#]+))?/.exec(location.hash);
+      if (m) {
+        welcome?.dismiss();
+        splitView.getActivePane().openCatalog(m[1], m[2] ? decodeURIComponent(m[2]) : null);
+        sidebarApi?.setActive(`vault/Research/${m[1][0].toUpperCase()}${m[1].slice(1)}`);
+      }
+    };
+    routeHash();
+    window.addEventListener('hashchange', routeHash);
+  });
 
   initResizeHandle(document.querySelector('[data-resize="sidebar"]'), document.querySelector('[data-vault-sidebar]'), {
     storageKey: 'forage-vault-sidebar-width',
@@ -80,7 +107,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const ribbonEl = document.querySelector('.ribbon');
   document.addEventListener('click', (e) => {
     const inRibbon = ribbonEl && ribbonEl.contains(e.target);
-    const inBlankSidebar = sidebarEl && sidebarEl.contains(e.target) && !e.target.closest('.vault-tree-file-btn');
+    const inBlankSidebar = sidebarEl && sidebarEl.contains(e.target)
+      && !e.target.closest('.vault-tree-file-btn') && !e.target.closest('.vault-tree-catalog-btn');
     if (inRibbon || inBlankSidebar) splitView.clearActiveHighlight();
   });
 });

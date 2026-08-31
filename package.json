@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "generate-manifest": "node scripts/generate-manifest.mjs",
+    "generate-catalog": "node scripts/generate-catalog.mjs",
     "generate-precache": "node scripts/generate-precache.mjs",
     "test": "node --test"
   },
