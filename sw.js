@@ -77,6 +77,7 @@ const PRECACHE_ENTRIES = [
   "assets/js/vault/highlight-colors.js",
   "assets/js/vault/html-frame-fit.js",
   "assets/js/vault/loading-bar.js",
+  "assets/js/vault/loading-phrases.js",
   "assets/js/vault/paste-image.js",
   "assets/js/vault/pdf-photo-detect.js",
   "assets/js/vault/pptx/extract-slide.js",

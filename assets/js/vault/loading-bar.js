@@ -18,6 +18,8 @@
  * so a missed destroy() can't leave it spinning.
  */
 
+import { createPhraseRotator, inferPhase } from './loading-phrases.js';
+
 /* Single lever: flip to false to disable the shader path everywhere (every
    loading bar becomes the plain CSS fallback) without touching the wiring
    in viewer-pane.js. */
@@ -214,6 +216,14 @@ export function createLoadingBar(name) {
   label.className = 'vault-loading-label';
   label.textContent = `Loading ${name}…`;
 
+  /* The dim second line under the shader pill: the real, informative
+     status a renderer reports ("Rendering page 3 of 12"). The pill itself
+     (`label`) shows a rotating gerund instead — see loading-phrases.js.
+     Only used on the animated path; the fallback keeps `label` literal. */
+  const sub = document.createElement('span');
+  sub.className = 'vault-loading-label vault-loading-sub';
+  sub.textContent = `Loading ${name}…`;
+
   const reducedMotion =
     typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -235,7 +245,7 @@ export function createLoadingBar(name) {
   overlay.className = 'vault-loading-overlay';
   overlay.append(label);
   stage.append(canvas, overlay);
-  outer.append(stage);
+  outer.append(stage, sub);
 
   let program;
   try {
@@ -268,6 +278,15 @@ export function createLoadingBar(name) {
   let raf = 0;
   let start = performance.now();
   let destroyed = false;
+
+  /* Cycle a playful gerund on the pill while the file works. inferPhase()
+     (below, in setProgress) keeps it loosely on-topic with whatever phase
+     the renderer reports; the real status goes on `sub`. */
+  const rotator = createPhraseRotator({
+    onWord: (word) => { if (!destroyed) label.textContent = word; },
+  });
+  rotator.setPhase('load');
+  rotator.start();
 
   function resize() {
     const dpr = Math.min(MAX_DPR, window.devicePixelRatio || 1);
@@ -319,6 +338,7 @@ export function createLoadingBar(name) {
   function destroy() {
     if (destroyed) return;
     destroyed = true;
+    rotator.stop();
     cancelAnimationFrame(raf);
     themeObserver.disconnect();
     resizeObserver.disconnect();
@@ -330,7 +350,10 @@ export function createLoadingBar(name) {
     el: outer,
     setProgress(fraction, text) {
       if (destroyed) return;
-      if (typeof text === 'string') label.textContent = text;
+      if (typeof text === 'string') {
+        sub.textContent = text;
+        rotator.setPhase(inferPhase(text));
+      }
       if (fraction == null || !Number.isFinite(fraction)) {
         indeterminate = 1;
       } else {
